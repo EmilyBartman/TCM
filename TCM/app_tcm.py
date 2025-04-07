@@ -24,7 +24,7 @@ try:
 
     db = firestore.client()
     bucket = storage.bucket("traditional-medicine-50518")
-    st.success("✅ Firebase and Firestore initialized")
+    # st.success("✅ Firebase and Firestore initialized")  # Hidden from UI
 except Exception as e:
     db = None
     bucket = None

@@ -54,6 +54,21 @@ if page == "Educational Content":
     - **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
     - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
     """)
+
+    st.header("🌐 Bridging TCM and Western Medicine")
+    st.markdown("""
+    Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
+
+    | Concept | TCM Interpretation | Western Medicine Analogy |
+    |--------|---------------------|---------------------------|
+    | Qi (Vital Energy) | Flow of life energy through meridians | Nervous & Circulatory System activity |
+    | Yin/Yang | Balance of cold/hot, passive/active forces | Homeostasis (e.g., hormonal balance) |
+    | Tongue Diagnosis | Reflects internal organ status | Inflammation markers, dehydration, anemia |
+    | Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
+
+    Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
+    """)
+
     st.header("TCM Syndrome Library")
     with st.expander("🔎 Click to view 8 Major Tongue Syndromes and Signs"):
         st.markdown("""
@@ -71,8 +86,9 @@ if page == "Educational Content":
         - *Foundations of Chinese Medicine* - Giovanni Maciocia
         - *Healing with Whole Foods* - Paul Pitchford
         - *The Web That Has No Weaver* - Ted J. Kaptchuk
+        - [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)
+        - [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
         """)
-
 # ---- TONGUE HEALTH CHECK ----
 elif page == "Tongue Health Check":
     st.title("👅 Tongue Diagnosis Tool")

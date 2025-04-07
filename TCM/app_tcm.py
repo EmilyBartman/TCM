@@ -200,15 +200,23 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(result)
 
             st.subheader("🧪 Analysis Results")
-            st.markdown(f"🖌️ **Tongue Color**: {avg_color_str} — This reflects the quality of blood and energy circulation. Pale may indicate deficiency; purple may suggest stagnation.")
-            st.markdown(f"📐 **Shape**: {shape_comment} — Swelling can signal dampness or fluid retention; a thin tongue may suggest blood or Yin deficiency.")
-            st.markdown(f"🌫️ **Texture**: {texture_comment} — Moisture tells us about body fluid processing and digestive heat or cold.")
-            st.markdown(f"🧧 **TCM Insight**: {prediction_TCM} — This suggests a pattern like low Qi, impacting energy, breath, and digestion. TCM emphasizes restoring balance through herbs, diet, or acupuncture.")
-            st.markdown(f"🧬 **Western Insight**: {prediction_Western} — These signs may relate to issues like anemia, dehydration, or stress-related fatigue in biomedical terms. Further lab work may confirm underlying conditions.")
+            st.markdown(f"🖌️ **Tongue Color**: {avg_color_str}
+- This is a soft reddish tone, commonly seen in people who may feel tired or low-energy. In TCM, it suggests Qi or Blood Deficiency.")
+            st.markdown(f"📐 **Shape**: {shape_comment}
+- A 'Normal' shape means the tongue edges are smooth and not swollen or too thin. This usually means there's no extreme heat or cold imbalance.")
+            st.markdown(f"🌫️ **Texture**: {texture_comment}
+- A moist texture suggests your body is doing a good job of keeping fluids balanced. Too dry or too wet would hint at Yin issues or Dampness.")
+            st.markdown(f"🧧 **TCM Insight**: {prediction_TCM}
+- Your tongue and symptoms suggest your body's energy (Qi) might be a bit low. This can show up as feeling tired, cold limbs, or weak digestion. TCM might recommend warm foods, rest, or herbal tea to support you.")
+            st.markdown(f"🧬 **Western Insight**: {prediction_Western}
+- This means you may be dealing with low iron, fatigue, or stress-related tiredness. It’s common and often helped by better hydration, nutrition, or sleep.")
 
-            feedback = st.text_input("Was this accurate? Provide feedback below:")
+            feedback = st.radio("Was this prediction accurate?", ["Yes", "No", "Not sure"], index=2)
             if feedback:
-                db.collection("tongue_scans").document(submission_id).update({"user_feedback": feedback})
+                db.collection("tongue_scans").document(submission_id).update({
+                    "user_feedback": feedback,
+                    "is_correct": True if feedback == "Yes" else (False if feedback == "No" else None)
+                })
                 st.success("🙏 Thanks for your feedback!")
         else:
             st.error("❌ Please upload an image and agree to consent.")
@@ -218,7 +226,27 @@ elif page == "Submission History":
     st.title("📜 My Tongue Scan History")
     if st.session_state.submissions:
         df = pd.DataFrame(st.session_state.submissions)
+
         st.dataframe(df)
+
+        # Accuracy summary if feedback exists
+        if "is_correct" in df.columns:
+            correct_count = df["is_correct"].sum()
+            total_feedback = df["is_correct"].notna().sum()
+            if total_feedback > 0:
+                accuracy = round((correct_count / total_feedback) * 100, 2)
+                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
+
+            st.subheader("📈 Accuracy Over Time")
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
+            st.line_chart(daily)
+
+            st.subheader("🧪 Accuracy by TCM Syndrome")
+            if "prediction_TCM" in df.columns:
+                by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
+                st.bar_chart(by_syndrome)
+
         csv = df.to_csv(index=False).encode("utf-8")
         st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
     else:

@@ -20,6 +20,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 
 # ---- FIREBASE SETUP (Streamlit Secrets) ----
+st.write(f"Connected to bucket: {bucket.name}")
 if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)

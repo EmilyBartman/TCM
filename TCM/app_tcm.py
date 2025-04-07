@@ -185,6 +185,7 @@ languages = {
 selected_lang = st.sidebar.selectbox("\U0001F310 Choose Language", list(languages.keys()))
 target_lang = languages[selected_lang]
 
+
 def translate(text, lang_code):
     try:
         return translator.translate(text, dest=lang_code).text
@@ -193,7 +194,7 @@ def translate(text, lang_code):
 
 
 # ---- EDUCATIONAL CONTENT ----
-target_lang = languages[]
+target_lang = languages[selected_lang]
     st.title(translate("'🌿' Traditional Chinese Medicine (TCM) Education", target_lang))
     st.header(translate("Foundations of TCM", target_lang))
     st.markdown(translate("""
@@ -240,15 +241,13 @@ target_lang = languages[]
     st.header(translate("TCM Syndrome Library", target_lang))
     with st.expander(translate("'🔎' Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
         st.markdown(translate("""
-        **Qi Deficiency**: Fatigue, pale tongue, short breath  
-        **Damp Retention**: Bloating, sticky tongue coat  
-        **Blood Stasis**: Sharp pain, purple tongue  
-        **Qi Stagnation**: Emotional blockage, rib pain  
-        **Damp Heat**: Yellow tongue coat, foul smell  
-        **Yang Deficiency**: Cold limbs, low energy  
-        **Yin Deficiency**: Dry mouth, night sweats  
-        **Blood Deficiency**: Pale lips, dizziness
-        """, target_lang))
+        - **Yin & Yang**: Balance of opposing but complementary forces.
+        - **Qi (Chi)**: Vital life energy.
+        - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
+        - **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
+        - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
+        """, target_lang))  # ✅ This ending is required
+
 
     with st.expander(translate("'📚' Recommended Reading", target_lang)):
         st.markdown("""
@@ -419,7 +418,7 @@ elif page == "Tongue Health Check":
                 pisa.CreatePDF(BytesIO(html_report.encode("utf-8")), dest=pdf_output)
                 pdf_bytes = pdf_output.getvalue()
                 b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-                download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">'📥' {translate("Download PDF Report", target_lang)}</a>'
+               download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 {translate("Download PDF Report", target_lang)}</a>'
                 st.markdown(download_link, unsafe_allow_html=True)
 
             # --- History Compare ---

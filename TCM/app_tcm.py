@@ -393,7 +393,7 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(result)
 
             st.subheader(translate("🧪 Analysis Results", target_lang))
-            st.info(f"🔍 {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} **{prediction_Western}**")
+            st.info(f"🔍 {translate('Detected TCM Pattern:', target_lang)}** {prediction_TCM} | {translate('Western View:', target_lang)}** {prediction_Western}")
 
 
 

@@ -18,8 +18,8 @@ import cv2
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials, firestore
-from google.cloud import storage as gcs_storage
 from google.oauth2 import service_account
+from google.cloud import storage as gcs_storage
 
 st.write("✅ App started loading")
 st.write("✅ Firebase config loaded")
@@ -30,13 +30,16 @@ st.write("✅ Firebase config loaded")
 firebase_config = dict(st.secrets["firebase"])
 cred = credentials.Certificate(firebase_config)
 
+# Firebase Admin init
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
+st.write("✅ Firebase config loaded")
 
-db = firestore.client()
+# ✅ GCS Credential Fix
 gcs_creds = service_account.Credentials.from_service_account_info(firebase_config)
 gcs_client = gcs_storage.Client(credentials=gcs_creds, project=firebase_config["project_id"])
 bucket = gcs_client.bucket("traditional-medicine-50518")
+st.write("✅ GCS bucket loaded")
 
 # ---- STREAMLIT SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")

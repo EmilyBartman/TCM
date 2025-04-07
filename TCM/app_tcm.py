@@ -18,36 +18,31 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from deep_translator import GoogleTranslator
 import streamlit as st
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.models import Model
+from sklearn.linear_model import LogisticRegression
 
 
-# ML Feature Extraction & Prediction
-def extract_features(cv_img):
-    resized = cv2.resize(cv_img, (300, 300))
-    avg_color = np.mean(resized.reshape(-1, 3), axis=0)
-    gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
-    edges = cv2.Canny(gray, 50, 150)
-    edge_pixels = np.sum(edges > 0)
-    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
-    return [*avg_color, edge_pixels, laplacian_var]
+# Load feature extractor
+base_model = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
+feature_model = Model(inputs=base_model.input, outputs=base_model.output)
+
+def extract_deep_features(cv_img):
+    img_resized = cv2.resize(cv_img, (224, 224))
+    img_array = img_to_array(img_resized)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array = preprocess_input(img_array)
+    features = feature_model.predict(img_array)
+    return features.flatten().tolist()
+
 
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
-    if not os.path.exists(model_path):
-        # Create and save a dummy model
-        X_dummy = np.random.rand(100, 6)
-        y_dummy = np.random.choice(['Qi Deficiency', 'Yin Deficiency', 'Blood Deficiency', 'Damp Retention'], size=100)
-        clf = RandomForestClassifier(n_estimators=100, random_state=42)
-        clf.fit(X_dummy, y_dummy)
-        os.makedirs("models", exist_ok=True)
-        joblib.dump(clf, model_path)
-        st.info("🔧 Dummy model generated and saved.")
-        return clf
-    try:
+    if os.path.exists(model_path):
         return joblib.load(model_path)
-    except Exception as e:
-        st.warning("⚠️ ML model not found and could not be loaded. Using fallback prediction.")
-        st.exception(e)
-        return None
+    else:
+        return None  # Only predict if a real model is available
 
 
 def predict_with_model(model, features, symptoms=[]):
@@ -83,9 +78,9 @@ def export_firestore_to_bigquery():
 def retrain_model_from_feedback(dataframe):
     labeled = dataframe[dataframe["is_correct"].notna()]
     if not labeled.empty:
-        X = labeled[["avg_r", "avg_g", "avg_b", "edges", "laplacian_var", "symptom_count"]]
-        y = labeled["prediction_TCM"]
-        clf = RandomForestClassifier(n_estimators=100, random_state=42)
+        X = np.vstack(labeled["features"].values)
+        y = labeled["prediction_TCM"].values
+        clf = LogisticRegression(max_iter=1000)  # or RandomForestClassifier
         clf.fit(X, y)
         joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
         return True
@@ -101,22 +96,19 @@ def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     return remedies_map.get(tcm_pattern, ["Balanced diet", "Hydration", "Rest"])
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
-    features = extract_features(cv_img)
-    avg_color_str = f"RGB({int(features[0])}, {int(features[1])}, {int(features[2])})"
+    features = extract_deep_features(cv_img)
     model = load_model()
 
     if model:
-        prediction_TCM, confidence = predict_with_model(model, features[:5], selected_symptoms)
-        prediction_Western = "ML-based insight"
+        prediction_TCM, confidence = predict_with_model(model, features)
     else:
-        prediction_TCM = "Qi Deficiency"
-        prediction_Western = "Low energy, fatigue, low immunity"
-        confidence = 50
+        prediction_TCM = "Model not yet trained"
+        confidence = 0
 
     if db:
         store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
 
-    return prediction_TCM, prediction_Western, avg_color_str, features, confidence
+    return prediction_TCM, "N/A", "N/A", features, confidence
 
 def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     remedies = get_dynamic_remedies(prediction_TCM, selected_symptoms)

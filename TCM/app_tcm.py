@@ -271,7 +271,14 @@ elif page == "Tongue Health Check":
 
             st.subheader("🧪 Analysis Results")
             st.info(f"🔍 Detected TCM Pattern: **{prediction_TCM}** | Western View: _{prediction_Western}_")
-            st.markdown(f"**Average Tongue Color**: `{avg_color_str}`  ")
+            st.markdown(f"**Average Tongue Color**: `{avg_color_str}`")
+            r, g, b = map(int, avg_color_str.strip('RGB()').split(','))
+            st.markdown(
+                f"<div style='width:100px;height:30px;border:1px solid #ccc;background-color:rgb({r},{g},{b});'></div>",
+                unsafe_allow_html=True
+            )
+            st.markdown("- A soft reddish tone may indicate Qi or Blood Deficiency.")
+
             st.markdown(f"**Confidence Level**: `{confidence}%`")
 
             render_dynamic_remedies(prediction_TCM, selected_symptoms)

@@ -482,7 +482,7 @@ elif page == "About & Disclaimer":
     - Demonstrating how AI may assist in early wellness screening
     - Researching global health variations using tongue + symptom data
 
-    🔒 **Data Usage**: All uploaded data is securely stored and used anonymously for improving model prediction.
+    "🔒" **Data Usage**: All uploaded data is securely stored and used anonymously for improving model prediction.
 
-    ⚠️ **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
+    "⚠️" **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
     """, target_lang))

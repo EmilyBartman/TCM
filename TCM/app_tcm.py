@@ -23,7 +23,9 @@ from google.cloud import storage as gcs_storage
 # ---- FIREBASE SETUP ----
 if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
-    cred = credentials.Certificate(firebase_config)
+cred = credentials.Certificate(firebase_config)
+
+if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()

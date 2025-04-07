@@ -16,7 +16,6 @@ import firebase_admin
 from firebase_admin import storage, credentials, firestore
 import joblib
 from sklearn.ensemble import RandomForestClassifier
-from googletrans import Translator
 from deep_translator import GoogleTranslator
 
 
@@ -157,8 +156,6 @@ page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
 
-translator = Translator()
-
 languages = {
     "English": "en",
     "Chinese (Simplified)": "zh-cn",
@@ -191,9 +188,8 @@ def translate(text, lang_code):
     try:
         return GoogleTranslator(source="auto", target=lang_code).translate(text)
     except Exception as e:
-        print(f"Translation failed: {e}")
+        print(f"[Translation Error] {e}")
         return text
-
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":

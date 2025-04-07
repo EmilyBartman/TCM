@@ -21,7 +21,7 @@ from firebase_admin import credentials, firestore, storage
 
 # ---- FIREBASE SETUP (Streamlit Secrets) ----
 if not firebase_admin._apps:
-    firebase_config = st.secrets["firebase"]
+    firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred, {
         'storageBucket': f'{firebase_config["project_id"]}.appspot.com'

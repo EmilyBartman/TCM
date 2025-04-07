@@ -192,16 +192,16 @@ page = st.sidebar.radio("Navigate", pages)
 if page == "Educational Content":
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
     st.header(translate("Foundations of TCM", target_lang))
-    st.markdown(translate("""
+    st.markdown(translate('''
     - **Yin & Yang**: Balance of opposing but complementary forces.
     - **Qi (Chi)**: Vital life energy.
     - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
     - **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
     - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
-    """, target_lang))
+    ''', target_lang))
 
     st.header(translate("🔎 Why the Tongue Matters in TCM", target_lang))
-    st.markdown(translate("""
+    st.markdown(translate('''
     In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
 
     **What the tongue reveals:**
@@ -216,10 +216,10 @@ if page == "Educational Content":
     - Dehydration (dry tongue)
     - Oral candidiasis (thick white coating)
     - Circulatory issues (bluish-purple tongue)
-    """, target_lang))
+    ''', target_lang))
 
     st.header(translate("🌐 Bridging TCM and Western Medicine", target_lang))
-    st.markdown(translate("""
+    st.markdown(translate('''
     Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
 
     | Concept | TCM Interpretation | Western Medicine Analogy |
@@ -230,11 +230,11 @@ if page == "Educational Content":
     | Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
 
     Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
-    """, target_lang))
+    ''', target_lang))
 
     st.header(translate("TCM Syndrome Library", target_lang))
     with st.expander(translate("🔎 Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
-        st.markdown(translate("""
+        st.markdown(translate('''
         **Qi Deficiency**: Fatigue, pale tongue, short breath  
         **Damp Retention**: Bloating, sticky tongue coat  
         **Blood Stasis**: Sharp pain, purple tongue  
@@ -243,10 +243,10 @@ if page == "Educational Content":
         **Yang Deficiency**: Cold limbs, low energy  
         **Yin Deficiency**: Dry mouth, night sweats  
         **Blood Deficiency**: Pale lips, dizziness
-        """, target_lang))
+        ''', target_lang))
 
     with st.expander(translate("📚 Recommended Reading", target_lang)):
-        st.markdown("""
+        st.markdown('''
         - *Foundations of Chinese Medicine* - Giovanni Maciocia
         - *Healing with Whole Foods* - Paul Pitchford
         - *The Web That Has No Weaver* - Ted J. Kaptchuk
@@ -369,35 +369,35 @@ elif page == "Tongue Health Check":
             with st.expander(translate("🌿 Suggested Remedies Based on TCM Pattern", target_lang)):
               remedy_text = ""
                 if prediction_TCM == "Qi Deficiency":
-                    remedy_text = """
+                    remedy_text = '''
                     "✅" Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
                     "🍠" Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
                     "🚶‍♂️" Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
-                    """
+                    '''
                 elif prediction_TCM == "Yin Deficiency":
-                    remedy_text = """
+                    remedy_text = '''
                     "🍒" Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening, perfect for restoring internal fluids.  
                     "🍐" Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin. Pears hydrate the lungs, while lily bulbs calm the spirit and ease dryness in the body.  
                     "🧘" Meditation and rest - Essential practices to conserve Yin. Meditation calms excessive Yang (activity), reduces stress, and promotes internal balance, especially helpful for those experiencing burnout or night sweats.
-                    """
+                    '''
                 elif prediction_TCM == "Blood Deficiency":
-                    remedy_text = """
+                    remedy_text = '''
                     "🥬" Beets, spinach, black beans - Iron-rich, blood-nourishing foods that boost hemoglobin levels, support liver function, and replenish vital nutrients to combat fatigue and dizziness.  
                     "🌿" Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the female ginseng.  
                     "🩸" Iron-rich foods - Essential for red blood cell production, these foods help treat symptoms like pale complexion, cold extremities, and low energy often associated with Blood Deficiency.
-                    """
+                    '''
                 elif prediction_TCM == "Damp Retention":
-                    remedy_text = """
+                    remedy_text = '''
                     "🥣" Barley water - Light, cooling drink that helps remove excess dampness and reduce bloating.  
                     "🚫" Avoid greasy food - Heavy, oily meals contribute to damp buildup and sluggish digestion, best to avoid.  
                     "🍵" Ginger and pu-erh tea - Warming teas that support digestion, reduce phlegm, and improve energy flow.
-                    """
+                    '''
                 else:
-                    remedy_text = """
+                    remedy_text = '''
                     "💧" Maintain hydration - Drink enough water to keep your body cool, clear toxins, and support organ function.  
                     "🥗" Balanced meals - Eat a mix of whole foods (like veggies, protein, and grains) to fuel your body and build Qi.  
                     "🧘" Gentle exercise - Light activities like stretching, yoga, or walking help energy flow and reduce stress.
-                    """
+                    '''
                 st.markdown(translate(remedy_text, target_lang))
 
             # --- PDF Download ---

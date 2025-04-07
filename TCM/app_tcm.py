@@ -155,11 +155,11 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
-
+# Language Selector
 languages = {
     "English": "en",
-    "Chinese (Simplified)": "zh-cn",
     "Spanish": "es",
+    "Chinese (Simplified)": "zh",
     "French": "fr",
     "Hindi": "hi",
     "Arabic": "ar",
@@ -175,21 +175,28 @@ languages = {
     "Malay": "ms",
     "Vietnamese": "vi",
     "Thai": "th",
-    "Filipino": "tl",
+    "Filipino": "fil",
     "Japanese": "ja",
     "Korean": "ko"
 }
 
-selected_lang = st.sidebar.selectbox("\U0001F310 Choose Language", list(languages.keys()))
-target_lang = languages[selected_lang]
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "English"
 
+def update_lang():
+    st.session_state.selected_lang = st.session_state.lang_temp
+    st.experimental_rerun()  # <- rerun the app immediately
 
-def translate(text, lang_code):
-    try:
-        return GoogleTranslator(source="auto", target=lang_code).translate(text)
-    except Exception as e:
-        print(f"[Translation Error] {e}")
-        return text
+st.sidebar.selectbox(
+    "🌐 Choose Language",
+    list(languages.keys()),
+    index=list(languages.keys()).index(st.session_state.selected_lang),
+    key="lang_temp",
+    on_change=update_lang  # 👈 this triggers rerun on change
+)
+
+target_lang = languages[st.session_state.selected_lang]
+
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":

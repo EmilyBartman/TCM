@@ -36,15 +36,17 @@ if not firebase_admin._apps:
 st.write("✅ Firebase config loaded")
 
 # ✅ GCS Credential Fix
-try:
-    gcs_creds = service_account.Credentials.from_service_account_info(firebase_config)
-    gcs_client = gcs_storage.Client(credentials=gcs_creds, project=firebase_config["project_id"])
-    bucket = gcs_client.bucket("traditional-medicine-50518")
-    st.write("✅ GCS bucket loaded")
-except Exception as e:
-    st.error("❌ Failed to connect to GCS")
-    st.exception(e)
-    st.stop()
+# try:
+    # gcs_creds = service_account.Credentials.from_service_account_info(firebase_config)
+    # gcs_client = gcs_storage.Client(credentials=gcs_creds, project=firebase_config["project_id"])
+    # bucket = gcs_client.bucket("traditional-medicine-50518")
+    # st.write("✅ GCS bucket loaded")
+ # except Exception as e:
+    # st.error("❌ Failed to connect to GCS")
+    # st.exception(e)
+    # st.stop()
+st.write("✅ Skipped GCS init temporarily")
+
 
 
 # ---- STREAMLIT SETUP ----

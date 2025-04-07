@@ -43,14 +43,14 @@ languages = {
     "Korean": "ko"
 }
 
-selected_lang = st.sidebar.selectbox("🌐 Choose Language", list(languages.keys()))
+selected_lang = st.sidebar.selectbox(""🌐" Choose Language", list(languages.keys()))
 target_lang = languages[selected_lang]
 
 def translate(text, lang_code):
     try:
         return translator.translate(text, dest=lang_code).text
     except Exception as e:
-        st.warning("🌐 Translation failed. Showing original text.")
+        st.warning(""🌐" Translation failed. Showing original text.")
         return text
 
 # ML Feature Extraction & Prediction
@@ -78,7 +78,7 @@ def load_model():
     try:
         return joblib.load(model_path)
     except Exception as e:
-        st.warning("⚠️ ML model not found and could not be loaded. Using fallback prediction.")
+        st.warning(""⚠️" ML model not found and could not be loaded. Using fallback prediction.")
         st.exception(e)
         return None
 
@@ -190,7 +190,7 @@ page = st.sidebar.radio("Navigate", pages)
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":
-    st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
+    st.title(translate(""🌿" Traditional Chinese Medicine (TCM) Education", target_lang))
     st.header(translate("Foundations of TCM", target_lang))
     st.markdown(translate("""
     - **Yin & Yang**: Balance of opposing but complementary forces.
@@ -200,7 +200,7 @@ if page == "Educational Content":
     - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
     """, target_lang))
 
-    st.header(translate("🔎 Why the Tongue Matters in TCM", target_lang))
+    st.header(translate(""🔎" Why the Tongue Matters in TCM", target_lang))
     st.markdown(translate("""
     In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
 
@@ -218,7 +218,7 @@ if page == "Educational Content":
     - Circulatory issues (bluish-purple tongue)
     """, target_lang))
 
-    st.header(translate("🌐 Bridging TCM and Western Medicine", target_lang))
+    st.header(translate(""🌐" Bridging TCM and Western Medicine", target_lang))
     st.markdown(translate("""
     Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
 
@@ -233,7 +233,7 @@ if page == "Educational Content":
     """, target_lang))
 
     st.header(translate("TCM Syndrome Library", target_lang))
-    with st.expander(translate("🔎 Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
+    with st.expander(translate(""🔎" Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
         st.markdown(translate("""
         **Qi Deficiency**: Fatigue, pale tongue, short breath  
         **Damp Retention**: Bloating, sticky tongue coat  
@@ -245,7 +245,7 @@ if page == "Educational Content":
         **Blood Deficiency**: Pale lips, dizziness
         """, target_lang))
 
-    with st.expander(translate("📚 Recommended Reading", target_lang)):
+    with st.expander(translate(""📚" Recommended Reading", target_lang)):
         st.markdown("""
         - *Foundations of Chinese Medicine* - Giovanni Maciocia
         - *Healing with Whole Foods* - Paul Pitchford
@@ -258,7 +258,7 @@ if page == "Educational Content":
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
-    st.title("📜 My Tongue Scan History")
+    st.title(""📜" My Tongue Scan History")
     if st.session_state.submissions:
         df = pd.DataFrame(st.session_state.submissions)
         st.dataframe(df)
@@ -268,27 +268,27 @@ elif page == "Submission History":
             total_feedback = df["is_correct"].notna().sum()
             if total_feedback > 0:
                 accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
+                st.metric(""📊" Model Accuracy (based on feedback)", f"{accuracy}%")
 
-            st.subheader("📈 Accuracy Over Time")
+            st.subheader(""📈" Accuracy Over Time")
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
             st.line_chart(daily)
 
-            st.subheader("🧪 Accuracy by TCM Syndrome")
+            st.subheader(""🧪" Accuracy by TCM Syndrome")
             if "prediction_TCM" in df.columns:
                 by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
                 st.bar_chart(by_syndrome)
 
         csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
+        st.download_button(""⬇️" Download CSV", csv, "my_tongue_scans.csv", "text/csv")
     else:
         st.info("You haven't submitted any scans yet.")
 
 # ---- TONGUE HEALTH CHECK ----
 # ---- TONGUE HEALTH CHECK ----
 elif page == "Tongue Health Check":
-    st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
+    st.title(translate(""👅" Tongue Diagnosis Tool", target_lang))
     uploaded_img = st.file_uploader(translate("Upload your tongue image", target_lang), type=["jpg", "jpeg", "png"])
 
     if uploaded_img:
@@ -306,7 +306,7 @@ elif page == "Tongue Health Check":
     consent = st.checkbox(translate("I consent to use of my image and data for research.", target_lang))
     st.info(translate("Not a medical diagnosis. For research and education only.", target_lang))
 
-    if st.button(translate("🔍 Analyze My Tongue", target_lang)):
+    if st.button(translate(""🔍" Analyze My Tongue", target_lang)):
         if uploaded_img and consent:
             symptoms = ", ".join(selected_symptoms) if selected_symptoms else translate("None provided", target_lang)
             submission_id = str(uuid.uuid4())
@@ -323,7 +323,7 @@ elif page == "Tongue Health Check":
 
             avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
             if avg_color[0] > 200 and avg_color[1] > 200 and avg_color[2] > 200:
-                st.error(translate("⚠️ This image may not contain a tongue. Please upload a close-up of your tongue.", target_lang))
+                st.error(translate(""⚠️" This image may not contain a tongue. Please upload a close-up of your tongue.", target_lang))
                 st.stop()
 
             prediction_TCM, prediction_Western, avg_color_str, features, confidence = analyze_tongue_with_model(
@@ -335,10 +335,10 @@ elif page == "Tongue Health Check":
                 blob.upload_from_filename(temp_path)
                 url = blob.generate_signed_url(expiration=timedelta(hours=1), method="GET")
                 img_url = url
-                st.success(translate("✅ Image uploaded.", target_lang))
+                st.success(translate(""✅" Image uploaded.", target_lang))
                 st.markdown(f"🔗 [{translate('View Uploaded Image', target_lang)}]({img_url})")
             except Exception as e:
-                st.error(translate("❌ Upload to Firebase failed.", target_lang))
+                st.error(translate(""❌" Upload to Firebase failed.", target_lang))
                 st.exception(e)
                 st.stop()
 
@@ -355,8 +355,8 @@ elif page == "Tongue Health Check":
             st.session_state.submissions.append(result)
             db.collection("tongue_scans").document(submission_id).set(result)
 
-            st.subheader(translate("🧪 Analysis Results", target_lang))
-            st.info(f"🔍 {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} _{prediction_Western}_")
+            st.subheader(translate(""🧪" Analysis Results", target_lang))
+            st.info(f""🔍" {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} _{prediction_Western}_")
             st.markdown(f"**{translate('Average Tongue Color', target_lang)}**: `{avg_color_str}`  ")
             st.markdown(f"**{translate('Confidence Level', target_lang)}**: `{confidence}%`")
 
@@ -366,7 +366,7 @@ elif page == "Tongue Health Check":
 
 
             # --- More Details Suggested Remedies ---
-            with st.expander(translate("🌿 Suggested Remedies Based on TCM Pattern", target_lang)):
+            with st.expander(translate(""🌿" Suggested Remedies Based on TCM Pattern", target_lang)):
               remedy_text = ""
                 if prediction_TCM == "Qi Deficiency":
                     remedy_text = """
@@ -414,11 +414,11 @@ elif page == "Tongue Health Check":
                 pisa.CreatePDF(BytesIO(html_report.encode("utf-8")), dest=pdf_output)
                 pdf_bytes = pdf_output.getvalue()
                 b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-                download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 {translate("Download PDF Report", target_lang)}</a>'
+                download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">"📥" {translate("Download PDF Report", target_lang)}</a>'
                 st.markdown(download_link, unsafe_allow_html=True)
 
             # --- History Compare ---
-            with st.expander(translate("📊 Compare with Previous Scans", target_lang)):
+            with st.expander(translate(""📊" Compare with Previous Scans", target_lang)):
                 scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
                 history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
                 if history:
@@ -442,7 +442,7 @@ elif page == "Tongue Health Check":
                             
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
-    st.title(translate("📜 My Tongue Scan History", target_lang))
+    st.title(translate(""📜" My Tongue Scan History", target_lang))
     if st.session_state.submissions:
         df = pd.DataFrame(st.session_state.submissions)
         st.dataframe(df.rename(columns={
@@ -456,26 +456,26 @@ elif page == "Submission History":
             total_feedback = df["is_correct"].notna().sum()
             if total_feedback > 0:
                 accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric(translate("📊 Model Accuracy (based on feedback)", target_lang), f"{accuracy}%")
+                st.metric(translate(""📊" Model Accuracy (based on feedback)", target_lang), f"{accuracy}%")
 
-            st.subheader(translate("📈 Accuracy Over Time", target_lang))
+            st.subheader(translate(""📈" Accuracy Over Time", target_lang))
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
             st.line_chart(daily)
 
-            st.subheader(translate("🧪 Accuracy by TCM Syndrome", target_lang))
+            st.subheader(translate(""🧪" Accuracy by TCM Syndrome", target_lang))
             if "prediction_TCM" in df.columns:
                 by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
                 st.bar_chart(by_syndrome.rename(index=lambda x: translate(x, target_lang)))
 
         csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button(translate("⬇️ Download CSV", target_lang), csv, "my_tongue_scans.csv", "text/csv")
+        st.download_button(translate(""⬇️" Download CSV", target_lang), csv, "my_tongue_scans.csv", "text/csv")
     else:
         st.info(translate("You haven't submitted any scans yet.", target_lang))
 
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
-    st.title(translate("ℹ️ About This App", target_lang))
+    st.title(translate(""ℹ️" About This App", target_lang))
     about_text = """
         This app is built for:
         - Educating users about TCM tongue diagnostics

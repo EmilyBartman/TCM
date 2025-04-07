@@ -19,13 +19,6 @@ from sklearn.ensemble import RandomForestClassifier
 from googletrans import Translator
 
 
-def translate(text, lang_code):
-    try:
-        return translator.translate(text, dest=lang_code).text
-    except Exception as e:
-        st.warning("'🌐' Translation failed. Showing original text.")
-        return text
-
 # ML Feature Extraction & Prediction
 def extract_features(cv_img):
     resized = cv2.resize(cv_img, (300, 300))
@@ -160,36 +153,46 @@ pages = [
     "About & Disclaimer"
 ]
 page = st.sidebar.radio("Navigate", pages)
+elif page == "Tongue Health Check":
+    # Language options including more Asian and African languages
+    from googletrans import Translator
+    translator = Translator()
+
+    languages = {
+        "English": "en",
+        "Chinese (Simplified)": "zh-cn",
+        "Spanish": "es",
+        "French": "fr",
+        "Hindi": "hi",
+        "Arabic": "ar",
+        "Swahili": "sw",
+        "Zulu": "zu",
+        "Amharic": "am",
+        "Igbo": "ig",
+        "Yoruba": "yo",
+        "Tamil": "ta",
+        "Telugu": "te",
+        "Urdu": "ur",
+        "Bengali": "bn",
+        "Malay": "ms",
+        "Vietnamese": "vi",
+        "Thai": "th",
+        "Filipino": "tl",
+        "Japanese": "ja",
+        "Korean": "ko"
+    }
+
+    selected_lang = st.sidebar.selectbox("🌐 Choose Language", list(languages.keys()))
+    target_lang = languages[selected_lang]
+
+    def translate(text, lang_code):
+        try:
+            return translator.translate(text, dest=lang_code).text
+        except Exception as e:
+            st.warning("🌐 Translation failed. Showing original text.")
+            return text
 
 # ---- EDUCATIONAL CONTENT ----
-elif page == "Tongue Health Check":
-translator = Translator()
-languages = {
-    "English": "en",
-    "Chinese (Simplified)": "zh-cn",
-    "Spanish": "es",
-    "French": "fr",
-    "Hindi": "hi",
-    "Arabic": "ar",
-    "Swahili": "sw",
-    "Zulu": "zu",
-    "Amharic": "am",
-    "Igbo": "ig",
-    "Yoruba": "yo",
-    "Tamil": "ta",
-    "Telugu": "te",
-    "Urdu": "ur",
-    "Bengali": "bn",
-    "Malay": "ms",
-    "Vietnamese": "vi",
-    "Thai": "th",
-    "Filipino": "tl",
-    "Japanese": "ja",
-    "Korean": "ko"
-}
-
-selected_lang = st.sidebar.selectbox("Choose Language", list(languages.keys()))
-
 target_lang = languages[]
     st.title(translate("'🌿' Traditional Chinese Medicine (TCM) Education", target_lang))
     st.header(translate("Foundations of TCM", target_lang))
@@ -437,7 +440,7 @@ elif page == "Tongue Health Check":
                         "user_feedback": feedback,
                         "is_correct": True if feedback == translate("Yes", target_lang) else False
                     })
-                    st.toast(translate("Feedback submitted. Thank you!", target_lang), icon='📬')
+                    st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="📬")
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
                             
@@ -477,7 +480,8 @@ elif page == "Submission History":
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
     st.title(translate("About This App", target_lang))
-    about_text = """This app is built for:
+    about_text = """
+This app is built for:
 - Educating users about TCM tongue diagnostics
 - Demonstrating how AI may assist in early wellness screening
 - Researching global health variations using tongue + symptom data

@@ -16,14 +16,18 @@ import numpy as np
 import firebase_admin
 from firebase_admin import credentials
 
-# --- APP INITIALIZATION ---
+# --- PAGE CONFIG ---
 st.set_page_config(page_title="TCM Health App", layout="wide")
-st.write("✅ App started loading")
 
+# --- SESSION INIT ---
 if "submissions" not in st.session_state:
     st.session_state.submissions = []
+if "selected_page" not in st.session_state:
+    st.session_state.selected_page = "Educational Content"
 
-# --- FIREBASE SETUP ---
+st.write("✅ App started loading")
+
+# --- FIREBASE INIT ---
 try:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
@@ -34,123 +38,129 @@ except Exception as e:
     st.error("❌ Firebase initialization failed")
     st.exception(e)
 
-# Placeholder for Firestore (temporarily unused)
+# --- DATABASE PLACEHOLDER ---
 db = None
 
 # --- SIDEBAR NAVIGATION ---
 try:
     pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
-    page = st.sidebar.radio("Navigate", pages)
+    selected_index = pages.index(st.session_state.selected_page)
+    page = st.sidebar.radio("Navigate", pages, index=selected_index)
+    st.session_state.selected_page = page
     st.write(f"✅ Current page: {page}")
 except Exception as e:
     st.error("❌ Sidebar navigation failed")
     st.exception(e)
 
-# --- PAGE: Educational Content ---
-if page == "Educational Content":
-    st.title("🌿 Traditional Chinese Medicine (TCM) Basics")
-    st.header("What is TCM?")
-    st.write("""
-        Traditional Chinese Medicine is a holistic approach to health including:
-        - **Yin & Yang**: Balance between opposite but complementary forces
-        - **Qi (Chi)**: Vital energy flowing through the body
-        - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs and emotions
+# --- PAGE CONTENT RENDERING ---
+try:
+    # --- EDUCATIONAL CONTENT ---
+    if page == "Educational Content":
+        st.title("🌿 Traditional Chinese Medicine (TCM) Basics")
+        st.header("What is TCM?")
+        st.write("""
+            Traditional Chinese Medicine is a holistic approach to health including:
+            - **Yin & Yang**: Balance between opposite but complementary forces
+            - **Qi (Chi)**: Vital energy flowing through the body
+            - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs and emotions
 
-        TCM often contrasts with **Western medicine**, which focuses on pathology and medication.
-    """)
-    st.subheader("Sources")
-    st.markdown("- [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)")
-    st.markdown("- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)")
+            TCM often contrasts with **Western medicine**, which focuses on pathology and medication.
+        """)
+        st.subheader("Sources")
+        st.markdown("- [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)")
+        st.markdown("- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)")
 
-# --- PAGE: Tongue Health Check ---
-elif page == "Tongue Health Check":
-    st.title("👅 Tongue Diagnosis Tool")
-    uploaded_img = st.file_uploader("Upload a clear image of your tongue", type=["jpg", "jpeg", "png"])
+    # --- TONGUE HEALTH CHECK ---
+    elif page == "Tongue Health Check":
+        st.title("👅 Tongue Diagnosis Tool")
 
-    if uploaded_img:
-        img = Image.open(uploaded_img)
-        st.image(img, caption="Uploaded Tongue Image", use_container_width=True)
+        uploaded_img = st.file_uploader("Upload a clear image of your tongue", type=["jpg", "jpeg", "png"])
+        if uploaded_img:
+            img = Image.open(uploaded_img)
+            st.image(img, caption="Uploaded Tongue Image", use_container_width=True)
 
-    symptoms = st.text_area("Describe your symptoms (e.g. tiredness, stress, stomach ache)")
-    consent = st.checkbox("I consent to use of my image and data for research and model training.")
+        symptoms = st.text_area("Describe your symptoms (e.g. tiredness, stress, stomach ache)")
+        consent = st.checkbox("I consent to use of my image and data for research and model training.")
+        st.info("This app does not provide medical diagnoses. For educational use only.")
 
-    st.info("This app does not provide medical diagnoses. For educational use only.")
+        if st.button("🔍 Analyze My Tongue"):
+            if uploaded_img and consent:
+                submission_id = str(uuid.uuid4())
+                timestamp = datetime.utcnow().isoformat()
+                file_ext = uploaded_img.name.split(".")[-1]
+                filename = f"{submission_id}.{file_ext}"
 
-    if st.button("🔍 Analyze My Tongue"):
-        if uploaded_img and consent:
-            submission_id = str(uuid.uuid4())
-            timestamp = datetime.utcnow().isoformat()
-            file_ext = uploaded_img.name.split(".")[-1]
-            firebase_filename = f"tongue_images/{submission_id}.{file_ext}"
+                # Save image
+                os.makedirs("temp", exist_ok=True)
+                temp_path = os.path.join("temp", filename)
+                img.save(temp_path)
 
-            temp_dir = "temp"
-            os.makedirs(temp_dir, exist_ok=True)
-            temp_path = os.path.join(temp_dir, f"{submission_id}.{file_ext}")
-            img.save(temp_path)
+                # Process image
+                cv_img = cv2.cvtColor(cv2.imread(temp_path), cv2.COLOR_BGR2RGB)
+                resized = cv2.resize(cv_img, (300, 300))
 
-            # --- IMAGE ANALYSIS ---
-            cv_img = cv2.cvtColor(cv2.imread(temp_path), cv2.COLOR_BGR2RGB)
-            resized = cv2.resize(cv_img, (300, 300))
+                avg_color = np.mean(resized.reshape(-1, 3), axis=0)
+                avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
 
-            avg_color = np.mean(resized.reshape(-1, 3), axis=0)
-            avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
+                gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
+                edges = cv2.Canny(gray, 50, 150)
+                edge_pixels = np.sum(edges > 0)
+                laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
 
-            gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
-            edges = cv2.Canny(gray, 50, 150)
-            edge_pixels = np.sum(edges > 0)
-            laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+                shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
+                texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
 
-            shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
-            texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
+                # Simulate GCS Upload
+                try:
+                    img_url = "https://storage.googleapis.com/demo-placeholder.png"
+                    st.success("✅ Simulated image upload.")
+                    st.write(f"🔗 Image URL: {img_url}")
+                except Exception as e:
+                    st.error("❌ Upload simulation failed")
+                    st.exception(e)
+                    st.stop()
 
-            # --- Simulate Upload ---
-            try:
-                img_url = "https://storage.googleapis.com/demo-placeholder.png"
-                st.success("✅ Simulated image upload.")
-                st.write(f"🔗 Image URL: {img_url}")
-            except Exception as e:
-                st.error("❌ Upload simulation failed.")
-                st.exception(e)
-                st.stop()
+                st.session_state.submissions.append({
+                    "id": submission_id,
+                    "timestamp": timestamp,
+                    "symptoms": symptoms,
+                    "image_url": img_url,
+                    "avg_color": avg_color_str,
+                    "shape_comment": shape_comment,
+                    "texture_comment": texture_comment,
+                    "prediction_TCM": "Qi Deficiency (placeholder)",
+                    "prediction_Western": "Possible Fatigue/Anemia (placeholder)"
+                })
 
-            # --- STORE RESULTS LOCALLY ---
-            st.session_state.submissions.append({
-                "id": submission_id,
-                "timestamp": timestamp,
-                "symptoms": symptoms,
-                "image_url": img_url,
-                "avg_color": avg_color_str,
-                "shape_comment": shape_comment,
-                "texture_comment": texture_comment,
-                "prediction_TCM": "Qi Deficiency (placeholder)",
-                "prediction_Western": "Possible Fatigue/Anemia (placeholder)",
-            })
+                # Results
+                st.subheader("🧪 Analysis Results")
+                st.markdown(f"- **Tongue Color**: {avg_color_str}")
+                st.markdown(f"- **Shape**: {shape_comment}")
+                st.markdown(f"- **Texture**: {texture_comment}")
+                st.markdown("- **TCM Insight**: Qi Deficiency (based on image features)")
+                st.markdown("- **Western Equivalent**: Signs of fatigue or low hemoglobin")
 
-            # --- DISPLAY RESULTS ---
-            st.subheader("🧪 Analysis Results")
-            st.markdown(f"- **Tongue Color**: {avg_color_str}")
-            st.markdown(f"- **Shape**: {shape_comment}")
-            st.markdown(f"- **Texture**: {texture_comment}")
-            st.markdown("- **TCM Insight**: Qi Deficiency (based on image features)")
-            st.markdown("- **Western Equivalent**: Signs of fatigue or low hemoglobin")
+                feedback = st.text_input("How accurate was this? (optional feedback)")
+                if feedback:
+                    st.success("Thanks for your feedback! 🙏")
+            else:
+                st.error("⚠️ Please upload an image and provide consent.")
 
-            # --- USER FEEDBACK ---
-            feedback = st.text_input("How accurate was this? (optional feedback)")
-            if feedback:
-                st.success("Thanks for your feedback! 🙏")
-                # Placeholder to store feedback to Firestore
-        else:
-            st.error("⚠️ Please upload an image and provide consent.")
+    # --- ABOUT & DISCLAIMER ---
+    elif page == "About & Disclaimer":
+        st.title("📜 About This App")
+        st.write("""
+            This app is a prototype to:
+            - Educate users on Traditional Chinese Medicine
+            - Explore tongue analysis as a health indicator
+            - Begin building a research dataset
 
-# --- PAGE: About & Disclaimer ---
-elif page == "About & Disclaimer":
-    st.title("📜 About This App")
-    st.write("""
-        This app is a prototype to:
-        - Educate users on Traditional Chinese Medicine
-        - Explore tongue analysis as a health indicator
-        - Begin building a research dataset
+            ⚠️ **Disclaimer**: This tool does NOT replace medical professionals. Use responsibly.
+        """)
 
-        ⚠️ **Disclaimer**: This tool does NOT replace medical professionals. Use responsibly.
-    """)
+    else:
+        st.warning("Page not recognized.")
 
+except Exception as e:
+    st.error("❌ Failed to load the page.")
+    st.exception(e)

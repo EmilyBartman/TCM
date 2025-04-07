@@ -108,10 +108,17 @@ elif page == "Tongue Health Check":
             texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
 
             # Upload to Firebase Storage
-            blob = bucket.blob(firebase_filename)
-            blob.upload_from_filename(temp_path)
-            blob.make_public()
-            img_url = blob.public_url
+            try:
+                blob = bucket.blob(firebase_filename)
+                blob.upload_from_filename(temp_path)
+                blob.make_public()
+                img_url = blob.public_url
+                st.success("✅ Image uploaded successfully.")
+                st.write(f"🔗 Public URL: {img_url}")
+            except Exception as e:
+                st.error("❌ Upload to Firebase failed.")
+                st.exception(e)
+
 
             # Store metadata in Firestore
             data_row = {

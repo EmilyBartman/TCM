@@ -17,20 +17,20 @@ from datetime import datetime
 import cv2
 import numpy as np
 import firebase_admin
-from firebase_admin import credentials, firestore, storage
+from firebase_admin import credentials, firestore
+from google.cloud import storage as gcs_storage
 
-# ---- FIREBASE SETUP (Streamlit Secrets) ----
-
+# ---- FIREBASE SETUP ----
 if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
-    firebase_admin.initialize_app(cred, {
-        'storageBucket': 'traditional-medicine-50518.appspot.com'  
-    })
-
+    firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-bucket = storage.bucket()
+
+# GCS client setup (use existing bucket name)
+gcs_client = gcs_storage.Client(credentials=cred, project=firebase_config["project_id"])
+bucket = gcs_client.bucket("traditional-medicine-50518")  # Using your working bucket
 
 # ---- SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -51,7 +51,7 @@ if page == "Educational Content":
         - **Yin & Yang**: Balance between opposite but complementary forces
         - **Qi (Chi)**: Vital energy flowing through the body
         - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs and emotions
-        
+
         TCM often contrasts with **Western medicine**, which tends to focus on pathology, lab diagnostics, and medications.
     """)
 
@@ -107,7 +107,7 @@ elif page == "Tongue Health Check":
             shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
             texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
 
-            # Upload to Firebase Storage
+            # Upload to GCS
             try:
                 blob = bucket.blob(firebase_filename)
                 blob.upload_from_filename(temp_path)
@@ -118,7 +118,7 @@ elif page == "Tongue Health Check":
             except Exception as e:
                 st.error("❌ Upload to Firebase failed.")
                 st.exception(e)
-
+                st.stop()
 
             # Store metadata in Firestore
             data_row = {

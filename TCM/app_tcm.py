@@ -370,8 +370,8 @@ elif page == "Tongue Health Check":
               remedy_text = ""
                 if prediction_TCM == "Qi Deficiency":
                     remedy_text = """
-                    ✅ Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
-                    🍠 Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
+                    "✅" Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
+                    "🍠" Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
                     🚶‍♂️ Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
                     """
                 elif prediction_TCM == "Yin Deficiency":

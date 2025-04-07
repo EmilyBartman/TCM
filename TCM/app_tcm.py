@@ -19,29 +19,29 @@ from sklearn.ensemble import RandomForestClassifier
 from googletrans import Translator
 
 translator = Translator()
-    languages = {
-        "English": "en",
-        "Chinese (Simplified)": "zh-cn",
-        "Spanish": "es",
-        "French": "fr",
-        "Hindi": "hi",
-        "Arabic": "ar",
-        "Swahili": "sw",
-        "Zulu": "zu",
-        "Amharic": "am",
-        "Igbo": "ig",
-        "Yoruba": "yo",
-        "Tamil": "ta",
-        "Telugu": "te",
-        "Urdu": "ur",
-        "Bengali": "bn",
-        "Malay": "ms",
-        "Vietnamese": "vi",
-        "Thai": "th",
-        "Filipino": "tl",
-        "Japanese": "ja",
-        "Korean": "ko"
-    }
+languages = {
+    "English": "en",
+    "Chinese (Simplified)": "zh-cn",
+    "Spanish": "es",
+    "French": "fr",
+    "Hindi": "hi",
+    "Arabic": "ar",
+    "Swahili": "sw",
+    "Zulu": "zu",
+    "Amharic": "am",
+    "Igbo": "ig",
+    "Yoruba": "yo",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Urdu": "ur",
+    "Bengali": "bn",
+    "Malay": "ms",
+    "Vietnamese": "vi",
+    "Thai": "th",
+    "Filipino": "tl",
+    "Japanese": "ja",
+    "Korean": "ko"
+}
 
 selected_lang = st.sidebar.selectbox("🌐 Choose Language", list(languages.keys()))
 target_lang = languages[selected_lang]

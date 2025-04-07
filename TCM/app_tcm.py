@@ -204,6 +204,7 @@ target_lang = languages[]
     - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
     """, target_lang))
 
+
     st.header(translate("'🔎' Why the Tongue Matters in TCM", target_lang))
     st.markdown(translate("""
     In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.

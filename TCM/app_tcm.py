@@ -204,7 +204,7 @@ target_lang = languages[st.session_state.selected_lang]
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":
-    target_lang = languages[selected_lang]
+    target_lang = languages[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
     st.header(translate("Foundations of TCM", target_lang))

@@ -122,7 +122,8 @@ elif page == "Tongue Health Check":
             try:
                 blob = bucket.blob(firebase_filename)
                 blob.upload_from_filename(temp_path)
-                blob.make_public()
+                # Skip public access if you're not sharing the file directly
+                # Just keep the upload path in Firestore
                 img_url = blob.public_url
                 st.success("✅ Image uploaded successfully.")
                 st.write(f"🔗 Public URL: {img_url}")

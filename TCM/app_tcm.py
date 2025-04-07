@@ -27,26 +27,23 @@ from google.cloud import storage as gcs_storage
 # ---- FIREBASE SETUP ----
 try:
     firebase_config = dict(st.secrets["firebase"])
-
-    # Create credential object from secrets
     cred = credentials.Certificate(firebase_config)
 
-    # Initialize Firebase app if not already done
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred, {
-            "storageBucket": f"{firebase_config['project_id']}.appspot.com"
+            "storageBucket": "traditional-medicine-50518.appspot.com"  # << your actual bucket name
         })
 
-    # Setup Firestore and GCS
     db = firestore.client()
-    bucket = storage.bucket()
+    bucket = storage.bucket()  # now this will work
 
-    st.success("✅ Firebase and GCS initialized")
+    st.success("✅ Firebase, Firestore, and Storage initialized")
 except Exception as e:
-    st.error("❌ Firebase initialization failed")
-    st.exception(e)
     db = None
     bucket = None
+    st.error("❌ Firebase initialization failed")
+    st.exception(e)
+    
 # ---- SETUP ----
 if "submissions" not in st.session_state:
     st.session_state.submissions = []

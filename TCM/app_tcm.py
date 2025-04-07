@@ -55,6 +55,24 @@ if page == "Educational Content":
     - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
     """)
 
+    st.header("🔎 Why the Tongue Matters in TCM")
+    st.markdown("""
+    In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
+
+    **What the tongue reveals:**
+    - **Tongue Body Color**: Reflects blood, Qi, and organ health
+    - **Tongue Shape**: Can indicate excess or deficiency syndromes
+    - **Tongue Coating**: Suggests digestive heat, cold, or dampness
+    - **Moisture Level**: Linked to fluid metabolism and Yin/Yang balance
+    - **Tongue Movement**: Trembling or deviation may signal wind or weakness
+
+    Western medicine may not commonly use tongue inspection diagnostically, but it does correlate with:
+    - Anemia (pale tongue)
+    - Dehydration (dry tongue)
+    - Oral candidiasis (thick white coating)
+    - Circulatory issues (bluish-purple tongue)
+    """)
+
     st.header("🌐 Bridging TCM and Western Medicine")
     st.markdown("""
     Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:

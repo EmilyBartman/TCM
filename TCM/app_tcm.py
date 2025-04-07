@@ -200,11 +200,11 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(result)
 
             st.subheader("🧪 Analysis Results")
-            st.markdown(f"- **Tongue Color**: {avg_color_str}")
-            st.markdown(f"- **Shape**: {shape_comment}")
-            st.markdown(f"- **Texture**: {texture_comment}")
-            st.markdown(f"- **TCM Insight**: {prediction_TCM}")
-            st.markdown(f"- **Western Insight**: {prediction_Western}")
+            st.markdown(f"🖌️ **Tongue Color**: {avg_color_str} — This reflects the quality of blood and energy circulation. Pale may indicate deficiency; purple may suggest stagnation.")
+            st.markdown(f"📐 **Shape**: {shape_comment} — Swelling can signal dampness or fluid retention; a thin tongue may suggest blood or Yin deficiency.")
+            st.markdown(f"🌫️ **Texture**: {texture_comment} — Moisture tells us about body fluid processing and digestive heat or cold.")
+            st.markdown(f"🧧 **TCM Insight**: {prediction_TCM} — This suggests a pattern like low Qi, impacting energy, breath, and digestion. TCM emphasizes restoring balance through herbs, diet, or acupuncture.")
+            st.markdown(f"🧬 **Western Insight**: {prediction_Western} — These signs may relate to issues like anemia, dehydration, or stress-related fatigue in biomedical terms. Further lab work may confirm underlying conditions.")
 
             feedback = st.text_input("Was this accurate? Provide feedback below:")
             if feedback:

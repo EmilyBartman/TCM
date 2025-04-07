@@ -14,7 +14,77 @@ import cv2
 import numpy as np
 import firebase_admin
 from firebase_admin import storage, credentials, firestore
+import joblib
+from sklearn.ensemble import RandomForestClassifier
 
+def extract_features(cv_img):
+    resized = cv2.resize(cv_img, (300, 300))
+    avg_color = np.mean(resized.reshape(-1, 3), axis=0)
+    gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(gray, 50, 150)
+    edge_pixels = np.sum(edges > 0)
+    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+    return [*avg_color, edge_pixels, laplacian_var]
+
+def load_model():
+    try:
+        model = joblib.load("models/tcm_diagnosis_model.pkl")
+        return model
+    except:
+        return None
+
+def predict_with_model(model, features, symptoms=[]):
+    symptom_count = len(symptoms)
+    features += [symptom_count]  # simplistic fusion
+    pred = model.predict([features])[0]
+    prob = model.predict_proba([features])[0].max()
+    return pred, round(prob * 100, 2)
+
+# Part 2: Firestore Feature Store Saving
+from firebase_admin import firestore
+
+def store_features_to_firestore(db, submission_id, features, label, prob):
+    doc_ref = db.collection("tongue_features").document(submission_id)
+    doc_ref.set({
+        "features": features,
+        "label": label,
+        "confidence": prob,
+        "timestamp": firestore.SERVER_TIMESTAMP
+    })
+
+# Part 3: BigQuery Export via Scheduled Function (example function call)
+# In practice, you'd deploy this as a Google Cloud Function or schedule via Cloud Scheduler
+
+def export_firestore_to_bigquery():
+    # Placeholder - this logic should be implemented as a scheduled cloud function or script
+    # that connects Firestore to BigQuery
+    pass
+
+# Part 4: Feedback-based Learning Stub (active learning)
+def retrain_model_from_feedback(dataframe):
+    # Check if labeled feedback exists
+    labeled = dataframe[dataframe["is_correct"].notna()]
+    if not labeled.empty:
+        X = labeled[["avg_r", "avg_g", "avg_b", "edges", "laplacian_var", "symptom_count"]]
+        y = labeled["prediction_TCM"]
+        clf = RandomForestClassifier(n_estimators=100, random_state=42)
+        clf.fit(X, y)
+        joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
+        return True
+    return False
+
+# Part 5: Smart Recommendations Function (remedy + feedback)
+def get_dynamic_remedies(tcm_pattern, symptoms=[]):
+    # Extend this logic with rules or an LLM lookup
+    if tcm_pattern == "Qi Deficiency":
+        return ["Ginseng tea", "Sweet potatoes", "Moderate walking"]
+    elif tcm_pattern == "Yin Deficiency":
+        return ["Goji berries", "Pears & lily bulb soup", "Meditation"]
+    elif tcm_pattern == "Blood Deficiency":
+        return ["Beets", "Spinach", "Dang Gui"]
+    elif tcm_pattern == "Damp Retention":
+        return ["Barley water", "Avoid greasy food", "Pu-erh tea"]
+    return ["Balanced diet", "Hydration", "Rest"]
 # ---- FIREBASE SETUP ----
 try:
     firebase_config = dict(st.secrets["firebase"])

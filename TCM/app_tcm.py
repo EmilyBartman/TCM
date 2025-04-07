@@ -476,8 +476,7 @@ elif page == "Submission History":
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
     st.title(translate("ℹ️ About This App", target_lang))
-    st.markdown(translate(
-        """
+    about_text = """
         This app is built for:
         - Educating users about TCM tongue diagnostics
         - Demonstrating how AI may assist in early wellness screening
@@ -486,6 +485,5 @@ elif page == "About & Disclaimer":
         '🔒' **Data Usage**: All uploaded data is securely stored and used anonymously for improving model prediction.
 
         '⚠️' **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
-        """,
-        target_lang
-    ))
+        """
+    st.markdown(translate(about_text, target_lang))

@@ -41,19 +41,25 @@ def predict_with_model(model, features, symptoms=[]):
     return pred, round(prob * 100, 2)
 
 def store_features_to_firestore(db, submission_id, features, label, prob):
+    def to_python_type(val):
+        return val.item() if isinstance(val, (np.generic, np.bool_)) else val
+
+    features = [to_python_type(f) for f in features]
+
     doc_ref = db.collection("tongue_features").document(submission_id)
     doc_ref.set({
         "features": features,
-        "label": label,
-        "confidence": prob,
-        "avg_r": features[0],
-        "avg_g": features[1],
-        "avg_b": features[2],
-        "edges": features[3],
-        "laplacian_var": features[4],
-        "symptom_count": features[5] if len(features) > 5 else 0,
+        "label": str(label),
+        "confidence": float(prob),
+        "avg_r": float(features[0]),
+        "avg_g": float(features[1]),
+        "avg_b": float(features[2]),
+        "edges": int(features[3]),
+        "laplacian_var": float(features[4]),
+        "symptom_count": int(features[5]) if len(features) > 5 else 0,
         "timestamp": firestore.SERVER_TIMESTAMP
     })
+
 
 def export_firestore_to_bigquery():
     pass  # Placeholder for actual implementation

@@ -131,7 +131,6 @@ elif page == "Tongue Health Check":
     if st.button("🔍 Analyze My Tongue"):
         if uploaded_img and consent:
             symptoms = ", ".join(selected_symptoms) if selected_symptoms else "None provided"
-            # full analysis logic restored
             submission_id = str(uuid.uuid4())
             timestamp = datetime.utcnow().isoformat()
             file_ext = uploaded_img.name.split(".")[-1]
@@ -211,7 +210,7 @@ elif page == "Tongue Health Check":
 """)
             st.markdown(f"""🧧 **TCM Insight**: {prediction_TCM}
 - Your tongue and symptoms suggest your body's energy (Qi) might be a bit low. This can show up as feeling tired, cold limbs, or weak digestion. TCM might recommend warm foods, rest, or herbal tea to support you.
-""") might be a bit low. This can show up as feeling tired, cold limbs, or weak digestion. TCM might recommend warm foods, rest, or herbal tea to support you.")
+""")
             st.markdown(f"""🧬 **Western Insight**: {prediction_Western}
 - This means you may be dealing with low iron, fatigue, or stress-related tiredness. It’s common and often helped by better hydration, nutrition, or sleep.
 """)
@@ -223,8 +222,6 @@ elif page == "Tongue Health Check":
                     "is_correct": True if feedback == "Yes" else (False if feedback == "No" else None)
                 })
                 st.success("🙏 Thanks for your feedback!")
-        else:
-            st.error("❌ Please upload an image and agree to consent.")
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":

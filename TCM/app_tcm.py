@@ -475,7 +475,7 @@ elif page == "Submission History":
 
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
-    st.title(translate("ℹ️ About This App", target_lang))
+    st.title(translate(""ℹ️" About This App", target_lang))
     st.markdown(translate("""
     This app is built for:
     - Educating users about TCM tongue diagnostics

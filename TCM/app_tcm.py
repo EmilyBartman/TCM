@@ -51,7 +51,7 @@ elif page == "Tongue Health Check":
 
     if uploaded_img:
         img = Image.open(uploaded_img)
-        st.image(img, caption="Uploaded Tongue Image", use_column_width=True)
+        st.image(img, caption="Uploaded Tongue Image", use_container_width=True)
 
     st.subheader("Step 2: Describe Your Current Symptoms")
     symptoms = st.text_area("Describe what you’re feeling physically or emotionally (e.g. tiredness, stress, stomach ache)")

@@ -25,8 +25,9 @@ if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
     firebase_admin.initialize_app(cred, {
-        'storageBucket': 'traditional-medicine-50518.appspot.com'
+        'storageBucket': 'traditional-medicine-50518.appspot.com'  
     })
+
 
 db = firestore.client()
 bucket = storage.bucket()

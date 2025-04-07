@@ -256,7 +256,6 @@ elif page == "Submission History":
         st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
     else:
         st.info("You haven't submitted any scans yet.")
-
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
     st.title("ℹ️ About This App")

@@ -200,42 +200,28 @@ elif page == "Tongue Health Check":
 
             st.subheader("🧪 Analysis Results")
 
-            with st.container():
-                st.markdown(f"""**🖌️ Tongue Color**  
-:white_circle: {avg_color_str}""")
-                st.markdown("""
-                - This is a soft reddish tone, commonly seen in people who may feel tired or low-energy. 
-                - In TCM, it suggests Qi or Blood Deficiency.
-                """)
+            with st.expander("🎨 Tongue Color Analysis", expanded=True):
+                st.markdown(f"**RGB Value**: `{avg_color_str}`")
+                st.markdown("- A soft reddish tone may indicate Qi or Blood Deficiency.")
 
-                st.markdown(f"""**📐 Shape**  
-:straight_ruler: {shape_comment}""")
-                st.markdown("""
-                - A 'Normal' shape means the tongue edges are smooth and not swollen or too thin. 
-                - This usually means there's no extreme heat or cold imbalance.
-                """)
+            with st.expander("📐 Shape Interpretation", expanded=True):
+                st.markdown(f"**Detected Shape**: `{shape_comment}`")
+                st.markdown("- Normal shape suggests no major heat or fluid imbalance.")
 
-                st.markdown(f"""**🌫️ Texture**  
-:droplet: {texture_comment}""")
-                st.markdown("""
-                - A moist texture suggests your body is doing a good job of keeping fluids balanced. 
-                - Too dry or too wet may hint at Yin issues or Dampness.
-                """)
+            with st.expander("💧 Texture Observation", expanded=True):
+                st.markdown(f"**Surface Texture**: `{texture_comment}`")
+                st.markdown("- Moist texture implies healthy fluid regulation. Too dry or coated may hint at Yin imbalance.")
 
-                st.markdown(f"""**🧧 TCM Insight**  
-:red_gift_envelope: {prediction_TCM}""")
-                st.markdown("""
-                - This pattern suggests your body's energy (Qi) might be a bit low. 
-                - You may feel tired, have cold limbs, or weak digestion.
-                - TCM may suggest warm foods, rest, or herbal tea.
-                """)
+            with st.expander("🧧 TCM Insight", expanded=True):
+                st.markdown(f"**Syndrome**: `{prediction_TCM}`")
+                st.markdown("- This pattern suggests your body's energy (Qi) might be a bit low.")
+                st.markdown("- You may feel tired, have cold limbs, or weak digestion.")
+                st.markdown("- TCM may suggest warm foods, rest, or herbal tea.")
 
-                st.markdown(f"""**🧬 Western Insight**  
-:microscope: {prediction_Western}""")
-                st.markdown("""
-                - These signs might relate to low iron, fatigue, or stress-related tiredness. 
-                - Improving hydration, nutrition, or rest often helps.
-                """)
+            with st.expander("🧬 Western Medical View", expanded=True):
+                st.markdown(f"**Insight**: `{prediction_Western}`")
+                st.markdown("- Could relate to low iron, dehydration, or fatigue.")
+                st.markdown("- Hydration, nutrition, and better sleep often help.")
 
             feedback = st.radio("Was this prediction accurate?", ["Yes", "No", "Not sure"], index=2)
             if feedback != "Not sure":

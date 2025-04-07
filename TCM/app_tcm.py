@@ -216,12 +216,12 @@ elif page == "Tongue Health Check":
                 with st.expander("💧 Texture Observation", expanded=True):
                     st.markdown(f"**Surface Texture**: `{texture_comment}`")
                     st.markdown("- Moist texture implies healthy fluid regulation. Too dry or coated may hint at Yin imbalance.")
-
-            with col2:
+              
                 with st.expander("📐 Shape Interpretation", expanded=True):
                     st.markdown(f"**Detected Shape**: `{shape_comment}`")
                     st.markdown("- Normal shape suggests no major heat or fluid imbalance.")
 
+            with col2:
                 with st.expander("🧧 TCM Insight", expanded=True):
                     st.markdown(f"**Syndrome**: `{prediction_TCM}`")
                     st.markdown("- This pattern suggests your body's energy (Qi) might be a bit low.")

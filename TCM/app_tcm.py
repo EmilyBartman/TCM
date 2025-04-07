@@ -43,8 +43,9 @@ languages = {
     "Korean": "ko"
 }
 
-selected_lang = st.sidebar.selectbox(""🌐" Choose Language", list(languages.keys()))
-target_lang = languages[selected_lang]
+selected_lang = st.sidebar.selectbox("Choose Language", list(languages.keys()))
+
+target_lang = languages[]
 
 def translate(text, lang_code):
     try:

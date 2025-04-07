@@ -240,25 +240,27 @@ Integrative medicine combines both paradigms to enhance wellness, prevention, an
 """, target_lang))
 
     st.header(translate("TCM Syndrome Library", target_lang))
-    with st.expander(translate("'🔎' Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
+    with st.expander(translate("🔎 Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
         st.markdown(translate("""
-        - **Yin & Yang**: Balance of opposing but complementary forces.
-        - **Qi (Chi)**: Vital life energy.
-        - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
-        - **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
-        - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
-        """, target_lang))  # ✅ This ending is required
+**Qi Deficiency**: Fatigue, pale tongue, short breath  
+**Damp Retention**: Bloating, sticky tongue coat  
+**Blood Stasis**: Sharp pain, purple tongue  
+**Qi Stagnation**: Emotional blockage, rib pain  
+**Damp Heat**: Yellow tongue coat, foul smell  
+**Yang Deficiency**: Cold limbs, low energy  
+**Yin Deficiency**: Dry mouth, night sweats  
+**Blood Deficiency**: Pale lips, dizziness
+""", target_lang))
 
+    with st.expander(translate("📚 Recommended Reading", target_lang)):
+        st.markdown(translate("""
+- *Foundations of Chinese Medicine* - Giovanni Maciocia  
+- *Healing with Whole Foods* - Paul Pitchford  
+- *The Web That Has No Weaver* - Ted J. Kaptchuk  
+- [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)  
+- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
+""", target_lang))
 
-    with st.expander(translate("'📚' Recommended Reading", target_lang)):
-        st.markdown("""
-        - *Foundations of Chinese Medicine* - Giovanni Maciocia
-        - *Healing with Whole Foods* - Paul Pitchford
-        - *The Web That Has No Weaver* - Ted J. Kaptchuk
-        - [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)
-        - [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
-        ""
-        )
 # ---- TONGUE HEALTH CHECK ----
 
 # ---- SUBMISSION HISTORY ----

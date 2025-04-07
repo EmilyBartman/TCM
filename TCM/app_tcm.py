@@ -155,7 +155,13 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
-# Language codes
+import streamlit as st
+from deep_translator import GoogleTranslator
+
+# -----------------------
+# Language config
+# -----------------------
+
 languages = {
     "English": "en",
     "Spanish": "es",
@@ -180,19 +186,19 @@ languages = {
     "Korean": "ko"
 }
 
-# Initialize session state
+# -----------------------
+# Session state for language
+# -----------------------
+
 if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "English"
 
-# Define rerun trigger
-def translate(text, lang_code):
-    try:
-        return GoogleTranslator(source="auto", target=lang_code).translate(text)
-    except Exception as e:
-        print(f"[Translation Error] {e}")
-        return text
+# Define this before using it in on_change
+def update_lang():
+    st.session_state.selected_lang = st.session_state.lang_temp
+    st.experimental_rerun()
 
-# Sidebar language picker
+# Sidebar dropdown (triggers rerun on change)
 st.sidebar.selectbox(
     "🌐 Choose Language",
     list(languages.keys()),
@@ -201,9 +207,19 @@ st.sidebar.selectbox(
     on_change=update_lang
 )
 
-# Final resolved language code
+# This is the final language code to use
 target_lang = languages[st.session_state.selected_lang]
 
+# -----------------------
+# Translation helper
+# -----------------------
+
+def translate(text, lang_code):
+    try:
+        return GoogleTranslator(source="auto", target=lang_code).translate(text)
+    except Exception as e:
+        print(f"[Translation error] {e}")
+        return text
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":

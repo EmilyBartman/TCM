@@ -7,3 +7,4 @@ pandas
 streamlit-option-menu
 streamlit-lottie
 langdetect
+google-cloud-storage

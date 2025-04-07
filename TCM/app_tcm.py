@@ -484,5 +484,4 @@ elif page == "About & Disclaimer":
 
     "🔒" **Data Usage**: All uploaded data is securely stored and used anonymously for improving model prediction.
 
-    "⚠️" **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
-    """, target_lang))
+    "⚠️" **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care. """, target_lang))

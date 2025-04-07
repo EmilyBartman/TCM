@@ -20,7 +20,7 @@ if "submissions" not in st.session_state:
 if "selected_page" not in st.session_state:
     st.session_state.selected_page = "Educational Content"
 
-st.write("\u2705 App started loading")
+st.write("✅ App started loading")
 
 # --- FIREBASE SETUP ---
 try:
@@ -39,28 +39,29 @@ try:
 
     db = firestore.client()
     bucket = fb_storage.bucket()
-    st.write("\u2705 Firebase initialized successfully")
+    st.write("✅ Firebase initialized successfully")
 except Exception as e:
     db = None
     bucket = None
-    st.error("\u274C Firebase initialization failed")
+    st.error("❌ Firebase initialization failed")
     st.exception(e)
 
 # --- SIDEBAR NAVIGATION ---
 try:
     pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
-    selected_index = pages.index(st.session_state.selected_page)
+    selected_index = pages.index(st.session_state.get("selected_page", "Educational Content"))
     page = st.sidebar.radio("Navigate", pages, index=selected_index)
     st.session_state.selected_page = page
-    st.write(f"\u2705 Current page: {page}")
+    st.write(f"✅ Current page: {page}")
+    st.write("📄 Debug: Session state", st.session_state)
 except Exception as e:
-    st.error("\u274C Sidebar navigation failed")
+    st.error("❌ Sidebar navigation failed")
     st.exception(e)
 
 # --- PAGE CONTENT RENDERING ---
 try:
     if page == "Educational Content":
-        st.title("\ud83c\udf3f Traditional Chinese Medicine (TCM) Basics")
+        st.title("🌿 Traditional Chinese Medicine (TCM) Basics")
         st.header("What is TCM?")
         st.write("""
             Traditional Chinese Medicine is a holistic approach to health including:
@@ -75,7 +76,7 @@ try:
         st.markdown("- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)")
 
     elif page == "Tongue Health Check":
-        st.title("\ud83d\udc45 Tongue Diagnosis Tool")
+        st.title("👅 Tongue Diagnosis Tool")
 
         uploaded_img = st.file_uploader("Upload a clear image of your tongue", type=["jpg", "jpeg", "png"])
         if uploaded_img:
@@ -86,7 +87,7 @@ try:
         consent = st.checkbox("I consent to use of my image and data for research and model training.")
         st.info("This app does not provide medical diagnoses. For educational use only.")
 
-        if st.button("\ud83d\udd0d Analyze My Tongue"):
+        if st.button("🔍 Analyze My Tongue"):
             if uploaded_img and consent:
                 submission_id = str(uuid.uuid4())
                 timestamp = datetime.utcnow().isoformat()
@@ -114,7 +115,7 @@ try:
                     blob.upload_from_filename(temp_path)
                     blob.make_public()
                     img_url = blob.public_url
-                    st.success("\u2705 Image uploaded to Firebase Storage")
+                    st.success("✅ Image uploaded to Firebase Storage")
                 else:
                     img_url = "https://storage.googleapis.com/demo-placeholder.png"
                     st.warning("Firebase Storage not available. Using placeholder URL.")
@@ -133,14 +134,14 @@ try:
 
                 if db:
                     db.collection("tongue_diagnostics").document(submission_id).set(data)
-                    st.success("\u2705 Submission saved to Firestore")
+                    st.success("✅ Submission saved to Firestore")
                 else:
                     st.warning("Firestore not available. Data not saved to database.")
 
                 st.session_state.submissions.append(data)
 
                 # Show results
-                st.subheader("\ud83e\uddea Analysis Results")
+                st.subheader("🧪 Analysis Results")
                 st.markdown(f"- **Tongue Color**: {avg_color_str}")
                 st.markdown(f"- **Shape**: {shape_comment}")
                 st.markdown(f"- **Texture**: {texture_comment}")
@@ -149,23 +150,23 @@ try:
 
                 feedback = st.text_input("How accurate was this? (optional feedback)")
                 if feedback:
-                    st.success("Thanks for your feedback! \ud83d\ude4f")
+                    st.success("Thanks for your feedback! 🙏")
             else:
-                st.error("\u26a0\ufe0f Please upload an image and provide consent.")
+                st.error("⚠️ Please upload an image and provide consent.")
 
     elif page == "About & Disclaimer":
-        st.title("\ud83d\udcdc About This App")
+        st.title("📜 About This App")
         st.write("""
             This app is a prototype to:
             - Educate users on Traditional Chinese Medicine
             - Explore tongue analysis as a health indicator
             - Begin building a research dataset
 
-            \u26a0\ufe0f **Disclaimer**: This tool does NOT replace medical professionals. Use responsibly.
+            ⚠️ **Disclaimer**: This tool does NOT replace medical professionals. Use responsibly.
         """)
     else:
         st.warning("Page not recognized.")
 
 except Exception as e:
-    st.error("\u274C Failed to load the page.")
+    st.error("❌ Failed to load the page.")
     st.exception(e)

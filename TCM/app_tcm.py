@@ -233,17 +233,6 @@ elif page == "Tongue Health Check":
                     st.markdown("- Could relate to low iron, dehydration, or fatigue.")
                     st.markdown("- Hydration, nutrition, and better sleep often help.")
 
-            feedback = st.radio("Was this prediction accurate?", ["Not sure", "Yes", "No"], index=0)
-            if st.button("💾 Submit Feedback"):
-                if feedback in ["Yes", "No"]:
-                    db.collection("tongue_scans").document(submission_id).update({
-                        "user_feedback": feedback,
-                        "is_correct": True if feedback == "Yes" else False
-                    })
-                    st.toast("✅ Feedback submitted. Thank you!", icon="📬")
-                else:
-                    st.warning("Please select 'Yes' or 'No' to submit feedback.")
-
             # --- Suggested Remedies ---
             with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
                 remedy_text = ""
@@ -307,6 +296,16 @@ elif page == "Tongue Health Check":
                     st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
                 else:
                     st.write("No prior scans available to compare.")
+            feedback = st.radio("Was this prediction accurate?", ["Not sure", "Yes", "No"], index=0)
+            if st.button("💾 Submit Feedback"):
+                if feedback in ["Yes", "No"]:
+                    db.collection("tongue_scans").document(submission_id).update({
+                        "user_feedback": feedback,
+                        "is_correct": True if feedback == "Yes" else False
+                    })
+                    st.toast("✅ Feedback submitted. Thank you!", icon="📬")
+                else:
+                    st.warning("Please select 'Yes' or 'No' to submit feedback.")
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
     st.title("📜 My Tongue Scan History")

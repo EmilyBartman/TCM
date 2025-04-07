@@ -189,7 +189,8 @@ target_lang = languages[selected_lang]
 def translate(text, lang_code):
     try:
         return translator.translate(text, dest=lang_code).text
-    except Exception:
+    except Exception as e:
+        print(f"Translation failed for '{text}' to {lang_code}: {e}")
         return text
 
 

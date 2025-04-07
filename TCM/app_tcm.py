@@ -201,37 +201,37 @@ elif page == "Tongue Health Check":
             st.subheader("🧪 Analysis Results")
 
             with st.container():
-                st.markdown(f"**🖌️ Tongue Color**
-:white_circle: {avg_color_str}")
+                st.markdown(f"""**🖌️ Tongue Color**  
+:white_circle: {avg_color_str}""")
                 st.markdown("""
                 - This is a soft reddish tone, commonly seen in people who may feel tired or low-energy. 
                 - In TCM, it suggests Qi or Blood Deficiency.
                 """)
 
-                st.markdown(f"**📐 Shape**
-:straight_ruler: {shape_comment}")
+                st.markdown(f"""**📐 Shape**  
+:straight_ruler: {shape_comment}""")
                 st.markdown("""
                 - A 'Normal' shape means the tongue edges are smooth and not swollen or too thin. 
                 - This usually means there's no extreme heat or cold imbalance.
                 """)
 
-                st.markdown(f"**🌫️ Texture**
-:droplet: {texture_comment}")
+                st.markdown(f"""**🌫️ Texture**  
+:droplet: {texture_comment}""")
                 st.markdown("""
                 - A moist texture suggests your body is doing a good job of keeping fluids balanced. 
                 - Too dry or too wet may hint at Yin issues or Dampness.
                 """)
 
-                st.markdown(f"**🧧 TCM Insight**
-:red_gift_envelope: {prediction_TCM}")
+                st.markdown(f"""**🧧 TCM Insight**  
+:red_gift_envelope: {prediction_TCM}""")
                 st.markdown("""
                 - This pattern suggests your body's energy (Qi) might be a bit low. 
                 - You may feel tired, have cold limbs, or weak digestion.
                 - TCM may suggest warm foods, rest, or herbal tea.
                 """)
 
-                st.markdown(f"**🧬 Western Insight**
-:microscope: {prediction_Western}")
+                st.markdown(f"""**🧬 Western Insight**  
+:microscope: {prediction_Western}""")
                 st.markdown("""
                 - These signs might relate to low iron, fatigue, or stress-related tiredness. 
                 - Improving hydration, nutrition, or rest often helps.
@@ -243,13 +243,7 @@ elif page == "Tongue Health Check":
                     "user_feedback": feedback,
                     "is_correct": True if feedback == "Yes" else False
                 })
-                st.toast("🙏 Thanks for your feedback!", icon="💬")"Was this prediction accurate?", ["Yes", "No", "Not sure"], index=2)
-            if feedback:
-                db.collection("tongue_scans").document(submission_id).update({
-                    "user_feedback": feedback,
-                    "is_correct": True if feedback == "Yes" else (False if feedback == "No" else None)
-                })
-                st.success("🙏 Thanks for your feedback!")
+                st.toast("🙏 Thanks for your feedback!", icon="💬")
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":

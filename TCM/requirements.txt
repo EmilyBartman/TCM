@@ -1,6 +1,6 @@
 streamlit
 firebase-admin
-opencv-python
+opencv-python-headless
 pillow
 numpy
 pandas

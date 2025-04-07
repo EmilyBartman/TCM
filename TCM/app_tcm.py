@@ -185,9 +185,12 @@ if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "English"
 
 # Define rerun trigger
-def update_lang():
-    st.session_state.selected_lang = st.session_state.lang_temp
-    st.experimental_rerun()
+def translate(text, lang_code):
+    try:
+        return GoogleTranslator(source="auto", target=lang_code).translate(text)
+    except Exception as e:
+        print(f"[Translation Error] {e}")
+        return text
 
 # Sidebar language picker
 st.sidebar.selectbox(

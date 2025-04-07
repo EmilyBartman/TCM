@@ -421,7 +421,7 @@ elif page == "Tongue Health Check":
                 pisa.CreatePDF(BytesIO(html_report.encode("utf-8")), dest=pdf_output)
                 pdf_bytes = pdf_output.getvalue()
                 b64 = base64.b64encode(pdf_bytes).decode("utf-8")
-               download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 {translate("Download PDF Report", target_lang)}</a>'
+                download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 {translate("Download PDF Report", target_lang)}</a>'
                 st.markdown(download_link, unsafe_allow_html=True)
 
             # --- History Compare ---

@@ -23,7 +23,7 @@ def translate(text, lang_code):
     try:
         return translator.translate(text, dest=lang_code).text
     except Exception as e:
-        st.warning(""🌐" Translation failed. Showing original text.")
+        st.warning("'🌐' Translation failed. Showing original text.")
         return text
 
 # ML Feature Extraction & Prediction

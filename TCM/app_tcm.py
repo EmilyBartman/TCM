@@ -6,7 +6,6 @@ Original file is located at
 """
 # Traditional Chinese Medicine Web App MVP (Streamlit)
 import streamlit as st
-import pandas as pd
 from PIL import Image
 import os
 import uuid
@@ -27,19 +26,23 @@ if "selected_page" not in st.session_state:
 
 st.write("✅ App started loading")
 
-# --- FIREBASE INIT ---
+# --- FIREBASE SETUP (Safe Mode) ---
 try:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
     if not firebase_admin._apps:
-        firebase_admin.initialize_app(cred)
-    st.write("✅ Firebase config loaded")
+        firebase_admin.initialize_app(cred, {
+            "projectId": firebase_config.get("project_id", "demo-project")
+        })
+    st.write("✅ Firebase config loaded (Safe Mode)")
 except Exception as e:
     st.error("❌ Firebase initialization failed")
     st.exception(e)
 
-# --- DATABASE PLACEHOLDER ---
+# TEMP DISABLE FIRESTORE AND GCS
 db = None
+storage = None
+st.write("⚠️ Firestore and GCS temporarily disabled")
 
 # --- SIDEBAR NAVIGATION ---
 try:
@@ -110,16 +113,12 @@ try:
                 shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
                 texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
 
-                # Simulate GCS Upload
-                try:
-                    img_url = "https://storage.googleapis.com/demo-placeholder.png"
-                    st.success("✅ Simulated image upload.")
-                    st.write(f"🔗 Image URL: {img_url}")
-                except Exception as e:
-                    st.error("❌ Upload simulation failed")
-                    st.exception(e)
-                    st.stop()
+                # Simulated image upload
+                img_url = "https://storage.googleapis.com/demo-placeholder.png"
+                st.success("✅ Simulated image upload.")
+                st.write(f"🔗 Image URL: {img_url}")
 
+                # Store data in memory
                 st.session_state.submissions.append({
                     "id": submission_id,
                     "timestamp": timestamp,
@@ -132,7 +131,7 @@ try:
                     "prediction_Western": "Possible Fatigue/Anemia (placeholder)"
                 })
 
-                # Results
+                # Display results
                 st.subheader("🧪 Analysis Results")
                 st.markdown(f"- **Tongue Color**: {avg_color_str}")
                 st.markdown(f"- **Shape**: {shape_comment}")

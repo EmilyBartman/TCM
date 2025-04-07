@@ -15,7 +15,7 @@ from datetime import datetime
 import cv2
 import numpy as np
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials
 from google.oauth2 import service_account
 from google.cloud import storage as gcs_storage
 
@@ -31,14 +31,9 @@ if not firebase_admin._apps:
 
 st.write("✅ Firebase config loaded")
 
-# Firestore connection test
-try:
-    db = firestore.client()
-    st.write("✅ Firestore connected")
-except Exception as e:
-    st.error("❌ Firestore init failed")
-    st.exception(e)
-    st.stop()
+# TEMP DISABLE FIRESTORE
+db = None
+st.write("⚠️ Firestore skipped for now")
 
 # Skipping GCS init temporarily
 st.write("✅ Skipped GCS init temporarily")
@@ -123,7 +118,7 @@ elif page == "Tongue Health Check":
             shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
             texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
 
-            # Upload to GCS (disabled for now)
+            # Simulate upload to GCS
             try:
                 img_url = "https://storage.googleapis.com/demo-placeholder.png"
                 st.success("✅ Simulated image upload.")
@@ -133,7 +128,7 @@ elif page == "Tongue Health Check":
                 st.exception(e)
                 st.stop()
 
-            # Store metadata in Firestore
+            # Store metadata (skipped)
             data_row = {
                 "id": submission_id,
                 "timestamp": timestamp,
@@ -146,10 +141,10 @@ elif page == "Tongue Health Check":
                 "prediction_Western": "Possible Fatigue/Anemia (placeholder)",
                 "user_feedback": ""
             }
-            db.collection("tongue_scans").document(submission_id).set(data_row)
+            # db.collection("tongue_scans").document(submission_id).set(data_row)
 
             st.success("Image submitted and analyzed successfully! Scroll down for prediction.")
-            st.write(f"Connected to Firestore")
+            st.write(f"Connected to Firestore (disabled)")
 
             # Display prediction & analysis
             st.subheader("🧪 Analysis Results")
@@ -159,12 +154,12 @@ elif page == "Tongue Health Check":
             st.markdown("- **TCM Insight**: Qi Deficiency (based on image features)")
             st.markdown("- **Western Equivalent**: Possible signs of fatigue or low hemoglobin")
 
-            # Feedback
+            # Feedback (skipped)
             st.subheader("How accurate was this?")
             feedback = st.text_input("Your feedback or correction (optional)")
             if feedback:
-                db.collection("tongue_scans").document(submission_id).update({"user_feedback": feedback})
                 st.success("Thanks! Your feedback helps improve our model.")
+                # db.collection("tongue_scans").document(submission_id).update({"user_feedback": feedback})
         else:
             st.error("Please upload an image and provide consent.")
 

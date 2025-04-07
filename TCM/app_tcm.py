@@ -155,7 +155,7 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
-from googletrans import Translator
+
 translator = Translator()
 
 languages = {
@@ -190,6 +190,7 @@ def translate(text, lang_code):
         return translator.translate(text, dest=lang_code).text
     except Exception:
         return text
+
 
 # ---- EDUCATIONAL CONTENT ----
 target_lang = languages[]
@@ -432,7 +433,7 @@ elif page == "Tongue Health Check":
                     st.write(translate("No prior scans available to compare.", target_lang))
 
             # --- Feedback Section ---
-            feedback = st.radio(
+                feedback = st.radio(
                 translate("Was this prediction accurate?", target_lang),
                 [translate("Not sure", target_lang), translate("Yes", target_lang), translate("No", target_lang)],
                 index=0
@@ -446,6 +447,7 @@ elif page == "Tongue Health Check":
                     st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="\U0001F4EC")
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
+
                     
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
@@ -483,7 +485,7 @@ elif page == "Submission History":
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
     st.title(translate("About This App", target_lang))
-    about_text = """
+    about_text = '''
 This app is built for:
 - Educating users about TCM tongue diagnostics
 - Demonstrating how AI may assist in early wellness screening
@@ -492,7 +494,6 @@ This app is built for:
 Data Usage: All uploaded data is securely stored and used anonymously for improving model prediction.
 
 Disclaimer: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
-"""
+'''
     st.markdown(translate(about_text, target_lang))
-
 

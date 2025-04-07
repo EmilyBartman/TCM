@@ -376,7 +376,7 @@ elif page == "Tongue Health Check":
                     """
                 elif prediction_TCM == "Yin Deficiency":
                     remedy_text = """
-                    "🍒" Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening—perfect for restoring internal fluids.  
+                    "🍒" Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening, perfect for restoring internal fluids.  
                     "🍐" Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin. Pears hydrate the lungs, while lily bulbs calm the spirit and ease dryness in the body.  
                     "🧘" Meditation and rest - Essential practices to conserve Yin. Meditation calms excessive Yang (activity), reduces stress, and promotes internal balance, especially helpful for those experiencing burnout or night sweats.
                     """

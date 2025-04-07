@@ -8,3 +8,4 @@ xhtml2pdf
 joblib
 scikit-learn
 deep-translator
+tensorflow

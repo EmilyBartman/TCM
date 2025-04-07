@@ -45,7 +45,7 @@ def load_model():
     try:
         return joblib.load(model_path)
     except Exception as e:
-        st.warning("'⚠️' ML model not found and could not be loaded. Using fallback prediction.")
+        st.warning("⚠️ ML model not found and could not be loaded. Using fallback prediction.")
         st.exception(e)
         return None
 
@@ -139,7 +139,7 @@ try:
 except Exception as e:
     db = None
     bucket = None
-    st.error("'❌' Firebase initialization failed")
+    st.error("❌ Firebase initialization failed")
     st.exception(e)
 
 # ---- SESSION STATE ----
@@ -293,7 +293,7 @@ Integrative medicine combines both paradigms to enhance wellness, prevention, an
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
-    st.title("'📜' My Tongue Scan History")
+    st.title("📜 My Tongue Scan History")
     if st.session_state.submissions:
         df = pd.DataFrame(st.session_state.submissions)
         st.dataframe(df)
@@ -303,27 +303,27 @@ elif page == "Submission History":
             total_feedback = df["is_correct"].notna().sum()
             if total_feedback > 0:
                 accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric("'📊' Model Accuracy (based on feedback)", f"{accuracy}%")
+                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
 
-            st.subheader("'📈' Accuracy Over Time")
+            st.subheader("📈 Accuracy Over Time")
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
             st.line_chart(daily)
 
-            st.subheader("'🧪' Accuracy by TCM Syndrome")
+            st.subheader("🧪 Accuracy by TCM Syndrome")
             if "prediction_TCM" in df.columns:
                 by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
                 st.bar_chart(by_syndrome)
 
         csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("'⬇️' Download CSV", csv, "my_tongue_scans.csv", "text/csv")
+        st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
     else:
         st.info("You haven't submitted any scans yet.")
 
 # ---- TONGUE HEALTH CHECK ----
 # ---- TONGUE HEALTH CHECK ----
 elif page == "Tongue Health Check":
-    st.title(translate("'👅' Tongue Diagnosis Tool", target_lang))
+    st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
     uploaded_img = st.file_uploader(translate("Upload your tongue image", target_lang), type=["jpg", "jpeg", "png"])
 
     if uploaded_img:
@@ -341,7 +341,7 @@ elif page == "Tongue Health Check":
     consent = st.checkbox(translate("I consent to use of my image and data for research.", target_lang))
     st.info(translate("Not a medical diagnosis. For research and education only.", target_lang))
 
-    if st.button(translate("'🔍' Analyze My Tongue", target_lang)):
+    if st.button(translate("🔍 Analyze My Tongue", target_lang)):
         if uploaded_img and consent:
             symptoms = ", ".join(selected_symptoms) if selected_symptoms else translate("None provided", target_lang)
             submission_id = str(uuid.uuid4())
@@ -358,7 +358,7 @@ elif page == "Tongue Health Check":
 
             avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
             if avg_color[0] > 200 and avg_color[1] > 200 and avg_color[2] > 200:
-                st.error(translate("'⚠️' This image may not contain a tongue. Please upload a close-up of your tongue.", target_lang))
+                st.error(translate("⚠️ This image may not contain a tongue. Please upload a close-up of your tongue.", target_lang))
                 st.stop()
 
             prediction_TCM, prediction_Western, avg_color_str, features, confidence = analyze_tongue_with_model(
@@ -370,10 +370,10 @@ elif page == "Tongue Health Check":
                 blob.upload_from_filename(temp_path)
                 url = blob.generate_signed_url(expiration=timedelta(hours=1), method="GET")
                 img_url = url
-                st.success(translate("'✅' Image uploaded.", target_lang))
+                st.success(translate("✅ Image uploaded.", target_lang))
                 st.markdown(f"🔗 [{translate('View Uploaded Image', target_lang)}]({img_url})")
             except Exception as e:
-                st.error(translate("'❌' Upload to Firebase failed.", target_lang))
+                st.error(translate("❌ Upload to Firebase failed.", target_lang))
                 st.exception(e)
                 st.stop()
 
@@ -390,7 +390,7 @@ elif page == "Tongue Health Check":
             st.session_state.submissions.append(result)
             db.collection("tongue_scans").document(submission_id).set(result)
 
-            st.subheader(translate("'🧪' Analysis Results", target_lang))
+            st.subheader(translate("🧪 Analysis Results", target_lang))
             st.info(f"'🔍' {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} _{prediction_Western}_")
             st.markdown(f"**{translate('Average Tongue Color', target_lang)}**: `{avg_color_str}`  ")
             st.markdown(f"**{translate('Confidence Level', target_lang)}**: `{confidence}%`")
@@ -400,40 +400,43 @@ elif page == "Tongue Health Check":
             st.markdown("- " + translate("Hydration, nutrition, and better sleep often help.", target_lang))
 
 
-            # --- More Details Suggested Remedies ---
-            with st.expander(translate("'🌿' Suggested Remedies Based on TCM Pattern", target_lang)):
-              remedy_text = ""
-            if prediction_TCM == "Qi Deficiency":
-                remedy_text = """
-                '✅' Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
-                '🍠' Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
-                '🚶‍♂️' Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
-                """
-            elif prediction_TCM == "Yin Deficiency":
-                remedy_text = """
-                '🍒' Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening, perfect for restoring internal fluids.  
-                '🍐' Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin. Pears hydrate the lungs, while lily bulbs calm the spirit and ease dryness in the body.  
-                '🧘' Meditation and rest - Essential practices to conserve Yin. Meditation calms excessive Yang (activity), reduces stress, and promotes internal balance, especially helpful for those experiencing burnout or night sweats.
-                """
-            elif prediction_TCM == "Blood Deficiency":
-                remedy_text = """
-                '🥬' Beets, spinach, black beans - Iron-rich, blood-nourishing foods that boost hemoglobin levels, support liver function, and replenish vital nutrients to combat fatigue and dizziness.  
-                '🌿' Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the female ginseng.  
-                '🩸' Iron-rich foods - Essential for red blood cell production, these foods help treat symptoms like pale complexion, cold extremities, and low energy often associated with Blood Deficiency.
-                """
-            elif prediction_TCM == "Damp Retention":
-                remedy_text = """
-                '🥣' Barley water - Light, cooling drink that helps remove excess dampness and reduce bloating.  
-                '🚫' Avoid greasy food - Heavy, oily meals contribute to damp buildup and sluggish digestion, best to avoid.  
-                '🍵' Ginger and pu-erh tea - Warming teas that support digestion, reduce phlegm, and improve energy flow.
-                """
-            else:
-                remedy_text = """
-                '💧' Maintain hydration - Drink enough water to keep your body cool, clear toxins, and support organ function.  
-                '🥗' Balanced meals - Eat a mix of whole foods (like veggies, protein, and grains) to fuel your body and build Qi.  
-                '🧘' Gentle exercise - Light activities like stretching, yoga, or walking help energy flow and reduce stress.
-                """
-            st.markdown(translate(remedy_text, target_lang))
+           # --- More Details Suggested Remedies ---
+            with st.expander(translate("🌿 Suggested Remedies Based on TCM Pattern", target_lang)):
+                remedy_text = ""
+            
+                if prediction_TCM == "Qi Deficiency":
+                    remedy_text = """
+            ✅ Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
+            🍠 Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
+            🚶‍♂️ Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
+                    """
+                elif prediction_TCM == "Yin Deficiency":
+                    remedy_text = """
+            🍒 Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system.  
+            🍐 Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin.  
+            🧘 Meditation and rest - Meditation calms excessive Yang, reduces stress, and restores Yin energy.
+                    """
+                elif prediction_TCM == "Blood Deficiency":
+                    remedy_text = """
+            🥬 Beets, spinach, black beans - Iron-rich, blood-nourishing foods that replenish energy and nutrients.  
+            🌿 Dang Gui (Angelica Sinensis) - A powerful herb for enriching and circulating blood.  
+            🩸 Iron-rich foods - Support red blood cell production and help address cold extremities and pale complexion.
+                    """
+                elif prediction_TCM == "Damp Retention":
+                    remedy_text = """
+            🥣 Barley water - Cooling drink that helps remove excess dampness and reduce bloating.  
+            🚫 Avoid greasy food - Oily meals create damp buildup and sluggish digestion.  
+            🍵 Ginger and pu-erh tea - Warming teas that reduce phlegm and support healthy digestion.
+                    """
+                else:
+                    remedy_text = """
+            💧 Maintain hydration - Drink enough water to support detox and overall health.  
+            🥗 Balanced meals - Whole foods build Qi and support organ function.  
+            🧘 Gentle exercise - Yoga, stretching, or walking helps reduce stress and improve flow.
+                    """
+            
+                st.markdown(translate(remedy_text.strip(), target_lang))
+            
 
             # --- PDF Download ---
             with st.expander(translate("📄 Download Report", target_lang)):
@@ -453,7 +456,7 @@ elif page == "Tongue Health Check":
                 st.markdown(download_link, unsafe_allow_html=True)
 
             # --- History Compare ---
-            with st.expander(translate("'📊' Compare with Previous Scans", target_lang)):
+            with st.expander(translate("📊 Compare with Previous Scans", target_lang)):
                 scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
                 history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
                 if history:
@@ -482,7 +485,7 @@ elif page == "Tongue Health Check":
                     
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
-    st.title(translate("'📜' My Tongue Scan History", target_lang))
+    st.title(translate("📜 My Tongue Scan History", target_lang))
     if st.session_state.submissions:
         df = pd.DataFrame(st.session_state.submissions)
         st.dataframe(df.rename(columns={
@@ -496,20 +499,20 @@ elif page == "Submission History":
             total_feedback = df["is_correct"].notna().sum()
             if total_feedback > 0:
                 accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric(translate("'📊' Model Accuracy (based on feedback)", target_lang), f"{accuracy}%")
+                st.metric(translate("📊 Model Accuracy (based on feedback)", target_lang), f"{accuracy}%")
 
-            st.subheader(translate("'📈' Accuracy Over Time", target_lang))
+            st.subheader(translate("📈 Accuracy Over Time", target_lang))
             df["timestamp"] = pd.to_datetime(df["timestamp"])
             daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
             st.line_chart(daily)
 
-            st.subheader(translate("'🧪' Accuracy by TCM Syndrome", target_lang))
+            st.subheader(translate("🧪 Accuracy by TCM Syndrome", target_lang))
             if "prediction_TCM" in df.columns:
                 by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
                 st.bar_chart(by_syndrome.rename(index=lambda x: translate(x, target_lang)))
 
         csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button(translate("'⬇️' Download CSV", target_lang), csv, "my_tongue_scans.csv", "text/csv")
+        st.download_button(translate("⬇️ Download CSV", target_lang), csv, "my_tongue_scans.csv", "text/csv")
     else:
         st.info(translate("You haven't submitted any scans yet.", target_lang))
 

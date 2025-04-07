@@ -31,19 +31,19 @@ try:
 
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred, {
-        "storageBucket": "traditional-medicine-50518.appspot.com"  # Hardcoded exact name from Firebase Console
+            "storageBucket": "traditional-medicine-50518.appspot.com"
         })
 
     db = firestore.client()
-    bucket = storage.bucket()  # now this will work
+    bucket = storage.bucket("traditional-medicine-50518.appspot.com")  # explicitly named ✅
 
-    st.success("✅ Firebase, Firestore, and Storage initialized")
+    st.success("✅ Firebase and Firestore initialized")
 except Exception as e:
     db = None
     bucket = None
     st.error("❌ Firebase initialization failed")
     st.exception(e)
-    
+
 # ---- SETUP ----
 if "submissions" not in st.session_state:
     st.session_state.submissions = []

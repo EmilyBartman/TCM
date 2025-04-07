@@ -486,5 +486,4 @@ elif page == "About & Disclaimer":
 
         ⚠️ **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
         """
-
-
+    st.markdown(translate(about_text, target_lang))

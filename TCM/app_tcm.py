@@ -20,7 +20,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 
 # ---- FIREBASE SETUP (Streamlit Secrets) ----
-st.write(f"Connected to bucket: {bucket.name}")
+
 if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
@@ -128,6 +128,7 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(data_row)
 
             st.success("Image submitted and analyzed successfully! Scroll down for prediction.")
+            st.write(f"Connected to bucket: {bucket.name}")
 
             # Display prediction & analysis
             st.subheader("🧪 Analysis Results")

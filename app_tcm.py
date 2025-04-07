@@ -14,6 +14,8 @@ from PIL import Image
 import os
 import uuid
 from datetime import datetime
+import cv2
+import numpy as np
 
 # ---- SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -34,7 +36,7 @@ if page == "Educational Content":
         - **Yin & Yang**: Balance between opposite but complementary forces
         - **Qi (Chi)**: Vital energy flowing through the body
         - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs and emotions
-
+        
         TCM often contrasts with **Western medicine**, which tends to focus on pathology, lab diagnostics, and medications.
     """)
 
@@ -69,23 +71,53 @@ elif page == "Tongue Health Check":
 
             # Save image locally (or later to Firebase/S3)
             os.makedirs("submissions", exist_ok=True)
-            img.save(f"submissions/{submission_id}.png")
+            img_path = f"submissions/{submission_id}.png"
+            img.save(img_path)
 
-            # Save metadata (as placeholder CSV)
+            # ----- BASIC IMAGE ANALYSIS -----
+            cv_img = cv2.imread(img_path)
+            cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+
+            # Resize for faster processing
+            resized = cv2.resize(cv_img, (300, 300))
+
+            # Get average color
+            avg_color = np.mean(resized.reshape(-1, 3), axis=0)
+            avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
+
+            # Edge detection for shape
+            gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
+            edges = cv2.Canny(gray, 50, 150)
+            edge_pixels = np.sum(edges > 0)
+
+            # Texture using Laplacian
+            laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+            # Dummy logic
+            shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
+            texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
+
+            # Save metadata
             data_row = {
                 "id": submission_id,
                 "timestamp": timestamp,
                 "symptoms": symptoms,
-                "tongue_image_path": f"submissions/{submission_id}.png",
+                "tongue_image_path": img_path,
+                "avg_color": avg_color_str,
+                "shape_comment": shape_comment,
+                "texture_comment": texture_comment,
                 "prediction_TCM": "Qi Deficiency (placeholder)",
                 "prediction_Western": "Possible Fatigue/Anemia (placeholder)",
                 "user_feedback": ""
             }
             st.session_state.submissions.append(data_row)
-            st.success("Image submitted successfully! Scroll down for prediction.")
+            st.success("Image submitted and analyzed successfully! Scroll down for prediction.")
 
-            # Display placeholder predictions
-            st.subheader("Predictions")
+            # Display prediction & analysis
+            st.subheader("🧪 Analysis Results")
+            st.markdown(f"- **Tongue Color**: {avg_color_str}")
+            st.markdown(f"- **Shape Analysis**: {shape_comment}")
+            st.markdown(f"- **Coating / Moisture Level**: {texture_comment}")
             st.markdown("- **TCM Insight**: Qi Deficiency (based on image features)")
             st.markdown("- **Western Equivalent**: Possible signs of fatigue or low hemoglobin")
 

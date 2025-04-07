@@ -5,3 +5,5 @@ Pillow
 pandas
 numpy
 xhtml2pdf
+joblib
+scikit-learn

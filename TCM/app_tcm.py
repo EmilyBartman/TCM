@@ -31,7 +31,7 @@ try:
 
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred, {
-            "storageBucket": "traditional-medicine-50518.appspot.com"  # << your actual bucket name
+        "storageBucket": "traditional-medicine-50518.appspot.com"  # Hardcoded exact name from Firebase Console
         })
 
     db = firestore.client()

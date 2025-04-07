@@ -18,34 +18,6 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from googletrans import Translator
 
-translator = Translator()
-languages = {
-    "English": "en",
-    "Chinese (Simplified)": "zh-cn",
-    "Spanish": "es",
-    "French": "fr",
-    "Hindi": "hi",
-    "Arabic": "ar",
-    "Swahili": "sw",
-    "Zulu": "zu",
-    "Amharic": "am",
-    "Igbo": "ig",
-    "Yoruba": "yo",
-    "Tamil": "ta",
-    "Telugu": "te",
-    "Urdu": "ur",
-    "Bengali": "bn",
-    "Malay": "ms",
-    "Vietnamese": "vi",
-    "Thai": "th",
-    "Filipino": "tl",
-    "Japanese": "ja",
-    "Korean": "ko"
-}
-
-selected_lang = st.sidebar.selectbox("Choose Language", list(languages.keys()))
-
-target_lang = languages[]
 
 def translate(text, lang_code):
     try:
@@ -190,7 +162,35 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- EDUCATIONAL CONTENT ----
-if page == "Educational Content":
+elif page == "Tongue Health Check":
+translator = Translator()
+languages = {
+    "English": "en",
+    "Chinese (Simplified)": "zh-cn",
+    "Spanish": "es",
+    "French": "fr",
+    "Hindi": "hi",
+    "Arabic": "ar",
+    "Swahili": "sw",
+    "Zulu": "zu",
+    "Amharic": "am",
+    "Igbo": "ig",
+    "Yoruba": "yo",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Urdu": "ur",
+    "Bengali": "bn",
+    "Malay": "ms",
+    "Vietnamese": "vi",
+    "Thai": "th",
+    "Filipino": "tl",
+    "Japanese": "ja",
+    "Korean": "ko"
+}
+
+selected_lang = st.sidebar.selectbox("Choose Language", list(languages.keys()))
+
+target_lang = languages[]
     st.title(translate(""🌿" Traditional Chinese Medicine (TCM) Education", target_lang))
     st.header(translate("Foundations of TCM", target_lang))
     st.markdown(translate("""
@@ -476,15 +476,15 @@ elif page == "Submission History":
 
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
-    st.title(translate(""ℹ️" About This App", target_lang))
+    st.title(translate("About This App", target_lang))
     about_text = """
         This app is built for:
         - Educating users about TCM tongue diagnostics
         - Demonstrating how AI may assist in early wellness screening
         - Researching global health variations using tongue + symptom data
 
-        **Data Usage**: All uploaded data is securely stored and used anonymously for improving model prediction.
+        Data Usage: All uploaded data is securely stored and used anonymously for improving model prediction.
 
-        **Disclaimer**: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
+        Disclaimer: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
         """
     st.markdown(translate(about_text, target_lang))

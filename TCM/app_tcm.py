@@ -196,7 +196,7 @@ if "selected_lang" not in st.session_state:
 # Define this before using it in on_change
 def update_lang():
     st.session_state.selected_lang = st.session_state.lang_temp
-    st.experimental_rerun()
+    st.rerun()
 
 # Sidebar dropdown (triggers rerun on change)
 st.sidebar.selectbox(

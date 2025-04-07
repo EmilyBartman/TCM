@@ -15,23 +15,36 @@ import os
 import uuid
 from datetime import datetime
 import cv2
+import json
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud import storage as gcs_storage
 
 # ---- FIREBASE SETUP ----
-if not firebase_admin._apps:
+try:
     firebase_config = dict(st.secrets["firebase"])
+
+    # Create credential object from secrets
     cred = credentials.Certificate(firebase_config)
-    firebase_admin.initialize_app(cred)
 
-db = firestore.client()
+    # Initialize Firebase app if not already done
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(cred, {
+            "storageBucket": f"{firebase_config['project_id']}.appspot.com"
+        })
 
-# GCS client setup (use existing bucket name)
-gcs_client = gcs_storage.Client(credentials=cred, project=firebase_config["project_id"])
-bucket = gcs_client.bucket("traditional-medicine-50518")  # Using your working bucket
+    # Setup Firestore and GCS
+    db = firestore.client()
+    gcs_client = gcs_storage.Client(credentials=cred, project=firebase_config["project_id"])
+    bucket = gcs_client.bucket(firebase_config["project_id"] + ".appspot.com")
 
+    st.success("✅ Firebase and GCS initialized")
+except Exception as e:
+    st.error("❌ Firebase initialization failed")
+    st.exception(e)
+    db = None
+    bucket = None
 # ---- SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")
 if "submissions" not in st.session_state:

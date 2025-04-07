@@ -196,48 +196,48 @@ def translate(text, lang_code):
 # ---- EDUCATIONAL CONTENT ----
 elif page == "Educational Content":
     target_lang = languages[selected_lang]
-    st.title(translate("'🌿' Traditional Chinese Medicine (TCM) Education", target_lang))
+    st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
+
     st.header(translate("Foundations of TCM", target_lang))
     st.markdown(translate("""
-    - **Yin & Yang**: Balance of opposing but complementary forces.
-    - **Qi (Chi)**: Vital life energy.
-    - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
-    - **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
-    - **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
-    """, target_lang))
+- **Yin & Yang**: Balance of opposing but complementary forces.
+- **Qi (Chi)**: Vital life energy.
+- **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
+- **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
+- **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
+""", target_lang))
 
-
-    st.header(translate("'🔎' Why the Tongue Matters in TCM", target_lang))
+    st.header(translate("🔎 Why the Tongue Matters in TCM", target_lang))
     st.markdown(translate("""
-    In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
+In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
 
-    **What the tongue reveals:**
-    - **Tongue Body Color**: Reflects blood, Qi, and organ health
-    - **Tongue Shape**: Can indicate excess or deficiency syndromes
-    - **Tongue Coating**: Suggests digestive heat, cold, or dampness
-    - **Moisture Level**: Linked to fluid metabolism and Yin/Yang balance
-    - **Tongue Movement**: Trembling or deviation may signal wind or weakness
+**What the tongue reveals:**
+- **Tongue Body Color**: Reflects blood, Qi, and organ health
+- **Tongue Shape**: Can indicate excess or deficiency syndromes
+- **Tongue Coating**: Suggests digestive heat, cold, or dampness
+- **Moisture Level**: Linked to fluid metabolism and Yin/Yang balance
+- **Tongue Movement**: Trembling or deviation may signal wind or weakness
 
-    Western medicine may not commonly use tongue inspection diagnostically, but it does correlate with:
-    - Anemia (pale tongue)
-    - Dehydration (dry tongue)
-    - Oral candidiasis (thick white coating)
-    - Circulatory issues (bluish-purple tongue)
-    """, target_lang))
+Western medicine may not commonly use tongue inspection diagnostically, but it does correlate with:
+- Anemia (pale tongue)
+- Dehydration (dry tongue)
+- Oral candidiasis (thick white coating)
+- Circulatory issues (bluish-purple tongue)
+""", target_lang))
 
-    st.header(translate("'🌐' Bridging TCM and Western Medicine", target_lang))
+    st.header(translate("🌐 Bridging TCM and Western Medicine", target_lang))
     st.markdown(translate("""
-    Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
+Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
 
-    | Concept | TCM Interpretation | Western Medicine Analogy |
-    |--------|---------------------|---------------------------|
-    | Qi (Vital Energy) | Flow of life energy through meridians | Nervous & Circulatory System activity |
-    | Yin/Yang | Balance of cold/hot, passive/active forces | Homeostasis (e.g., hormonal balance) |
-    | Tongue Diagnosis | Reflects internal organ status | Inflammation markers, dehydration, anemia |
-    | Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
+| Concept | TCM Interpretation | Western Medicine Analogy |
+|--------|---------------------|---------------------------|
+| Qi (Vital Energy) | Flow of life energy through meridians | Nervous & Circulatory System activity |
+| Yin/Yang | Balance of cold/hot, passive/active forces | Homeostasis (e.g., hormonal balance) |
+| Tongue Diagnosis | Reflects internal organ status | Inflammation markers, dehydration, anemia |
+| Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
 
-    Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
-    """, target_lang))
+Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
+""", target_lang))
 
     st.header(translate("TCM Syndrome Library", target_lang))
     with st.expander(translate("'🔎' Click to view 8 Major Tongue Syndromes and Signs", target_lang)):

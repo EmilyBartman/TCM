@@ -3,6 +3,7 @@ firebase-admin
 opencv-python-headless
 pillow
 numpy
+json
 pandas
 streamlit-option-menu
 streamlit-lottie

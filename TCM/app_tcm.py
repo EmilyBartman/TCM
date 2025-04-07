@@ -21,18 +21,22 @@ from firebase_admin import credentials, firestore
 from google.cloud import storage as gcs_storage
 
 # ---- FIREBASE SETUP ----
-if not firebase_admin._apps:
-    firebase_config = dict(st.secrets["firebase"])
+# Load Streamlit secret config
+firebase_config = dict(st.secrets["firebase"])
+
+# Create credentials from secret
 cred = credentials.Certificate(firebase_config)
 
+# Initialize Firebase if not already
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
+# Firestore DB
 db = firestore.client()
 
-# GCS client setup (use existing bucket name)
+# Google Cloud Storage client
 gcs_client = gcs_storage.Client(credentials=cred, project=firebase_config["project_id"])
-bucket = gcs_client.bucket("traditional-medicine-50518")  # Using your working bucket
+bucket = gcs_client.bucket("traditional-medicine-50518")  
 
 # ---- SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")

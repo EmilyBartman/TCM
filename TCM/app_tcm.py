@@ -24,6 +24,14 @@ from tensorflow.keras.models import Model
 from sklearn.linear_model import LogisticRegression
 
 
+
+def load_model():
+    model_path = "models/tcm_diagnosis_model.pkl"
+    if os.path.exists(model_path):
+        return joblib.load(model_path)
+    else:
+        return None  # Only predict if a real model is available
+
 # Load feature extractor
 base_model = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
 feature_model = Model(inputs=base_model.input, outputs=base_model.output)
@@ -36,20 +44,37 @@ def extract_deep_features(cv_img):
     features = feature_model.predict(img_array)
     return features.flatten().tolist()
 
+def retrain_model_from_feedback(dataframe):
+    labeled = dataframe[dataframe["is_correct"].notna()]
+    if not labeled.empty:
+        X = np.vstack(labeled["features"].values)
+        y = labeled["prediction_TCM"]
+        clf = LogisticRegression(max_iter=1000)
+        clf.fit(X, y)
+        joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
+        return True
+    return False
 
-def load_model():
-    model_path = "models/tcm_diagnosis_model.pkl"
-    if os.path.exists(model_path):
-        return joblib.load(model_path)
-    else:
-        return None  # Only predict if a real model is available
-
-
-def predict_with_model(model, features, symptoms=[]):
-    features += [len(symptoms)]
+def predict_with_model(model, features):
     pred = model.predict([features])[0]
     prob = model.predict_proba([features])[0].max()
     return pred, round(prob * 100, 2)
+
+def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
+    features = extract_deep_features(cv_img)
+    model = load_model()
+
+    if model:
+        prediction_TCM, confidence = predict_with_model(model, features)
+    else:
+        prediction_TCM = "Model not yet trained"
+        confidence = 0
+
+    if db:
+        store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
+
+    return prediction_TCM, "N/A", "N/A", features, confidence
+
 
 def store_features_to_firestore(db, submission_id, features, label, prob):
     def to_python_type(val):
@@ -75,17 +100,6 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
 def export_firestore_to_bigquery():
     pass  # Placeholder for actual implementation
 
-def retrain_model_from_feedback(dataframe):
-    labeled = dataframe[dataframe["is_correct"].notna()]
-    if not labeled.empty:
-        X = np.vstack(labeled["features"].values)
-        y = labeled["prediction_TCM"].values
-        clf = LogisticRegression(max_iter=1000)  # or RandomForestClassifier
-        clf.fit(X, y)
-        joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
-        return True
-    return False
-
 def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     remedies_map = {
         "Qi Deficiency": ["Ginseng tea", "Sweet potatoes", "Moderate walking"],
@@ -95,20 +109,7 @@ def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     }
     return remedies_map.get(tcm_pattern, ["Balanced diet", "Hydration", "Rest"])
 
-def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
-    features = extract_deep_features(cv_img)
-    model = load_model()
 
-    if model:
-        prediction_TCM, confidence = predict_with_model(model, features)
-    else:
-        prediction_TCM = "Model not yet trained"
-        confidence = 0
-
-    if db:
-        store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
-
-    return prediction_TCM, "N/A", "N/A", features, confidence
 
 def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     remedies = get_dynamic_remedies(prediction_TCM, selected_symptoms)

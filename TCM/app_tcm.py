@@ -146,15 +146,6 @@ except Exception as e:
 if "submissions" not in st.session_state:
     st.session_state.submissions = []
 
-# ---- NAVIGATION ----
-pages = [
-    "Educational Content",
-    "Tongue Health Check",
-    "Submission History",
-    "About & Disclaimer"
-]
-page = st.sidebar.radio("Navigate", pages)
-
 # ---- LANGUAGE SETUP ----
 from deep_translator import GoogleTranslator
 import streamlit as st
@@ -220,6 +211,17 @@ def translate(text, lang_code):
     except Exception as e:
         print(f"[Translation error] {e}")
         return text
+
+# ---- NAVIGATION ----
+pages = [
+    "Educational Content",
+    "Tongue Health Check",
+    "Submission History",
+    "About & Disclaimer"
+]
+page = st.sidebar.radio("Navigate", pages)
+
+
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":
@@ -401,7 +403,7 @@ elif page == "Tongue Health Check":
 
 
            # --- More Details Suggested Remedies ---
-            with st.expander(translate("🌿 Suggested Remedies Based on TCM Pattern", target_lang)):
+            with st.expander(translate("🌿 More Details on Suggested Remedies Based on TCM Pattern", target_lang)):
                 remedy_text = ""
             
                 if prediction_TCM == "Qi Deficiency":

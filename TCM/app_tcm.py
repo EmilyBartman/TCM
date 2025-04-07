@@ -308,36 +308,37 @@ with st.expander("📊 Compare with Previous Scans"):
         st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
     else:
         st.write("No prior scans available to compare.")
-# ---- SUBMISSION HISTORY ----
-elif page == "Submission History":
-    st.title("📜 My Tongue Scan History")
-    if st.session_state.submissions:
-        df = pd.DataFrame(st.session_state.submissions)
-
-        st.dataframe(df)
-
-        # Accuracy summary if feedback exists
-        if "is_correct" in df.columns:
-            correct_count = df["is_correct"].sum()
-            total_feedback = df["is_correct"].notna().sum()
-            if total_feedback > 0:
-                accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
-
-            st.subheader("📈 Accuracy Over Time")
-            df["timestamp"] = pd.to_datetime(df["timestamp"])
-            daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
-            st.line_chart(daily)
-
-            st.subheader("🧪 Accuracy by TCM Syndrome")
-            if "prediction_TCM" in df.columns:
-                by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
-                st.bar_chart(by_syndrome)
-
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
-    else:
-        st.info("You haven't submitted any scans yet.")
+        
+    # ---- SUBMISSION HISTORY ----
+    elif page == "Submission History":
+        st.title("📜 My Tongue Scan History")
+        if st.session_state.submissions:
+            df = pd.DataFrame(st.session_state.submissions)
+    
+            st.dataframe(df)
+    
+            # Accuracy summary if feedback exists
+            if "is_correct" in df.columns:
+                correct_count = df["is_correct"].sum()
+                total_feedback = df["is_correct"].notna().sum()
+                if total_feedback > 0:
+                    accuracy = round((correct_count / total_feedback) * 100, 2)
+                    st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
+    
+                st.subheader("📈 Accuracy Over Time")
+                df["timestamp"] = pd.to_datetime(df["timestamp"])
+                daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
+                st.line_chart(daily)
+    
+                st.subheader("🧪 Accuracy by TCM Syndrome")
+                if "prediction_TCM" in df.columns:
+                    by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
+                    st.bar_chart(by_syndrome)
+    
+            csv = df.to_csv(index=False).encode("utf-8")
+            st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
+        else:
+            st.info("You haven't submitted any scans yet.")
 # ---- ABOUT & DISCLAIMER ----
 elif page == "About & Disclaimer":
     st.title("ℹ️ About This App")

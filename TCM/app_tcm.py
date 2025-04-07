@@ -375,37 +375,37 @@ elif page == "Tongue Health Check":
             # --- More Details Suggested Remedies ---
             with st.expander(translate("'🌿' Suggested Remedies Based on TCM Pattern", target_lang)):
               remedy_text = ""
-                if prediction_TCM == "Qi Deficiency":
-                    remedy_text = """
-                    '✅' Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
-                    '🍠' Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
-                    '🚶‍♂️' Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
-                    """
-                elif prediction_TCM == "Yin Deficiency":
-                    remedy_text = """
-                    '🍒' Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening, perfect for restoring internal fluids.  
-                    '🍐' Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin. Pears hydrate the lungs, while lily bulbs calm the spirit and ease dryness in the body.  
-                    '🧘' Meditation and rest - Essential practices to conserve Yin. Meditation calms excessive Yang (activity), reduces stress, and promotes internal balance, especially helpful for those experiencing burnout or night sweats.
-                    """
-                elif prediction_TCM == "Blood Deficiency":
-                    remedy_text = """
-                    '🥬' Beets, spinach, black beans - Iron-rich, blood-nourishing foods that boost hemoglobin levels, support liver function, and replenish vital nutrients to combat fatigue and dizziness.  
-                    '🌿' Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the female ginseng.  
-                    '🩸' Iron-rich foods - Essential for red blood cell production, these foods help treat symptoms like pale complexion, cold extremities, and low energy often associated with Blood Deficiency.
-                    """
-                elif prediction_TCM == "Damp Retention":
-                    remedy_text = """
-                    '🥣' Barley water - Light, cooling drink that helps remove excess dampness and reduce bloating.  
-                    '🚫' Avoid greasy food - Heavy, oily meals contribute to damp buildup and sluggish digestion, best to avoid.  
-                    '🍵' Ginger and pu-erh tea - Warming teas that support digestion, reduce phlegm, and improve energy flow.
-                    """
-                else:
-                    remedy_text = """
-                    '💧' Maintain hydration - Drink enough water to keep your body cool, clear toxins, and support organ function.  
-                    '🥗' Balanced meals - Eat a mix of whole foods (like veggies, protein, and grains) to fuel your body and build Qi.  
-                    '🧘' Gentle exercise - Light activities like stretching, yoga, or walking help energy flow and reduce stress.
-                    """
-                st.markdown(translate(remedy_text, target_lang))
+            if prediction_TCM == "Qi Deficiency":
+                remedy_text = """
+                '✅' Ginseng tea - An adaptogenic herbal tonic that boosts Qi, supports immune function, and improves stamina.  
+                '🍠' Sweet potatoes - Nutrient-rich root vegetable that strengthens the spleen and digestion, a key organ in Qi production.  
+                '🚶‍♂️' Moderate exercise like walking - Gentle physical movement like walking or Tai Chi stimulates Qi flow, circulation, and reduces fatigue.
+                """
+            elif prediction_TCM == "Yin Deficiency":
+                remedy_text = """
+                '🍒' Goji berries - A Yin-nourishing superfruit traditionally used to support the liver, eyes, and immune system. Goji berries are cooling and moistening, perfect for restoring internal fluids.  
+                '🍐' Pears and lily bulb soup - A classic TCM remedy that clears heat and nourishes Yin. Pears hydrate the lungs, while lily bulbs calm the spirit and ease dryness in the body.  
+                '🧘' Meditation and rest - Essential practices to conserve Yin. Meditation calms excessive Yang (activity), reduces stress, and promotes internal balance, especially helpful for those experiencing burnout or night sweats.
+                """
+            elif prediction_TCM == "Blood Deficiency":
+                remedy_text = """
+                '🥬' Beets, spinach, black beans - Iron-rich, blood-nourishing foods that boost hemoglobin levels, support liver function, and replenish vital nutrients to combat fatigue and dizziness.  
+                '🌿' Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the female ginseng.  
+                '🩸' Iron-rich foods - Essential for red blood cell production, these foods help treat symptoms like pale complexion, cold extremities, and low energy often associated with Blood Deficiency.
+                """
+            elif prediction_TCM == "Damp Retention":
+                remedy_text = """
+                '🥣' Barley water - Light, cooling drink that helps remove excess dampness and reduce bloating.  
+                '🚫' Avoid greasy food - Heavy, oily meals contribute to damp buildup and sluggish digestion, best to avoid.  
+                '🍵' Ginger and pu-erh tea - Warming teas that support digestion, reduce phlegm, and improve energy flow.
+                """
+            else:
+                remedy_text = """
+                '💧' Maintain hydration - Drink enough water to keep your body cool, clear toxins, and support organ function.  
+                '🥗' Balanced meals - Eat a mix of whole foods (like veggies, protein, and grains) to fuel your body and build Qi.  
+                '🧘' Gentle exercise - Light activities like stretching, yoga, or walking help energy flow and reduce stress.
+                """
+            st.markdown(translate(remedy_text, target_lang))
 
             # --- PDF Download ---
             with st.expander(translate("📄 Download Report", target_lang)):

@@ -35,7 +35,7 @@ try:
         })
 
     db = firestore.client()
-    bucket = storage.bucket("traditional-medicine-50518.appspot.com")  # explicitly named ✅
+    bucket = storage.bucket("traditional-medicine-50518")  # explicitly named ✅
 
     st.success("✅ Firebase and Firestore initialized")
 except Exception as e:

@@ -394,7 +394,22 @@ elif page == "Tongue Health Check":
 
             st.subheader(translate("🧪 Analysis Results", target_lang))
             st.info(f"'🔍' {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} _{prediction_Western}_")
-            st.markdown(f"**{translate('Average Tongue Color', target_lang)}**: `{avg_color_str}`  ")
+            # Extract RGB values from the avg_color_str
+            r, g, b = map(int, avg_color_str.strip("RGB()").split(","))
+            hex_color = '#%02x%02x%02x' % (r, g, b)
+            
+            # Display translated label + value + color swatch
+            st.markdown(
+                f"""
+                <div style='display: flex; align-items: center; gap: 10px;'>
+                    <strong>{translate('Average Tongue Color', target_lang)}:</strong>
+                    <span>{avg_color_str}</span>
+                    <div style='width: 25px; height: 25px; background-color: {hex_color}; border-radius: 4px; border: 1px solid #ccc;'></div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
             st.markdown(f"**{translate('Confidence Level', target_lang)}**: `{confidence}%`")
 
             render_dynamic_remedies(prediction_TCM, selected_symptoms)

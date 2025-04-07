@@ -20,25 +20,20 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud import storage as gcs_storage
 
-# ---- FIREBASE SETUP ----
-# Load Streamlit secret config
-firebase_config = dict(st.secrets["firebase"])
+st.write("✅ App started loading")
 
-# Create credentials from secret
+# ---- FIREBASE & GCS SETUP ----
+firebase_config = dict(st.secrets["firebase"])
 cred = credentials.Certificate(firebase_config)
 
-# Initialize Firebase if not already
 if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
-# Firestore DB
 db = firestore.client()
-
-# Google Cloud Storage client
 gcs_client = gcs_storage.Client()
-bucket = gcs_client.bucket("traditional-medicine-50518")  
+bucket = gcs_client.bucket("traditional-medicine-50518")
 
-# ---- SETUP ----
+# ---- STREAMLIT SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")
 if "submissions" not in st.session_state:
     st.session_state.submissions = []
@@ -173,3 +168,4 @@ elif page == "About & Disclaimer":
         ⚠️ **Disclaimer**: This app does NOT replace professional medical advice.
         Your image and responses will be stored securely and anonymously, used only for improving predictive capabilities.
     """)
+

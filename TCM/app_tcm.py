@@ -19,6 +19,7 @@ import numpy as np
 import firebase_admin
 from firebase_admin import credentials, firestore
 from google.cloud import storage as gcs_storage
+from google.oauth2 import service_account
 
 st.write("✅ App started loading")
 st.write("✅ Firebase config loaded")
@@ -33,7 +34,8 @@ if not firebase_admin._apps:
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
-gcs_client = gcs_storage.Client()
+gcs_creds = service_account.Credentials.from_service_account_info(firebase_config)
+gcs_client = gcs_storage.Client(credentials=gcs_creds, project=firebase_config["project_id"])
 bucket = gcs_client.bucket("traditional-medicine-50518")
 
 # ---- STREAMLIT SETUP ----

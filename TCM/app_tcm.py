@@ -35,7 +35,7 @@ if not firebase_admin._apps:
 db = firestore.client()
 
 # Google Cloud Storage client
-gcs_client = gcs_storage.Client(credentials=cred, project=firebase_config["project_id"])
+gcs_client = gcs_storage.Client()
 bucket = gcs_client.bucket("traditional-medicine-50518")  
 
 # ---- SETUP ----

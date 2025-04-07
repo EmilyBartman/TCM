@@ -20,7 +20,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 
 # ---- FIREBASE SETUP (Streamlit Secrets) ----
-
+st.write(f"Connected to bucket: {bucket.name}")
 if not firebase_admin._apps:
     firebase_config = dict(st.secrets["firebase"])
     cred = credentials.Certificate(firebase_config)
@@ -128,7 +128,6 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(data_row)
 
             st.success("Image submitted and analyzed successfully! Scroll down for prediction.")
-            st.write(f"Connected to bucket: {bucket.name}")
 
             # Display prediction & analysis
             st.subheader("🧪 Analysis Results")
@@ -157,4 +156,5 @@ elif page == "About & Disclaimer":
         - Begin building a dataset for research into health diagnostics via images
 
         ⚠️ **Disclaimer**: This app does NOT replace professional medical advice.
-        Your image and responses will b
+        Your image and responses will be stored securely and anonymously, used only for improving predictive capabilities.
+    """)

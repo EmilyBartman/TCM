@@ -7,3 +7,4 @@ numpy
 xhtml2pdf
 joblib
 scikit-learn
+googletrans

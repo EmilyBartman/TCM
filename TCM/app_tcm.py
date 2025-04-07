@@ -299,17 +299,16 @@ with st.expander("📄 Download Report"):
     st.markdown(download_link, unsafe_allow_html=True)
 
 # --- History Compare ---
-with st.expander("📊 Compare with Previous Scans"):
-    scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
-    history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
-    if history:
-        hist_df = pd.DataFrame(history)
-        hist_df = hist_df.sort_values("timestamp", ascending=False).head(5)
-        st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
-    else:
-        st.write("No prior scans available to compare.")
-        
-    # ---- SUBMISSION HISTORY ----
+            with st.expander("📊 Compare with Previous Scans"):
+                scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
+                history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
+                if history:
+                    hist_df = pd.DataFrame(history)
+                    hist_df = hist_df.sort_values("timestamp", ascending=False).head(5)
+                    st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
+                else:
+                    st.write("No prior scans available to compare.")
+# ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
     st.title("📜 My Tongue Scan History")
     if st.session_state.submissions:

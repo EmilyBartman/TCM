@@ -11,6 +11,7 @@ import os
 import uuid
 from datetime import datetime
 import cv2
+import json
 import numpy as np
 import firebase_admin
 from firebase_admin import credentials
@@ -26,23 +27,27 @@ if "selected_page" not in st.session_state:
 
 st.write("✅ App started loading")
 
+
+
 # --- FIREBASE SETUP (Safe Mode) ---
 try:
     firebase_config = dict(st.secrets["firebase"])
-    cred = credentials.Certificate(firebase_config)
+
+    # Write config to a temporary file
+    os.makedirs("secrets", exist_ok=True)
+    with open("secrets/firebase_temp.json", "w") as f:
+        json.dump(firebase_config, f)
+
+    cred = credentials.Certificate("secrets/firebase_temp.json")
     if not firebase_admin._apps:
         firebase_admin.initialize_app(cred, {
             "projectId": firebase_config.get("project_id", "demo-project")
         })
-    st.write("✅ Firebase config loaded (Safe Mode)")
+    st.write("✅ Firebase config loaded (from secrets file)")
 except Exception as e:
     st.error("❌ Firebase initialization failed")
     st.exception(e)
 
-# TEMP DISABLE FIRESTORE AND GCS
-db = None
-storage = None
-st.write("⚠️ Firestore and GCS temporarily disabled")
 
 # --- SIDEBAR NAVIGATION ---
 try:

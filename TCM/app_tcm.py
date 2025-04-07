@@ -194,7 +194,7 @@ def translate(text, lang_code):
 
 
 # ---- EDUCATIONAL CONTENT ----
-elif page == "Educational Content":
+if page == "Educational Content":
     target_lang = languages[selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 

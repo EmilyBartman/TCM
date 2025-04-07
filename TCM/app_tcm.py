@@ -17,6 +17,7 @@ from firebase_admin import storage, credentials, firestore
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 
+# ML Feature Extraction & Prediction
 def extract_features(cv_img):
     resized = cv2.resize(cv_img, (300, 300))
     avg_color = np.mean(resized.reshape(-1, 3), axis=0)
@@ -28,20 +29,16 @@ def extract_features(cv_img):
 
 def load_model():
     try:
-        model = joblib.load("models/tcm_diagnosis_model.pkl")
-        return model
-    except:
+        return joblib.load("models/tcm_diagnosis_model.pkl")
+    except Exception:
+        st.warning("⚠️ ML model not found. Using fallback prediction.")
         return None
 
 def predict_with_model(model, features, symptoms=[]):
-    symptom_count = len(symptoms)
-    features += [symptom_count]  # simplistic fusion
+    features += [len(symptoms)]
     pred = model.predict([features])[0]
     prob = model.predict_proba([features])[0].max()
     return pred, round(prob * 100, 2)
-
-# Part 2: Firestore Feature Store Saving
-from firebase_admin import firestore
 
 def store_features_to_firestore(db, submission_id, features, label, prob):
     doc_ref = db.collection("tongue_features").document(submission_id)
@@ -49,20 +46,19 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
         "features": features,
         "label": label,
         "confidence": prob,
+        "avg_r": features[0],
+        "avg_g": features[1],
+        "avg_b": features[2],
+        "edges": features[3],
+        "laplacian_var": features[4],
+        "symptom_count": features[5] if len(features) > 5 else 0,
         "timestamp": firestore.SERVER_TIMESTAMP
     })
 
-# Part 3: BigQuery Export via Scheduled Function (example function call)
-# In practice, you'd deploy this as a Google Cloud Function or schedule via Cloud Scheduler
-
 def export_firestore_to_bigquery():
-    # Placeholder - this logic should be implemented as a scheduled cloud function or script
-    # that connects Firestore to BigQuery
-    pass
+    pass  # Placeholder for actual implementation
 
-# Part 4: Feedback-based Learning Stub (active learning)
 def retrain_model_from_feedback(dataframe):
-    # Check if labeled feedback exists
     labeled = dataframe[dataframe["is_correct"].notna()]
     if not labeled.empty:
         X = labeled[["avg_r", "avg_g", "avg_b", "edges", "laplacian_var", "symptom_count"]]
@@ -73,18 +69,39 @@ def retrain_model_from_feedback(dataframe):
         return True
     return False
 
-# Part 5: Smart Recommendations Function (remedy + feedback)
 def get_dynamic_remedies(tcm_pattern, symptoms=[]):
-    # Extend this logic with rules or an LLM lookup
-    if tcm_pattern == "Qi Deficiency":
-        return ["Ginseng tea", "Sweet potatoes", "Moderate walking"]
-    elif tcm_pattern == "Yin Deficiency":
-        return ["Goji berries", "Pears & lily bulb soup", "Meditation"]
-    elif tcm_pattern == "Blood Deficiency":
-        return ["Beets", "Spinach", "Dang Gui"]
-    elif tcm_pattern == "Damp Retention":
-        return ["Barley water", "Avoid greasy food", "Pu-erh tea"]
-    return ["Balanced diet", "Hydration", "Rest"]
+    remedies_map = {
+        "Qi Deficiency": ["Ginseng tea", "Sweet potatoes", "Moderate walking"],
+        "Yin Deficiency": ["Goji berries", "Pears & lily bulb soup", "Meditation"],
+        "Blood Deficiency": ["Beets", "Spinach", "Dang Gui"],
+        "Damp Retention": ["Barley water", "Avoid greasy food", "Pu-erh tea"]
+    }
+    return remedies_map.get(tcm_pattern, ["Balanced diet", "Hydration", "Rest"])
+
+def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
+    features = extract_features(cv_img)
+    avg_color_str = f"RGB({int(features[0])}, {int(features[1])}, {int(features[2])})"
+    model = load_model()
+
+    if model:
+        prediction_TCM, confidence = predict_with_model(model, features[:5], selected_symptoms)
+        prediction_Western = "ML-based insight"
+    else:
+        prediction_TCM = "Qi Deficiency"
+        prediction_Western = "Low energy, fatigue, low immunity"
+        confidence = 50
+
+    if db:
+        store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
+
+    return prediction_TCM, prediction_Western, avg_color_str, features, confidence
+
+def render_dynamic_remedies(prediction_TCM, selected_symptoms):
+    remedies = get_dynamic_remedies(prediction_TCM, selected_symptoms)
+    st.markdown("**Suggestions:**")
+    for item in remedies:
+        st.markdown(f"- {item}")
+
 # ---- FIREBASE SETUP ----
 try:
     firebase_config = dict(st.secrets["firebase"])

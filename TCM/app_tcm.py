@@ -273,39 +273,39 @@ elif page == "Tongue Health Check":
                     st.write("No prior scans available to compare.")
 
             with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
-    remedy_text = ""
-    if prediction_TCM == "Qi Deficiency":
-        remedy_text = """
-        ✅ Ginseng tea  
-        🍠 Sweet potatoes  
-        🚶‍♂️ Moderate exercise like walking
-        """
-    elif prediction_TCM == "Yin Deficiency":
-        remedy_text = """
-        🍒 Goji berries  
-        🍐 Pears and lily bulb soup  
-        🧘 Meditation and rest
-        """
-    elif prediction_TCM == "Blood Deficiency":
-        remedy_text = """
-        🥬 Beets, spinach, black beans  
-        🌿 Dang Gui (Angelica Sinensis)  
-        🩸 Iron-rich foods
-        """
-    elif prediction_TCM == "Damp Retention":
-        remedy_text = """
-        🥣 Barley water  
-        🚫 Avoid greasy food  
-        🍵 Ginger and pu-erh tea
-        """
-    else:
-        remedy_text = """
-        💧 Maintain hydration  
-        🥗 Balanced meals  
-        🧘 Gentle exercise
-        """
-    with st.container():
-        st.markdown(remedy_text)
+                remedy_text = ""
+                if prediction_TCM == "Qi Deficiency":
+                    remedy_text = """
+                    ✅ Ginseng tea  
+                    🍠 Sweet potatoes  
+                    🚶‍♂️ Moderate exercise like walking
+                    """
+                elif prediction_TCM == "Yin Deficiency":
+                    remedy_text = """
+                    🍒 Goji berries  
+                    🍐 Pears and lily bulb soup  
+                    🧘 Meditation and rest
+                    """
+                elif prediction_TCM == "Blood Deficiency":
+                    remedy_text = """
+                    🥬 Beets, spinach, black beans  
+                    🌿 Dang Gui (Angelica Sinensis)  
+                    🩸 Iron-rich foods
+                    """
+                elif prediction_TCM == "Damp Retention":
+                    remedy_text = """
+                    🥣 Barley water  
+                    🚫 Avoid greasy food  
+                    🍵 Ginger and pu-erh tea
+                    """
+                else:
+                    remedy_text = """
+                    💧 Maintain hydration  
+                    🥗 Balanced meals  
+                    🧘 Gentle exercise
+                    """
+                with st.container():
+                    st.markdown(remedy_text)
 
 
 # ---- SUBMISSION HISTORY ----

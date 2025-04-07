@@ -1,4 +1,6 @@
 streamlit
+firebase-admin
 opencv-python
 pillow
 numpy
+pandas

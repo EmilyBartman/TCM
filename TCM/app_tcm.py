@@ -153,44 +153,43 @@ pages = [
     "About & Disclaimer"
 ]
 page = st.sidebar.radio("Navigate", pages)
-elif page == "Tongue Health Check":
-    # Language options including more Asian and African languages
-    from googletrans import Translator
-    translator = Translator()
 
-    languages = {
-        "English": "en",
-        "Chinese (Simplified)": "zh-cn",
-        "Spanish": "es",
-        "French": "fr",
-        "Hindi": "hi",
-        "Arabic": "ar",
-        "Swahili": "sw",
-        "Zulu": "zu",
-        "Amharic": "am",
-        "Igbo": "ig",
-        "Yoruba": "yo",
-        "Tamil": "ta",
-        "Telugu": "te",
-        "Urdu": "ur",
-        "Bengali": "bn",
-        "Malay": "ms",
-        "Vietnamese": "vi",
-        "Thai": "th",
-        "Filipino": "tl",
-        "Japanese": "ja",
-        "Korean": "ko"
-    }
+# ---- LANGUAGE SETUP ----
+from googletrans import Translator
+translator = Translator()
 
-    selected_lang = st.sidebar.selectbox("🌐 Choose Language", list(languages.keys()))
-    target_lang = languages[selected_lang]
+languages = {
+    "English": "en",
+    "Chinese (Simplified)": "zh-cn",
+    "Spanish": "es",
+    "French": "fr",
+    "Hindi": "hi",
+    "Arabic": "ar",
+    "Swahili": "sw",
+    "Zulu": "zu",
+    "Amharic": "am",
+    "Igbo": "ig",
+    "Yoruba": "yo",
+    "Tamil": "ta",
+    "Telugu": "te",
+    "Urdu": "ur",
+    "Bengali": "bn",
+    "Malay": "ms",
+    "Vietnamese": "vi",
+    "Thai": "th",
+    "Filipino": "tl",
+    "Japanese": "ja",
+    "Korean": "ko"
+}
 
-    def translate(text, lang_code):
-        try:
-            return translator.translate(text, dest=lang_code).text
-        except Exception as e:
-            st.warning("🌐 Translation failed. Showing original text.")
-            return text
+selected_lang = st.sidebar.selectbox("\U0001F310 Choose Language", list(languages.keys()))
+target_lang = languages[selected_lang]
+
+def translate(text, lang_code):
+    try:
+        return translator.translate(text, dest=lang_code).text
+    except Exception:
+        return text
 
 # ---- EDUCATIONAL CONTENT ----
 target_lang = languages[]
@@ -433,17 +432,21 @@ elif page == "Tongue Health Check":
                     st.write(translate("No prior scans available to compare.", target_lang))
 
             # --- Feedback Section ---
-            feedback = st.radio(translate("Was this prediction accurate?", target_lang), [translate("Not sure", target_lang), translate("Yes", target_lang), translate("No", target_lang)], index=0)
+            feedback = st.radio(
+                translate("Was this prediction accurate?", target_lang),
+                [translate("Not sure", target_lang), translate("Yes", target_lang), translate("No", target_lang)],
+                index=0
+            )
             if st.button(translate("Submit Feedback", target_lang)):
                 if feedback in [translate("Yes", target_lang), translate("No", target_lang)]:
                     db.collection("tongue_scans").document(submission_id).update({
                         "user_feedback": feedback,
                         "is_correct": True if feedback == translate("Yes", target_lang) else False
                     })
-                    st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="📬")
+                    st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="\U0001F4EC")
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
-                            
+                    
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
     st.title(translate("'📜' My Tongue Scan History", target_lang))
@@ -491,4 +494,5 @@ Data Usage: All uploaded data is securely stored and used anonymously for improv
 Disclaimer: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
 """
     st.markdown(translate(about_text, target_lang))
+
 

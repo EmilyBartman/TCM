@@ -17,6 +17,7 @@ from firebase_admin import storage, credentials, firestore
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from googletrans import Translator
+from deep_translator import GoogleTranslator
 
 
 # ML Feature Extraction & Prediction
@@ -188,9 +189,9 @@ target_lang = languages[selected_lang]
 
 def translate(text, lang_code):
     try:
-        return translator.translate(text, dest=lang_code).text
+        return GoogleTranslator(source="auto", target=lang_code).translate(text)
     except Exception as e:
-        print(f"Translation failed for '{text}' to {lang_code}: {e}")
+        print(f"Translation failed: {e}")
         return text
 
 

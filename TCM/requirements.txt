@@ -1,9 +1,7 @@
 streamlit
+xhtml2pdf
+Pillow
+opencv-python
 firebase-admin
-opencv-python-headless
-pillow
 numpy
 pandas
-streamlit-option-menu
-streamlit-lottie
-langdetect

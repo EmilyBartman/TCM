@@ -5,6 +5,9 @@ st.set_page_config(page_title="TCM Health App", layout="wide")
 import pandas as pd
 from PIL import Image
 import os
+from xhtml2pdf import pisa
+from io import BytesIO
+import base64
 import uuid
 from datetime import datetime, timedelta
 import cv2
@@ -241,73 +244,70 @@ elif page == "Tongue Health Check":
                 else:
                     st.warning("Please select 'Yes' or 'No' to submit feedback.")
 
-            with st.expander("📄 Download Report"):
-                from io import BytesIO
-                import base64
-                import pdfkit
-                html_report = f"""
-                <h2>TCM Health Scan Report</h2>
-                <p><strong>Timestamp:</strong> {timestamp}</p>
-                <p><strong>Symptoms:</strong> {symptoms}</p>
-                <p><strong>Color:</strong> {avg_color_str} — {prediction_TCM}</p>
-                <p><strong>Shape:</strong> {shape_comment}</p>
-                <p><strong>Texture:</strong> {texture_comment}</p>
-                <p><strong>Western Insight:</strong> {prediction_Western}</p>
-                """
-                try:
-                    pdf_bytes = pdfkit.from_string(html_report, False)
-                    b64 = base64.b64encode(pdf_bytes).decode()
-                    href = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 Download PDF Report</a>'
-                    st.markdown(href, unsafe_allow_html=True)
-                except:
-                    st.info("PDF preview not supported here, but data is saved.")
+# --- Suggested Remedies ---
+with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
+    remedy_text = ""
+    if prediction_TCM == "Qi Deficiency":
+        remedy_text = """
+        ✅ Ginseng tea  
+        🍠 Sweet potatoes  
+        🚶‍♂️ Moderate exercise like walking
+        """
+    elif prediction_TCM == "Yin Deficiency":
+        remedy_text = """
+        🍒 Goji berries  
+        🍐 Pears and lily bulb soup  
+        🧘 Meditation and rest
+        """
+    elif prediction_TCM == "Blood Deficiency":
+        remedy_text = """
+        🥬 Beets, spinach, black beans  
+        🌿 Dang Gui (Angelica Sinensis)  
+        🩸 Iron-rich foods
+        """
+    elif prediction_TCM == "Damp Retention":
+        remedy_text = """
+        🥣 Barley water  
+        🚫 Avoid greasy food  
+        🍵 Ginger and pu-erh tea
+        """
+    else:
+        remedy_text = """
+        💧 Maintain hydration  
+        🥗 Balanced meals  
+        🧘 Gentle exercise
+        """
+    st.markdown(remedy_text)
 
-            with st.expander("📊 Compare with Previous Scans"):
-                scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
-                history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
-                if history:
-                    hist_df = pd.DataFrame(history)
-                    hist_df = hist_df.sort_values("timestamp", ascending=False).head(5)
-                    st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
-                else:
-                    st.write("No prior scans available to compare.")
+# --- PDF Download ---
+with st.expander("📄 Download Report"):
+    html_report = f"""
+    <h2>TCM Health Scan Report</h2>
+    <p><strong>Timestamp:</strong> {timestamp}</p>
+    <p><strong>Symptoms:</strong> {symptoms}</p>
+    <p><strong>Color:</strong> {avg_color_str} — {prediction_TCM}</p>
+    <p><strong>Shape:</strong> {shape_comment}</p>
+    <p><strong>Texture:</strong> {texture_comment}</p>
+    <p><strong>Western Insight:</strong> {prediction_Western}</p>
+    """
 
-            with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
-                remedy_text = ""
-                if prediction_TCM == "Qi Deficiency":
-                    remedy_text = """
-                    ✅ Ginseng tea  
-                    🍠 Sweet potatoes  
-                    🚶‍♂️ Moderate exercise like walking
-                    """
-                elif prediction_TCM == "Yin Deficiency":
-                    remedy_text = """
-                    🍒 Goji berries  
-                    🍐 Pears and lily bulb soup  
-                    🧘 Meditation and rest
-                    """
-                elif prediction_TCM == "Blood Deficiency":
-                    remedy_text = """
-                    🥬 Beets, spinach, black beans  
-                    🌿 Dang Gui (Angelica Sinensis)  
-                    🩸 Iron-rich foods
-                    """
-                elif prediction_TCM == "Damp Retention":
-                    remedy_text = """
-                    🥣 Barley water  
-                    🚫 Avoid greasy food  
-                    🍵 Ginger and pu-erh tea
-                    """
-                else:
-                    remedy_text = """
-                    💧 Maintain hydration  
-                    🥗 Balanced meals  
-                    🧘 Gentle exercise
-                    """
-                with st.container():
-                    st.markdown(remedy_text)
+    pdf_output = BytesIO()
+    pisa.CreatePDF(BytesIO(html_report.encode("utf-8")), dest=pdf_output)
+    pdf_bytes = pdf_output.getvalue()
+    b64 = base64.b64encode(pdf_bytes).decode("utf-8")
+    download_link = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 Download PDF Report</a>'
+    st.markdown(download_link, unsafe_allow_html=True)
 
-
+# --- History Compare ---
+with st.expander("📊 Compare with Previous Scans"):
+    scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
+    history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
+    if history:
+        hist_df = pd.DataFrame(history)
+        hist_df = hist_df.sort_values("timestamp", ascending=False).head(5)
+        st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
+    else:
+        st.write("No prior scans available to compare.")
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
     st.title("📜 My Tongue Scan History")

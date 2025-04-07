@@ -49,19 +49,8 @@ except Exception as e:
 # --- SIDEBAR NAVIGATION ---
 try:
     pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
-    default_page = "Educational Content"
+    page = st.sidebar.radio("Navigate", pages)
     
-    try:
-        selected_index = pages.index(st.session_state.get("selected_page", default_page))
-    except ValueError:
-        selected_index = 0  # fallback in case the session state has a wrong value
-    
-    page = st.sidebar.radio("Navigate", pages, index=selected_index)
-    st.session_state.selected_page = page
-    
-    # Always render a fallback if the sidebar isn't touched
-    if page not in pages:
-        page = default_page
 
     st.session_state.selected_page = page
     st.write(f"✅ Current page: {page}")

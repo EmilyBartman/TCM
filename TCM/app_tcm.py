@@ -17,6 +17,7 @@ from firebase_admin import storage, credentials, firestore
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from deep_translator import GoogleTranslator
+import streamlit as st
 
 
 # ML Feature Extraction & Prediction
@@ -155,8 +156,8 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
-import streamlit as st
 from deep_translator import GoogleTranslator
+import streamlit as st
 
 # -----------------------
 # Language config
@@ -193,21 +194,19 @@ languages = {
 if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "English"
 
-# Define this before using it in on_change
-def update_lang():
-    st.session_state.selected_lang = st.session_state.lang_temp
-    st.rerun()
-
-# Sidebar dropdown (triggers rerun on change)
-st.sidebar.selectbox(
+# Language selector (no callback)
+new_lang = st.sidebar.selectbox(
     "🌐 Choose Language",
     list(languages.keys()),
-    index=list(languages.keys()).index(st.session_state.selected_lang),
-    key="lang_temp",
-    on_change=update_lang
+    index=list(languages.keys()).index(st.session_state.selected_lang)
 )
 
-# This is the final language code to use
+# Detect change and trigger rerun manually
+if new_lang != st.session_state.selected_lang:
+    st.session_state.selected_lang = new_lang
+    st.rerun()
+
+# Final resolved language code
 target_lang = languages[st.session_state.selected_lang]
 
 # -----------------------

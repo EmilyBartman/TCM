@@ -22,7 +22,7 @@ from google.cloud import storage as gcs_storage
 
 st.write("✅ App started loading")
 st.write("✅ Firebase config loaded")
-st.write(f"✅ Current page: {page}")
+
 
 
 # ---- FIREBASE & GCS SETUP ----
@@ -45,6 +45,7 @@ if "submissions" not in st.session_state:
 try:
     pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
     page = st.sidebar.radio("Navigate", pages)
+    st.write(f"✅ Current page: {page}")
 except Exception as e:
     st.error("❌ Sidebar navigation failed")
     st.exception(e)

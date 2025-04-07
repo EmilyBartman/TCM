@@ -14,6 +14,21 @@ from PIL import Image
 import os
 import uuid
 from datetime import datetime
+import cv2
+import numpy as np
+import firebase_admin
+from firebase_admin import credentials, firestore, storage
+
+# ---- FIREBASE SETUP (Streamlit Secrets) ----
+if not firebase_admin._apps:
+    firebase_config = st.secrets["firebase"]
+    cred = credentials.Certificate(firebase_config)
+    firebase_admin.initialize_app(cred, {
+        'storageBucket': f'{firebase_config["project_id"]}.appspot.com'
+    })
+
+db = firestore.client()
+bucket = storage.bucket()
 
 # ---- SETUP ----
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -34,7 +49,7 @@ if page == "Educational Content":
         - **Yin & Yang**: Balance between opposite but complementary forces
         - **Qi (Chi)**: Vital energy flowing through the body
         - **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs and emotions
-
+        
         TCM often contrasts with **Western medicine**, which tends to focus on pathology, lab diagnostics, and medications.
     """)
 
@@ -66,26 +81,58 @@ elif page == "Tongue Health Check":
         if uploaded_img and consent:
             submission_id = str(uuid.uuid4())
             timestamp = datetime.utcnow().isoformat()
+            file_ext = uploaded_img.name.split(".")[-1]
+            firebase_filename = f"tongue_images/{submission_id}.{file_ext}"
 
-            # Save image locally (or later to Firebase/S3)
-            os.makedirs("submissions", exist_ok=True)
-            img.save(f"submissions/{submission_id}.png")
+            # Save image temporarily for analysis
+            os.makedirs("temp", exist_ok=True)
+            temp_path = f"temp/{submission_id}.{file_ext}"
+            img.save(temp_path)
 
-            # Save metadata (as placeholder CSV)
+            # ----- BASIC IMAGE ANALYSIS -----
+            cv_img = cv2.imread(temp_path)
+            cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+            resized = cv2.resize(cv_img, (300, 300))
+
+            avg_color = np.mean(resized.reshape(-1, 3), axis=0)
+            avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
+
+            gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
+            edges = cv2.Canny(gray, 50, 150)
+            edge_pixels = np.sum(edges > 0)
+            laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+
+            shape_comment = "Normal" if edge_pixels < 5000 else "Swollen or Elongated"
+            texture_comment = "Moist" if laplacian_var < 100 else "Dry/Coated"
+
+            # Upload to Firebase Storage
+            blob = bucket.blob(firebase_filename)
+            blob.upload_from_filename(temp_path)
+            blob.make_public()
+            img_url = blob.public_url
+
+            # Store metadata in Firestore
             data_row = {
                 "id": submission_id,
                 "timestamp": timestamp,
                 "symptoms": symptoms,
-                "tongue_image_path": f"submissions/{submission_id}.png",
+                "tongue_image_url": img_url,
+                "avg_color": avg_color_str,
+                "shape_comment": shape_comment,
+                "texture_comment": texture_comment,
                 "prediction_TCM": "Qi Deficiency (placeholder)",
                 "prediction_Western": "Possible Fatigue/Anemia (placeholder)",
                 "user_feedback": ""
             }
-            st.session_state.submissions.append(data_row)
-            st.success("Image submitted successfully! Scroll down for prediction.")
+            db.collection("tongue_scans").document(submission_id).set(data_row)
 
-            # Display placeholder predictions
-            st.subheader("Predictions")
+            st.success("Image submitted and analyzed successfully! Scroll down for prediction.")
+
+            # Display prediction & analysis
+            st.subheader("🧪 Analysis Results")
+            st.markdown(f"- **Tongue Color**: {avg_color_str}")
+            st.markdown(f"- **Shape Analysis**: {shape_comment}")
+            st.markdown(f"- **Coating / Moisture Level**: {texture_comment}")
             st.markdown("- **TCM Insight**: Qi Deficiency (based on image features)")
             st.markdown("- **Western Equivalent**: Possible signs of fatigue or low hemoglobin")
 
@@ -93,7 +140,7 @@ elif page == "Tongue Health Check":
             st.subheader("How accurate was this?")
             feedback = st.text_input("Your feedback or correction (optional)")
             if feedback:
-                st.session_state.submissions[-1]["user_feedback"] = feedback
+                db.collection("tongue_scans").document(submission_id).update({"user_feedback": feedback})
                 st.success("Thanks! Your feedback helps improve our model.")
         else:
             st.error("Please upload an image and provide consent.")

@@ -383,7 +383,7 @@ elif page == "Tongue Health Check":
                 elif prediction_TCM == "Blood Deficiency":
                     remedy_text = """
                     "🥬" Beets, spinach, black beans - Iron-rich, blood-nourishing foods that boost hemoglobin levels, support liver function, and replenish vital nutrients to combat fatigue and dizziness.  
-                    "🌿" Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the “female ginseng.”  
+                    "🌿" Dang Gui (Angelica Sinensis) - A powerful TCM herb traditionally used to enrich and circulate blood, regulate menstruation, and strengthen overall vitality, often referred to as the female ginseng.  
                     "🩸" Iron-rich foods - Essential for red blood cell production, these foods help treat symptoms like pale complexion, cold extremities, and low energy often associated with Blood Deficiency.
                     """
                 elif prediction_TCM == "Damp Retention":

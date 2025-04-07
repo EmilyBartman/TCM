@@ -430,16 +430,16 @@ elif page == "Tongue Health Check":
 
             # --- Feedback Section ---
             feedback = st.radio(translate("Was this prediction accurate?", target_lang), [translate("Not sure", target_lang), translate("Yes", target_lang), translate("No", target_lang)], index=0)
-            if st.button(translate("💾 Submit Feedback", target_lang)):
+            if st.button(translate("Submit Feedback", target_lang)):
                 if feedback in [translate("Yes", target_lang), translate("No", target_lang)]:
                     db.collection("tongue_scans").document(submission_id).update({
                         "user_feedback": feedback,
                         "is_correct": True if feedback == translate("Yes", target_lang) else False
                     })
-                    st.toast(translate("✅ Feedback submitted. Thank you!", target_lang), icon="📬")
+                    st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="📬")
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
-                    
+                            
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":
     st.title(translate("📜 My Tongue Scan History", target_lang))

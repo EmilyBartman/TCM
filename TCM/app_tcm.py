@@ -155,7 +155,7 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 # ---- LANGUAGE SETUP ----
-# Language Selector
+# Language codes
 languages = {
     "English": "en",
     "Spanish": "es",
@@ -180,21 +180,25 @@ languages = {
     "Korean": "ko"
 }
 
+# Initialize session state
 if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "English"
 
+# Define rerun trigger
 def update_lang():
     st.session_state.selected_lang = st.session_state.lang_temp
-    st.experimental_rerun()  # <- rerun the app immediately
+    st.experimental_rerun()
 
+# Sidebar language picker
 st.sidebar.selectbox(
     "🌐 Choose Language",
     list(languages.keys()),
     index=list(languages.keys()).index(st.session_state.selected_lang),
     key="lang_temp",
-    on_change=update_lang  # 👈 this triggers rerun on change
+    on_change=update_lang
 )
 
+# Final resolved language code
 target_lang = languages[st.session_state.selected_lang]
 
 

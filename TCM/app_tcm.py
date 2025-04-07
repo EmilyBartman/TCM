@@ -21,6 +21,9 @@ from firebase_admin import credentials, firestore
 from google.cloud import storage as gcs_storage
 
 st.write("✅ App started loading")
+st.write("✅ Firebase config loaded")
+st.write(f"✅ Current page: {page}")
+
 
 # ---- FIREBASE & GCS SETUP ----
 firebase_config = dict(st.secrets["firebase"])
@@ -39,8 +42,12 @@ if "submissions" not in st.session_state:
     st.session_state.submissions = []
 
 # ---- NAVIGATION ----
-pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
-page = st.sidebar.radio("Navigate", pages)
+try:
+    pages = ["Educational Content", "Tongue Health Check", "About & Disclaimer"]
+    page = st.sidebar.radio("Navigate", pages)
+except Exception as e:
+    st.error("❌ Sidebar navigation failed")
+    st.exception(e)
 
 # ---- 1. EDUCATIONAL CONTENT ----
 if page == "Educational Content":

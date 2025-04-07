@@ -166,7 +166,8 @@ import streamlit as st
 languages = {
     "English": "en",
     "Spanish": "es",
-    "Chinese (Simplified)": "zh",
+    "Chinese (Simplified)": "zh-CN",  
+    "Chinese (Traditional)": "zh-TW", 
     "French": "fr",
     "Hindi": "hi",
     "Arabic": "ar",

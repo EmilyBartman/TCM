@@ -200,36 +200,100 @@ elif page == "Tongue Health Check":
 
             st.subheader("🧪 Analysis Results")
 
-            with st.expander("🎨 Tongue Color Analysis", expanded=True):
-                st.markdown(f"**RGB Value**: `{avg_color_str}`")
-                st.markdown("- A soft reddish tone may indicate Qi or Blood Deficiency.")
+            st.info(f"🔍 Detected TCM Pattern: **{prediction_TCM}** | Western View: _{prediction_Western}_")
 
-            with st.expander("📐 Shape Interpretation", expanded=True):
-                st.markdown(f"**Detected Shape**: `{shape_comment}`")
-                st.markdown("- Normal shape suggests no major heat or fluid imbalance.")
+            col1, col2 = st.columns(2)
 
-            with st.expander("💧 Texture Observation", expanded=True):
-                st.markdown(f"**Surface Texture**: `{texture_comment}`")
-                st.markdown("- Moist texture implies healthy fluid regulation. Too dry or coated may hint at Yin imbalance.")
+            with col1:
+                with st.expander("🎨 Tongue Color Analysis", expanded=True):
+                    st.markdown(f"**RGB Value**: `{avg_color_str}`")
+                    st.markdown("<div style='width:100px;height:30px;border:1px solid #ccc;background-color:rgb" + avg_color_str[3:] + "'></div>", unsafe_allow_html=True)
+                    st.markdown("- A soft reddish tone may indicate Qi or Blood Deficiency.")
 
-            with st.expander("🧧 TCM Insight", expanded=True):
-                st.markdown(f"**Syndrome**: `{prediction_TCM}`")
-                st.markdown("- This pattern suggests your body's energy (Qi) might be a bit low.")
-                st.markdown("- You may feel tired, have cold limbs, or weak digestion.")
-                st.markdown("- TCM may suggest warm foods, rest, or herbal tea.")
+                with st.expander("💧 Texture Observation", expanded=True):
+                    st.markdown(f"**Surface Texture**: `{texture_comment}`")
+                    st.markdown("- Moist texture implies healthy fluid regulation. Too dry or coated may hint at Yin imbalance.")
 
-            with st.expander("🧬 Western Medical View", expanded=True):
-                st.markdown(f"**Insight**: `{prediction_Western}`")
-                st.markdown("- Could relate to low iron, dehydration, or fatigue.")
-                st.markdown("- Hydration, nutrition, and better sleep often help.")
+            with col2:
+                with st.expander("📐 Shape Interpretation", expanded=True):
+                    st.markdown(f"**Detected Shape**: `{shape_comment}`")
+                    st.markdown("- Normal shape suggests no major heat or fluid imbalance.")
 
-            feedback = st.radio("Was this prediction accurate?", ["Yes", "No", "Not sure"], index=2)
-            if feedback != "Not sure":
-                db.collection("tongue_scans").document(submission_id).update({
-                    "user_feedback": feedback,
-                    "is_correct": True if feedback == "Yes" else False
-                })
-                st.toast("🙏 Thanks for your feedback!", icon="💬")
+                with st.expander("🧧 TCM Insight", expanded=True):
+                    st.markdown(f"**Syndrome**: `{prediction_TCM}`")
+                    st.markdown("- This pattern suggests your body's energy (Qi) might be a bit low.")
+                    st.markdown("- You may feel tired, have cold limbs, or weak digestion.")
+                    st.markdown("- TCM may suggest warm foods, rest, or herbal tea.")
+
+                with st.expander("🧬 Western Medical View", expanded=True):
+                    st.markdown(f"**Insight**: `{prediction_Western}`")
+                    st.markdown("- Could relate to low iron, dehydration, or fatigue.")
+                    st.markdown("- Hydration, nutrition, and better sleep often help.")
+
+            feedback = st.radio("Was this prediction accurate?", ["Not sure", "Yes", "No"], index=0)
+            if st.button("💾 Submit Feedback"):
+                if feedback in ["Yes", "No"]:
+                    db.collection("tongue_scans").document(submission_id).update({
+                        "user_feedback": feedback,
+                        "is_correct": True if feedback == "Yes" else False
+                    })
+                    st.toast("✅ Feedback submitted. Thank you!", icon="📬")
+                else:
+                    st.warning("Please select 'Yes' or 'No' to submit feedback.")
+
+            with st.expander("📄 Download Report"):
+                from io import BytesIO
+                import base64
+                import pdfkit
+                html_report = f"""
+                <h2>TCM Health Scan Report</h2>
+                <p><strong>Timestamp:</strong> {timestamp}</p>
+                <p><strong>Symptoms:</strong> {symptoms}</p>
+                <p><strong>Color:</strong> {avg_color_str} — {prediction_TCM}</p>
+                <p><strong>Shape:</strong> {shape_comment}</p>
+                <p><strong>Texture:</strong> {texture_comment}</p>
+                <p><strong>Western Insight:</strong> {prediction_Western}</p>
+                """
+                try:
+                    pdf_bytes = pdfkit.from_string(html_report, False)
+                    b64 = base64.b64encode(pdf_bytes).decode()
+                    href = f'<a href="data:application/pdf;base64,{b64}" download="tcm_report.pdf">📥 Download PDF Report</a>'
+                    st.markdown(href, unsafe_allow_html=True)
+                except:
+                    st.info("PDF preview not supported here, but data is saved.")
+
+            with st.expander("📊 Compare with Previous Scans"):
+                scans = db.collection("tongue_scans").where("id", "!=", submission_id).stream()
+                history = [doc.to_dict() for doc in scans if doc.to_dict().get("prediction_TCM")]
+                if history:
+                    hist_df = pd.DataFrame(history)
+                    hist_df = hist_df.sort_values("timestamp", ascending=False).head(5)
+                    st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
+                else:
+                    st.write("No prior scans available to compare.")
+
+            with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
+                if prediction_TCM == "Qi Deficiency":
+                    st.markdown("- Ginseng tea
+- Sweet potatoes
+- Moderate exercise like walking")
+                elif prediction_TCM == "Yin Deficiency":
+                    st.markdown("- Goji berries
+- Pears and lily bulb soup
+- Meditation and rest")
+                elif prediction_TCM == "Blood Deficiency":
+                    st.markdown("- Beets, spinach, black beans
+- Dang Gui (Angelica Sinensis)
+- Iron-rich foods")
+                elif prediction_TCM == "Damp Retention":
+                    st.markdown("- Barley water
+- Avoid greasy food
+- Ginger and pu-erh tea")
+                else:
+                    st.markdown("- Maintain hydration
+- Balanced meals
+- Gentle exercise")
+
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":

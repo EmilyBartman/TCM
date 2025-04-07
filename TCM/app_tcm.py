@@ -406,7 +406,7 @@ elif page == "Tongue Health Check":
                 <h2>{translate('TCM Health Scan Report', target_lang)}</h2>
                 <p><strong>{translate('Timestamp', target_lang)}:</strong> {timestamp}</p>
                 <p><strong>{translate('Symptoms', target_lang)}:</strong> {symptoms}</p>
-                <p><strong>{translate('Color', target_lang)}:</strong> {avg_color_str} — {prediction_TCM}</p>
+                <p><strong>{translate('Color', target_lang)}:</strong> {avg_color_str} - {prediction_TCM}</p>
                 <p><strong>{translate('Western Insight', target_lang)}:</strong> {prediction_Western}</p>
                 <p><strong>{translate('Confidence', target_lang)}:</strong> {confidence}%</p>
                 """

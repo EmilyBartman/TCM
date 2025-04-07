@@ -114,7 +114,6 @@ try:
 
     db = firestore.client()
     bucket = storage.bucket("traditional-medicine-50518")
-    # st.success("✅ Firebase and Firestore initialized")  # Hidden from UI
 except Exception as e:
     db = None
     bucket = None
@@ -125,6 +124,7 @@ except Exception as e:
 if "submissions" not in st.session_state:
     st.session_state.submissions = []
 
+# ---- NAVIGATION ----
 pages = [
     "Educational Content",
     "Tongue Health Check",
@@ -180,15 +180,16 @@ if page == "Educational Content":
     st.header("TCM Syndrome Library")
     with st.expander("🔎 Click to view 8 Major Tongue Syndromes and Signs"):
         st.markdown("""
-        **Qi Deficiency**: Fatigue, pale tongue, short breath
-        **Damp Retention**: Bloating, sticky tongue coat
-        **Blood Stasis**: Sharp pain, purple tongue
-        **Qi Stagnation**: Emotional blockage, rib pain
-        **Damp Heat**: Yellow tongue coat, foul smell
-        **Yang Deficiency**: Cold limbs, low energy
-        **Yin Deficiency**: Dry mouth, night sweats
+        **Qi Deficiency**: Fatigue, pale tongue, short breath  
+        **Damp Retention**: Bloating, sticky tongue coat  
+        **Blood Stasis**: Sharp pain, purple tongue  
+        **Qi Stagnation**: Emotional blockage, rib pain  
+        **Damp Heat**: Yellow tongue coat, foul smell  
+        **Yang Deficiency**: Cold limbs, low energy  
+        **Yin Deficiency**: Dry mouth, night sweats  
         **Blood Deficiency**: Pale lips, dizziness
         """)
+
     with st.expander("📚 Recommended Reading"):
         st.markdown("""
         - *Foundations of Chinese Medicine* - Giovanni Maciocia
@@ -232,34 +233,10 @@ elif page == "Tongue Health Check":
 
             cv_img = cv2.imread(temp_path)
             cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-            resized = cv2.resize(cv_img, (300, 300))
 
-            avg_color = np.mean(resized.reshape(-1, 3), axis=0)
-            avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
-
-            gray = cv2.cvtColor(resized, cv2.COLOR_RGB2GRAY)
-            edges = cv2.Canny(gray, 50, 150)
-            edge_pixels = np.sum(edges > 0)
-            laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
-
-            shape_comment = "Swollen or Elongated" if edge_pixels > 5000 else "Normal"
-            texture_comment = "Dry/Coated" if laplacian_var > 100 else "Moist"
-
-            prediction_TCM = ""
-            prediction_Western = ""
-
-            if avg_color[0] < 180 and "dry" in texture_comment.lower():
-                prediction_TCM = "Yin Deficiency"
-                prediction_Western = "Possible dehydration or hormone imbalance"
-            elif "Swollen" in shape_comment:
-                prediction_TCM = "Damp Retention"
-                prediction_Western = "Inflammation or fluid retention"
-            elif avg_color[0] < 140 and avg_color[2] > 160:
-                prediction_TCM = "Blood Deficiency"
-                prediction_Western = "Anemia or nutritional deficiency"
-            else:
-                prediction_TCM = "Qi Deficiency"
-                prediction_Western = "Low energy, fatigue, low immunity"
+            prediction_TCM, prediction_Western, avg_color_str, features, confidence = analyze_tongue_with_model(
+                cv_img, submission_id, selected_symptoms, db
+            )
 
             try:
                 blob = bucket.blob(firebase_filename)
@@ -279,8 +256,6 @@ elif page == "Tongue Health Check":
                 "symptoms": symptoms,
                 "tongue_image_url": img_url,
                 "avg_color": avg_color_str,
-                "shape_comment": shape_comment,
-                "texture_comment": texture_comment,
                 "prediction_TCM": prediction_TCM,
                 "prediction_Western": prediction_Western,
                 "user_feedback": ""
@@ -289,36 +264,13 @@ elif page == "Tongue Health Check":
             db.collection("tongue_scans").document(submission_id).set(result)
 
             st.subheader("🧪 Analysis Results")
-
             st.info(f"🔍 Detected TCM Pattern: **{prediction_TCM}** | Western View: _{prediction_Western}_")
+            st.markdown(f"**Average Tongue Color**: `{avg_color_str}`  ")
+            st.markdown(f"**Confidence Level**: `{confidence}%`")
 
-            col1, col2 = st.columns(2)
+            render_dynamic_remedies(prediction_TCM, selected_symptoms)
 
-            with col1:
-                with st.expander("🎨 Tongue Color Analysis", expanded=True):
-                    st.markdown(f"**RGB Value**: `{avg_color_str}`")
-                    st.markdown("<div style='width:100px;height:30px;border:1px solid #ccc;background-color:rgb" + avg_color_str[3:] + "'></div>", unsafe_allow_html=True)
-                    st.markdown("- A soft reddish tone may indicate Qi or Blood Deficiency.")
-
-                with st.expander("💧 Texture Observation", expanded=True):
-                    st.markdown(f"**Surface Texture**: `{texture_comment}`")
-                    st.markdown("- Moist texture implies healthy fluid regulation. Too dry or coated may hint at Yin imbalance.")
-              
-                with st.expander("📐 Shape Interpretation", expanded=True):
-                    st.markdown(f"**Detected Shape**: `{shape_comment}`")
-                    st.markdown("- Normal shape suggests no major heat or fluid imbalance.")
-
-            with col2:
-                with st.expander("🧧 TCM Insight", expanded=True):
-                    st.markdown(f"**Syndrome**: `{prediction_TCM}`")
-                    st.markdown("- This pattern suggests your body's energy (Qi) might be a bit low.")
-                    st.markdown("- You may feel tired, have cold limbs, or weak digestion.")
-                    st.markdown("- TCM may suggest warm foods, rest, or herbal tea.")
-
-                with st.expander("🧬 Western Medical View", expanded=True):
-                    st.markdown(f"**Insight**: `{prediction_Western}`")
-                    st.markdown("- Could relate to low iron, dehydration, or fatigue.")
-                    st.markdown("- Hydration, nutrition, and better sleep often help.")
+            st.markdown("- Hydration, nutrition, and better sleep often help.")
 
             # --- Suggested Remedies ---
             with st.expander("🌿 Suggested Remedies Based on TCM Pattern"):
@@ -362,9 +314,8 @@ elif page == "Tongue Health Check":
                 <p><strong>Timestamp:</strong> {timestamp}</p>
                 <p><strong>Symptoms:</strong> {symptoms}</p>
                 <p><strong>Color:</strong> {avg_color_str} — {prediction_TCM}</p>
-                <p><strong>Shape:</strong> {shape_comment}</p>
-                <p><strong>Texture:</strong> {texture_comment}</p>
                 <p><strong>Western Insight:</strong> {prediction_Western}</p>
+                <p><strong>Confidence:</strong> {confidence}%</p>
                 """
                 pdf_output = BytesIO()
                 pisa.CreatePDF(BytesIO(html_report.encode("utf-8")), dest=pdf_output)
@@ -383,6 +334,7 @@ elif page == "Tongue Health Check":
                     st.dataframe(hist_df[["timestamp", "prediction_TCM", "prediction_Western"]])
                 else:
                     st.write("No prior scans available to compare.")
+
             feedback = st.radio("Was this prediction accurate?", ["Not sure", "Yes", "No"], index=0)
             if st.button("💾 Submit Feedback"):
                 if feedback in ["Yes", "No"]:

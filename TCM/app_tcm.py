@@ -73,6 +73,7 @@ def retrain_model_from_firestore(db):
     import joblib
     from sklearn.linear_model import LogisticRegression
 
+    st.info("🧪 Fetching data from Firestore...")
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
@@ -84,20 +85,20 @@ def retrain_model_from_firestore(db):
     y = np.array([d["label"] for d in data])
 
     if X.shape[1] != 576:
-        st.warning(f"⚠️ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
+        st.error(f"❌ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
         return
+
+    # Fit and save new model
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X, y)
 
     os.makedirs("models", exist_ok=True)
     model_path = "models/tcm_diagnosis_model.pkl"
-    if os.path.exists(model_path):
-        os.remove(model_path)
+    joblib.dump(model, model_path)
 
-        model = LogisticRegression(max_iter=1000)
-        model.fit(X, y)  # You forgot this step!
-        joblib.dump(model, model_path)
-        st.success("✅ Model retrained on deep features!")
+    st.success("✅ Model retrained and saved to disk!")
+    st.experimental_rerun()  # This will reload the app and let it pick up the new model
 
-    st.session_state["model_retrained"] = True  # 🔄 optional flag to help UI refresh logic
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)

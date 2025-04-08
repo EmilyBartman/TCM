@@ -72,7 +72,10 @@ def predict_with_model(model, features):
     try:
         st.write("🧪 Feature vector length:", len(features))
         pred = model.predict([features])[0]
-        prob = model.predict_proba([features])[0].max()
+        prob_array = model.predict_proba([features])[0]
+        prob = prob_array.max()
+        st.write(f"🧬 Raw Prediction: {pred}")
+        st.write(f"📈 Probabilities: {prob_array}")
         return pred, round(prob * 100, 2)
     except ValueError as e:
         st.error("❌ Model feature mismatch. Did you retrain?")
@@ -147,11 +150,8 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
         except Exception as e:
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
-        if prediction_TCM == "Model not trained":
-        st.error("🧠 Model failed to load or was not trained properly.")
-        st.info(f"Model file exists: {os.path.exists('models/tcm_diagnosis_model.pkl')}")
 
-        if prediction_TCM == "Model not trained":
+    if prediction_TCM == "Model not trained":
         st.error("🧠 Model failed to load or was not trained properly.")
         st.info(f"Model file exists: {os.path.exists('models/tcm_diagnosis_model.pkl')}")
 
@@ -190,6 +190,7 @@ def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
+
 
 
 

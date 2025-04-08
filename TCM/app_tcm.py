@@ -80,21 +80,41 @@ def retrain_model_from_feedback(dataframe):
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
-    features = extract_features(cv_img)
-    model = joblib.load("models/tcm_diagnosis_model.pkl")
+    # UI-only average color (not for model anymore)
+    avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
+    avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
 
+    # Extract deep features using PyTorch + MobileNetV3
+    try:
+        features = extract_features(cv_img)
+    except Exception as e:
+        st.error("❌ Failed to extract image features.")
+        st.exception(e)
+        return "Feature extraction error", "N/A", "N/A", [], 0
+
+    # Load trained model
+    model = load_model()
 
     if model:
-        prediction_TCM, confidence = predict_with_model(model, features)
+        try:
+            prediction_TCM, confidence = predict_with_model(model, features)
+        except ValueError as e:
+            st.warning("⚠️ Model feature mismatch – please retrain the model.")
+            prediction_TCM, confidence = "Model feature mismatch", 0
     else:
-        prediction_TCM = "Model not yet trained"
-        confidence = 0
+        prediction_TCM, confidence = "Model not trained", 0
 
+    prediction_Western = "N/A"
+
+    # Store to Firebase
     if db:
-        store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
+        try:
+            store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
+        except Exception as e:
+            st.warning("⚠️ Could not store features to Firebase.")
+            st.exception(e)
 
-    return prediction_TCM, "N/A", "N/A", features, confidence
-
+    return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 
 def store_features_to_firestore(db, submission_id, features, label, prob):
     def to_python_type(val):
@@ -413,16 +433,10 @@ elif page == "Tongue Health Check":
             hex_color = '#%02x%02x%02x' % (r, g, b)
             
             # Display translated label + value + color swatch
-            st.markdown(
-                f"""
-                <div style='display: flex; align-items: center; gap: 10px;'>
-                    <strong>{translate('Average Tongue Color', target_lang)}:</strong>
-                    <span>{avg_color_str}</span>
-                    <div style='width: 25px; height: 25px; background-color: {hex_color}; border-radius: 4px; border: 1px solid #ccc;'></div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
+            r, g, b = map(int, avg_color)
+            hex_color = '#%02x%02x%02x' % (r, g, b)
+            avg_color_str = f"RGB({r}, {g}, {b})"
 
             st.markdown(f"**{translate('Confidence Level', target_lang)}**: `{confidence}%`")
 

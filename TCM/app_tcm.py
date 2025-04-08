@@ -265,8 +265,6 @@ pages = [
 ]
 page = st.sidebar.radio("Navigate", pages)
 
-if st.button("🔁 Retrain Model"):
-    retrain_model_from_firestore(db)
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":
@@ -540,6 +538,9 @@ elif page == "Tongue Health Check":
 
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
+
+            if st.button("🔁 Retrain Model"):
+                retrain_model_from_firestore(db)
 
                     
 # ---- SUBMISSION HISTORY ----

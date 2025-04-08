@@ -51,9 +51,13 @@ def extract_features(cv_img):
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
     if os.path.exists(model_path):
-        return joblib.load(model_path)
+        model = joblib.load(model_path)
+        st.info(f"✅ Loaded model with {model.n_features_in_} features.")
+        return model
     else:
+        st.warning("⚠️ Model file not found.")
         return None
+
 
 
 def predict_with_model(model, features):
@@ -73,7 +77,6 @@ def retrain_model_from_firestore(db):
     import joblib
     from sklearn.linear_model import LogisticRegression
 
-    # Pull labeled feature data from Firestore
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
@@ -81,24 +84,24 @@ def retrain_model_from_firestore(db):
         st.warning("❌ No labeled training data found.")
         return
 
-    # Build feature matrix (X) and label vector (y)
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
 
-    # Check if features match MobileNetV3 embedding size
     if X.shape[1] != 576:
         st.warning(f"⚠️ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
         return
 
-    # Train new model
+    # Overwrite old model
+    os.makedirs("models", exist_ok=True)
+    model_path = "models/tcm_diagnosis_model.pkl"
+    if os.path.exists(model_path):
+        os.remove(model_path)  # Delete old model to avoid mismatch
+
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
 
-    # Save the model
-    os.makedirs("models", exist_ok=True)
-    joblib.dump(model, "models/tcm_diagnosis_model.pkl")
-    st.success("✅ Model retrained successfully using deep features.")
-
+    joblib.dump(model, model_path)
+    st.success("✅ Retrained and replaced old model!")
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):

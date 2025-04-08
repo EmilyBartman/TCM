@@ -22,6 +22,8 @@ from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_i
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
 from sklearn.linear_model import LogisticRegression
+import torch
+from torchvision import models, transforms
 
 
 
@@ -32,17 +34,25 @@ def load_model():
     else:
         return None  # Only predict if a real model is available
 
-# Load feature extractor
-base_model = MobileNetV2(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
-feature_model = Model(inputs=base_model.input, outputs=base_model.output)
+# Load pretrained MobileNetV3 (small) model
+mobilenet = models.mobilenet_v3_small(pretrained=True)
+mobilenet.classifier = torch.nn.Identity()  # Remove final classification head
+mobilenet.eval()
 
-def extract_deep_features(cv_img):
-    img_resized = cv2.resize(cv_img, (224, 224))
-    img_array = img_to_array(img_resized)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array = preprocess_input(img_array)
-    features = feature_model.predict(img_array)
-    return features.flatten().tolist()
+# Preprocessing pipeline
+transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406],  # Mean from ImageNet
+                         [0.229, 0.224, 0.225])  # Std from ImageNet
+])
+
+@torch.no_grad()
+def extract_features(cv_img):
+    tensor_img = transform(cv_img).unsqueeze(0)  # Add batch dimension
+    features = mobilenet(tensor_img).squeeze().numpy()
+    return features.tolist()
 
 def retrain_model_from_feedback(dataframe):
     labeled = dataframe[dataframe["is_correct"].notna()]

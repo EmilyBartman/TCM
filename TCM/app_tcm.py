@@ -143,9 +143,7 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
         "edges": int(features[3])
     }, merge=True)
 
-db.collection("tongue_features").document(submission_id).update({
-    "is_correct": True
-})
+
 def export_firestore_to_bigquery():
     pass  # Placeholder for actual implementation
 
@@ -433,7 +431,9 @@ elif page == "Tongue Health Check":
             }
             st.session_state.submissions.append(result)
             db.collection("tongue_scans").document(submission_id).set(result)
-
+            db.collection("tongue_features").document(submission_id).update({
+                "is_correct": True
+            })
             st.subheader(translate("🧪 Analysis Results", target_lang))
             st.info(f"🔍 {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} **{prediction_Western}**")         
             

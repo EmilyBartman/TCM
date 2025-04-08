@@ -142,7 +142,7 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
         "features": features,
         "label": str(label),  # this becomes training label
         "confidence": float(prob),
-        "timestamp": firestore.SERVER_TIMESTAMP
+        "timestamp": firestore.SERVER_TIMESTAMP,
         "avg_r": float(features[0]),
         "avg_g": float(features[1]),
         "avg_b": float(features[2]),

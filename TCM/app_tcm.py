@@ -275,7 +275,14 @@ In TCM, the tongue reflects internal health: its color, coating, and moisture ca
 # ---- TONGUE HEALTH CHECK PAGE ----
 elif page == "Tongue Health Check":
     from Tongue_Health_Page import render_tongue_health_check
-    render_tongue_health_check(analyze_tongue_with_model, db, bucket, translate, target_lang)
+    render_tongue_health_check(
+        analyze_tongue_with_model,
+        db=db,
+        bucket=bucket,
+        translate=translate,
+        target_lang=target_lang
+    )
+
 
 # ---- SUBMISSION HISTORY ----
 elif page == "Submission History":

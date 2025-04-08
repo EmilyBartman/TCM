@@ -33,6 +33,10 @@ from shared_utils import ensure_model_loaded
 # utils_model.py
 import os, joblib, streamlit as st
 
+import time
+print("🚀 Starting app_tcm...")
+
+
 def ensure_model_loaded():
     if "tcm_model" not in st.session_state or st.session_state.tcm_model is None:
         from app_tcm import load_model  # or better, move load_model here too
@@ -90,6 +94,7 @@ def load_model():
     if os.path.exists(model_path):
         model = joblib.load(model_path)
         st.session_state.tcm_model = model  # ✅ refresh session cache
+        print("🧠 Loading model...")
         return model
     else:
         st.warning("⚠️ No model file found. Automatically retraining using Firestore data...")
@@ -193,6 +198,7 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
 
+    print("🧬 Analyzing tongue...")
     st.code(f"Prediction: {prediction_TCM} | Confidence: {confidence}")
     return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 

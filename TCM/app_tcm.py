@@ -72,24 +72,29 @@ def predict_with_model(model, features):
 
 def retrain_model_from_firestore(db):
     import numpy as np
-    import joblib
     from sklearn.linear_model import LogisticRegression
+    import joblib
 
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
     if not data:
-        st.warning("❌ No training data with labels found.")
+        st.warning("❌ No labeled training data found.")
         return
 
+    # Extract deep feature arrays and labels
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
+
+    if X.shape[1] != 576:
+        st.warning(f"⚠️ Cannot retrain: detected {X.shape[1]} features (expected 576).")
+        return
 
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
 
     joblib.dump(model, "models/tcm_diagnosis_model.pkl")
-    st.success("✅ Model retrained using real deep features.")
+    st.success("✅ Model retrained on deep features!")
 
 
 

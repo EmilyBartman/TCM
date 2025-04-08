@@ -55,8 +55,8 @@ def load_model():
             st.success(f"✅ Auto-retrained and loaded model from `{model_path}`")
             return model
         else:
-            st.error("❌ Retrain failed. No model available.")
-            return None
+            st.error("❌ Retrain failed. No model file saved.")
+            raise FileNotFoundError("Model retraining failed. Ensure valid data exists in Firestore.")
 
 def predict_with_model(model, features):
     try:
@@ -76,10 +76,12 @@ def retrain_model_from_firestore(db):
 
     st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
-    data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict() and len(doc.to_dict()["features"]) == 576]
+    raw = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
+    st.write(f"📦 Total training docs: {len(raw)}")
 
+    data = [d for d in raw if len(d["features"]) == 576]
     if not data:
-        st.warning("❌ No valid training data found (576 features required).")
+        st.error("❌ No valid training samples with 576 features. Model not saved.")
         return
 
     X = np.array([d["features"] for d in data])
@@ -92,7 +94,11 @@ def retrain_model_from_firestore(db):
     os.makedirs("models", exist_ok=True)
     model_path = "models/tcm_diagnosis_model.pkl"
     joblib.dump(model, model_path)
-    st.success(f"✅ Model saved to: `{model_path}`")
+
+    if os.path.exists(model_path):
+        st.success(f"✅ Model saved to: `{model_path}`")
+    else:
+        st.error("❌ Model training completed but file not saved!")
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
@@ -154,6 +160,9 @@ def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
+
+
+
 # ---- FIREBASE SETUP ----
 try:
     firebase_config = dict(st.secrets["firebase"])

@@ -2,12 +2,6 @@
 import streamlit as st
 st.set_page_config(page_title="TCM Health App", layout="wide")
 
-# in Tongue_Health_Page.py
-from shared_utils import ensure_model_loaded
-
-# in app_tcm.py
-from Tongue_Health_Page import render_tongue_health_check
-
 import pandas as pd
 import numpy as np
 import cv2
@@ -32,6 +26,12 @@ import firebase_admin
 from firebase_admin import credentials, firestore, storage
 
 from deep_translator import GoogleTranslator
+
+# in Tongue_Health_Page.py
+from shared_utils import ensure_model_loaded
+# in app_tcm.py
+from Tongue_Health_Page import render_tongue_health_check
+
 
 # ---- FIREBASE SETUP ----
 try:

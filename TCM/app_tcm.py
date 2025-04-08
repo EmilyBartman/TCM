@@ -76,7 +76,7 @@ def retrain_model_from_feedback(dataframe):
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
-    features = extract_deep_features(cv_img)
+    features = extract_features(cv_img)
     model = load_model()
 
     if model:

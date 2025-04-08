@@ -2,6 +2,12 @@
 import streamlit as st
 st.set_page_config(page_title="TCM Health App", layout="wide")
 
+# in Tongue_Health_Page.py
+from shared_utils import ensure_model_loaded
+
+# in app_tcm.py
+from Tongue_Health_Page import render_tongue_health_check
+
 import pandas as pd
 import numpy as np
 import cv2
@@ -67,7 +73,10 @@ def extract_features(cv_img):
 
 def ensure_model_loaded():
     if "tcm_model" not in st.session_state or st.session_state.tcm_model is None:
-        st.session_state.tcm_model = load_model()
+        model_path = "models/tcm_diagnosis_model.pkl"
+        if os.path.exists(model_path):
+            model = joblib.load(model_path)
+            st.session_state.tcm_model = model
 
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"

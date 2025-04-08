@@ -27,48 +27,53 @@ from torchvision import models, transforms
 
 
 
+# Load MobileNetV3 (small, lightweight)
+mobilenet = models.mobilenet_v3_small(pretrained=True)
+mobilenet.classifier = torch.nn.Identity()
+mobilenet.eval()
+
+# Preprocess pipeline
+transform = transforms.Compose([
+    transforms.ToPILImage(),
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+@torch.no_grad()
+def extract_features(cv_img):
+    tensor_img = transform(cv_img).unsqueeze(0)  # shape: [1, 3, 224, 224]
+    features = mobilenet(tensor_img).squeeze().numpy()
+    return features.tolist()
+
+
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
     if os.path.exists(model_path):
         return joblib.load(model_path)
     else:
-        return None  # Only predict if a real model is available
+        return None
 
-# Load pretrained MobileNetV3 (small) model
-mobilenet = models.mobilenet_v3_small(pretrained=True)
-mobilenet.classifier = torch.nn.Identity()  # Remove final classification head
-mobilenet.eval()
 
-# Preprocessing pipeline
-transform = transforms.Compose([
-    transforms.ToPILImage(),
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406],  # Mean from ImageNet
-                         [0.229, 0.224, 0.225])  # Std from ImageNet
-])
+def predict_with_model(model, features):
+    pred = model.predict([features])[0]
+    prob = model.predict_proba([features])[0].max()
+    return pred, round(prob * 100, 2)
 
-@torch.no_grad()
-def extract_features(cv_img):
-    tensor_img = transform(cv_img).unsqueeze(0)  # Add batch dimension
-    features = mobilenet(tensor_img).squeeze().numpy()
-    return features.tolist()
 
 def retrain_model_from_feedback(dataframe):
     labeled = dataframe[dataframe["is_correct"].notna()]
     if not labeled.empty:
         X = np.vstack(labeled["features"].values)
         y = labeled["prediction_TCM"]
+        from sklearn.linear_model import LogisticRegression
         clf = LogisticRegression(max_iter=1000)
         clf.fit(X, y)
         joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
         return True
     return False
 
-def predict_with_model(model, features):
-    pred = model.predict([features])[0]
-    prob = model.predict_proba([features])[0].max()
-    return pred, round(prob * 100, 2)
+
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     features = extract_deep_features(cv_img)

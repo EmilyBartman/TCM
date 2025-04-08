@@ -35,6 +35,9 @@ from shared_utils import ensure_model_loaded
 import os, joblib, streamlit as st
 
 import time
+from shared_utils import ensure_model_loaded
+ensure_model_loaded()  # 🔄 make sure model is in session
+
 print("🚀 Starting app_tcm...")
 
 

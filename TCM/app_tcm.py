@@ -64,13 +64,13 @@ def predict_with_model(model, features):
 def retrain_model_from_feedback(dataframe):
     labeled = dataframe[dataframe["is_correct"].notna()]
     if not labeled.empty:
-        X = np.vstack(labeled["features"].values)
-        y = labeled["prediction_TCM"]
-        from sklearn.linear_model import LogisticRegression
+        # X = list of MobileNet features (each is a 1280-dim vector)
+        # y = corresponding labels (e.g. "Qi Deficiency", "Yin Deficiency", etc.)
         clf = LogisticRegression(max_iter=1000)
         clf.fit(X, y)
+        
         joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
-        return True
+                return True
     return False
 
 

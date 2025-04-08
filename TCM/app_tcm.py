@@ -66,17 +66,33 @@ def predict_with_model(model, features):
 
 
 
-def retrain_model_from_feedback(dataframe):
-    labeled = dataframe[dataframe["is_correct"].notna()]
-    if not labeled.empty:
-        X = np.vstack(labeled["features"].values)
-        y = labeled["prediction_TCM"]
+def retrain_model_from_firestore(db):
+    import numpy as np
+    import joblib
+    from sklearn.linear_model import LogisticRegression
+
+    try:
+        docs = db.collection("tongue_features").stream()
+        data = [doc.to_dict() for doc in docs if doc.to_dict().get("features") and doc.to_dict().get("label")]
+
+        if not data:
+            st.warning("❌ No labeled data available for retraining.")
+            return False
+
+        X = np.array([d["features"] for d in data])
+        y = np.array([d["label"] for d in data])
 
         clf = LogisticRegression(max_iter=1000)
         clf.fit(X, y)
         joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
+
+        st.success("✅ Model retrained successfully using Firestore data.")
         return True
-    return False
+
+    except Exception as e:
+        st.error("❌ Failed to retrain model from Firestore.")
+        st.exception(e)
+        return False
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):

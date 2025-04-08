@@ -1,5 +1,5 @@
 # Inside render_tongue_health_check()
-from Tcm_Health_App import ensure_model_loaded
+from app_tcm import ensure_model_loaded  # if your main file is named app_tcm.py
 ensure_model_loaded()  # 🔄 Force reload model from file into session state
 
 # Optional debug info

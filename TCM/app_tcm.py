@@ -138,19 +138,18 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
 
     features = [to_python_type(f) for f in features]
 
-    doc_ref = db.collection("tongue_features").document(submission_id)
-    doc_ref.set({
+    db.collection("tongue_features").document(submission_id).set({
         "features": features,
-        "label": str(label),
+        "label": str(label),  # this becomes training label
         "confidence": float(prob),
+        "timestamp": firestore.SERVER_TIMESTAMP
         "avg_r": float(features[0]),
         "avg_g": float(features[1]),
         "avg_b": float(features[2]),
         "edges": int(features[3]),
         "laplacian_var": float(features[4]),
         "symptom_count": int(features[5]) if len(features) > 5 else 0,
-        "timestamp": firestore.SERVER_TIMESTAMP
-    })
+    }, merge=True)
 
 
 def export_firestore_to_bigquery():
@@ -535,11 +534,11 @@ elif page == "Tongue Health Check":
             )
             if st.button(translate("Submit Feedback", target_lang)):
                 if feedback in [translate("Yes", target_lang), translate("No", target_lang)]:
-                    db.collection("tongue_scans").document(submission_id).update({
-                        "user_feedback": feedback,
+                    db.collection("tongue_features").document(submission_id).update({
                         "is_correct": True if feedback == translate("Yes", target_lang) else False
                     })
                     st.toast(translate("Feedback submitted. Thank you!", target_lang), icon="\U0001F4EC")
+
                 else:
                     st.warning(translate("Please select 'Yes' or 'No' to submit feedback.", target_lang))
 

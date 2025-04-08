@@ -51,6 +51,10 @@ def extract_features(cv_img):
     features = mobilenet(img_tensor).squeeze().numpy()
     return features.tolist()
 
+# Load model once at startup and store in session
+if "tcm_model" not in st.session_state:
+    st.session_state.tcm_model = load_model()
+
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
     if os.path.exists(model_path):
@@ -134,7 +138,9 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
         st.error("❌ Failed to extract image features.")
         st.exception(e)
         return "Feature extraction error", "N/A", "N/A", [], 0
-    model = load_model()
+
+    model = st.session_state.get("tcm_model")
+
     if model:
         try:
             prediction_TCM, confidence = predict_with_model(model, features)
@@ -143,6 +149,7 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
             prediction_TCM, confidence = "Model feature mismatch", 0
     else:
         prediction_TCM, confidence = "Model not trained", 0
+
     prediction_Western = "N/A"
     if db:
         try:

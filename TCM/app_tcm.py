@@ -27,12 +27,14 @@ from torchvision import models, transforms
 
 
 
-# Load MobileNetV3 (small, lightweight)
+import torch
+from torchvision import models, transforms
+
+# Setup model
 mobilenet = models.mobilenet_v3_small(pretrained=True)
 mobilenet.classifier = torch.nn.Identity()
 mobilenet.eval()
 
-# Preprocess pipeline
 transform = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((224, 224)),
@@ -42,9 +44,10 @@ transform = transforms.Compose([
 
 @torch.no_grad()
 def extract_features(cv_img):
-    tensor_img = transform(cv_img).unsqueeze(0)  # shape: [1, 3, 224, 224]
-    features = mobilenet(tensor_img).squeeze().numpy()
+    img_tensor = transform(cv_img).unsqueeze(0)
+    features = mobilenet(img_tensor).squeeze().numpy()
     return features.tolist()
+
 
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
@@ -67,25 +70,24 @@ def predict_with_model(model, features):
 
 def retrain_model_from_firestore(db):
     import numpy as np
-    import joblib
     from sklearn.linear_model import LogisticRegression
+    import joblib
 
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
     if not data:
-        st.warning("❌ No training data found.")
-        return False
+        st.warning("No labeled data found.")
+        return
 
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
 
     clf = LogisticRegression(max_iter=1000)
     clf.fit(X, y)
-    joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
 
-    st.success("✅ Model retrained with deep features.")
-    return True
+    joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
+    st.success("✅ Retrained on deep features")
 
 
 
@@ -128,13 +130,9 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
 
 
 def store_features_to_firestore(db, submission_id, features, label, prob):
-    def to_python_type(val):
-        return val.item() if isinstance(val, (np.generic, np.bool_)) else val
+    features = [float(f) for f in features]
 
-    features = [to_python_type(f) for f in features]
-
-    doc_ref = db.collection("tongue_features").document(submission_id)
-    doc_ref.set({
+    db.collection("tongue_features").document(submission_id).set({
         "features": features,
         "label": str(label),
         "confidence": float(prob),
@@ -145,7 +143,9 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
         "edges": int(features[3])
     }, merge=True)
 
-
+db.collection("tongue_features").document(submission_id).update({
+    "is_correct": True
+})
 def export_firestore_to_bigquery():
     pass  # Placeholder for actual implementation
 

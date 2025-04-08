@@ -56,35 +56,33 @@ def load_model():
 
 
 def predict_with_model(model, features):
-    pred = model.predict([features])[0]
-    prob = model.predict_proba([features])[0].max()
-    return pred, round(prob * 100, 2)
+    try:
+        pred = model.predict([features])[0]
+        prob = model.predict_proba([features])[0].max()
+        return pred, round(prob * 100, 2)
+    except ValueError as e:
+        print("⚠️ Prediction error:", e)
+        return "Model feature mismatch", 0
+
 
 
 def retrain_model_from_feedback(dataframe):
     labeled = dataframe[dataframe["is_correct"].notna()]
-
     if not labeled.empty:
-        import numpy as np
-        from sklearn.linear_model import LogisticRegression
-        import joblib
-
         X = np.vstack(labeled["features"].values)
         y = labeled["prediction_TCM"]
 
         clf = LogisticRegression(max_iter=1000)
         clf.fit(X, y)
         joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
-
         return True
-
     return False
-
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     features = extract_features(cv_img)
-    model = load_model()
+    model = joblib.load("models/tcm_diagnosis_model.pkl")
+
 
     if model:
         prediction_TCM, confidence = predict_with_model(model, features)

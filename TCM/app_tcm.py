@@ -43,18 +43,14 @@ def extract_features(cv_img):
 
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
-    
     if os.path.exists(model_path):
-        loaded_model = joblib.load(model_path)
-        st.write(f"✅ Loaded model with {loaded_model.n_features_in_} features.")
-        if hasattr(loaded_model, 'n_features_in_') and loaded_model.n_features_in_ != 576:
-            os.remove(model_path)
-            st.warning("⚠️ Deleted old model with wrong feature shape. Please retrain.")
-            return None
-        return loaded_model
+        model = joblib.load(model_path)
+        st.info(f"✅ Loaded model with {model.n_features_in_} features from `{model_path}`")
+        return model
     else:
         st.warning("⚠️ No model file found. Please retrain.")
         return None
+
 
 
 def predict_with_model(model, features):
@@ -73,7 +69,7 @@ def retrain_model_from_firestore(db):
     import joblib
     from sklearn.linear_model import LogisticRegression
 
-    st.info("🧪 Fetching data from Firestore...")
+    st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
@@ -85,20 +81,20 @@ def retrain_model_from_firestore(db):
     y = np.array([d["label"] for d in data])
 
     if X.shape[1] != 576:
-        st.error(f"❌ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
+        st.error(f"❌ Cannot retrain: expected 576 features, got {X.shape[1]}")
         return
 
-    # Fit and save new model
+    st.info(f"✅ Training model with shape: {X.shape}")
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
 
     os.makedirs("models", exist_ok=True)
     model_path = "models/tcm_diagnosis_model.pkl"
     joblib.dump(model, model_path)
+    st.success(f"✅ Model saved to: `{model_path}`")
 
-    st.success("✅ Model retrained and saved to disk!")
-    st.experimental_rerun()  # This will reload the app and let it pick up the new model
-
+    # Force reload to pick up model
+    st.experimental_rerun()
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)

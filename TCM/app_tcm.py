@@ -22,6 +22,7 @@ from tensorflow.keras.models import Model
 from sklearn.linear_model import LogisticRegression
 import torch
 from torchvision import models, transforms
+from collections import Counter
 
 # Setup model
 mobilenet = models.mobilenet_v3_small(pretrained=True)
@@ -77,17 +78,26 @@ def retrain_model_from_firestore(db):
     st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
     raw = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
-    st.write(f"📦 Total training docs: {len(raw)}")
 
-    data = [d for d in raw if len(d["features"]) == 576]
-    if not data:
-        st.error("❌ No valid training samples with 576 features. Model not saved.")
+    st.write(f"📦 Total docs in Firestore: {len(raw)}")
+
+    filtered = [d for d in raw if isinstance(d["features"], list)]
+    st.write(f"🧪 Documents with list-type features: {len(filtered)}")
+
+    valid = [d for d in filtered if len(d["features"]) == 576]
+    st.write(f"✅ Valid training samples (576 features): {len(valid)}")
+
+    if not valid:
+        st.error("❌ No valid training samples found with 576 features.")
         return
 
-    X = np.array([d["features"] for d in data])
-    y = np.array([d["label"] for d in data])
+    X = np.array([d["features"] for d in valid])
+    y = np.array([d["label"] for d in valid])
 
+    label_counts = Counter(y)
+    st.write(f"📊 Label distribution: {dict(label_counts)}")
     st.info(f"✅ Training model with shape: {X.shape}")
+
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
 

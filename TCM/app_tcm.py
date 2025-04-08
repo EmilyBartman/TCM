@@ -147,6 +147,10 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
         except Exception as e:
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
+        if prediction_TCM == "Model not trained":
+        st.error("🧠 Model failed to load or was not trained properly.")
+        st.info(f"Model file exists: {os.path.exists('models/tcm_diagnosis_model.pkl')}")
+
     return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 
 def store_features_to_firestore(db, submission_id, features, label, prob, selected_symptoms):
@@ -182,6 +186,7 @@ def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
+
 
 
 # ---- FIREBASE SETUP ----

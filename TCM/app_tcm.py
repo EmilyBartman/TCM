@@ -68,13 +68,12 @@ def predict_with_model(model, features):
         return "Model feature mismatch", 0
 
 
-
-
 def retrain_model_from_firestore(db):
     import numpy as np
-    from sklearn.linear_model import LogisticRegression
     import joblib
+    from sklearn.linear_model import LogisticRegression
 
+    # Pull labeled feature data from Firestore
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
@@ -82,19 +81,23 @@ def retrain_model_from_firestore(db):
         st.warning("❌ No labeled training data found.")
         return
 
-    # Extract deep feature arrays and labels
+    # Build feature matrix (X) and label vector (y)
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
 
+    # Check if features match MobileNetV3 embedding size
     if X.shape[1] != 576:
-        st.warning(f"⚠️ Cannot retrain: detected {X.shape[1]} features (expected 576).")
+        st.warning(f"⚠️ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
         return
 
+    # Train new model
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
 
+    # Save the model
+    os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/tcm_diagnosis_model.pkl")
-    st.success("✅ Model retrained on deep features!")
+    st.success("✅ Model retrained successfully using deep features.")
 
 
 

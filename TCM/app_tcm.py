@@ -24,6 +24,7 @@ import torch
 from torchvision import models, transforms
 from collections import Counter
 
+# Initialize Firebase if not already
 if not firebase_admin._apps:
     cred = credentials.Certificate(st.secrets["firebase"])
     firebase_admin.initialize_app(cred, {
@@ -31,11 +32,6 @@ if not firebase_admin._apps:
     })
 
 def get_firestore_client():
-    if not firebase_admin._apps:
-        cred = credentials.Certificate(st.secrets["firebase"])
-        firebase_admin.initialize_app(cred, {
-            "storageBucket": "traditional-medicine-50518"
-        })
     return firestore.client()
 
 # Setup model
@@ -71,7 +67,7 @@ def load_model():
             return model
         else:
             st.error("❌ Retrain failed. No model file saved.")
-            raise FileNotFoundError("Model retraining failed. Ensure valid data exists in Firestore.")
+            raise FileNotFoundError("Model retraining failed. Ensure valid data exists in Firestore and write access is enabled.")
 
 def predict_with_model(model, features):
     try:
@@ -116,13 +112,16 @@ def retrain_model_from_firestore(db):
     model.fit(X, y)
 
     os.makedirs("models", exist_ok=True)
-    model_path = "models/tcm_diagnosis_model.pkl"
-    joblib.dump(model, model_path)
+    st.write("📁 Model directory ensured: models/")
 
-    if os.path.exists(model_path):
+    model_path = "models/tcm_diagnosis_model.pkl"
+    try:
+        joblib.dump(model, model_path)
         st.success(f"✅ Model saved to: `{model_path}`")
-    else:
-        st.error("❌ Model training completed but file not saved!")
+    except Exception as e:
+        st.error("❌ Failed to save model.")
+        st.exception(e)
+        raise
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
@@ -184,8 +183,6 @@ def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
-
-
 
 # ---- FIREBASE SETUP ----
 try:
@@ -250,8 +247,9 @@ if "selected_lang" not in st.session_state:
     st.session_state.selected_lang = "English"
 
 # Language selector (no callback)
-new_lang = st.sidebar.selectbox(
+new_lang = st.sidebar.selectbox(translate(
     "🌐 Choose Language",
+    target_lang)
     list(languages.keys()),
     index=list(languages.keys()).index(st.session_state.selected_lang)
 )
@@ -277,12 +275,14 @@ def translate(text, lang_code):
 
 # ---- NAVIGATION ----
 pages = [
+    st.markdown(translate("""
     "Educational Content",
     "Tongue Health Check",
     "Submission History",
     "About & Disclaimer"
+    """, target_lang))
 ]
-page = st.sidebar.radio("Navigate", pages)
+page = st.sidebar.radio(translate("Navigate", target_lang), pages)
 
 
 # ---- EDUCATIONAL CONTENT ----

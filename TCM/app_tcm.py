@@ -24,6 +24,20 @@ import torch
 from torchvision import models, transforms
 from collections import Counter
 
+if not firebase_admin._apps:
+    cred = credentials.Certificate(st.secrets["firebase"])
+    firebase_admin.initialize_app(cred, {
+        "storageBucket": "traditional-medicine-50518"
+    })
+
+def get_firestore_client():
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(st.secrets["firebase"])
+        firebase_admin.initialize_app(cred, {
+            "storageBucket": "traditional-medicine-50518"
+        })
+    return firestore.client()
+
 # Setup model
 mobilenet = models.mobilenet_v3_small(pretrained=True)
 mobilenet.classifier = torch.nn.Identity()
@@ -50,7 +64,7 @@ def load_model():
         return model
     else:
         st.warning("⚠️ No model file found. Automatically retraining using Firestore data...")
-        retrain_model_from_firestore(firestore.client())
+        retrain_model_from_firestore(get_firestore_client())
         if os.path.exists(model_path):
             model = joblib.load(model_path)
             st.success(f"✅ Auto-retrained and loaded model from `{model_path}`")

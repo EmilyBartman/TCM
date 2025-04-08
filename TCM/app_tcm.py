@@ -92,11 +92,11 @@ def retrain_model_from_firestore(db):
     if os.path.exists(model_path):
         os.remove(model_path)
 
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X, y)
+        model = LogisticRegression(max_iter=1000)
+        model.fit(X, y)  # You forgot this step!
+        joblib.dump(model, model_path)
+        st.success("✅ Model retrained on deep features!")
 
-    joblib.dump(model, model_path)  # ✅ Save after training
-    st.success("✅ Model retrained on deep features!")
     st.session_state["model_retrained"] = True  # 🔄 optional flag to help UI refresh logic
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):

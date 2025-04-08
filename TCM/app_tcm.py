@@ -19,7 +19,6 @@ from sklearn.ensemble import RandomForestClassifier
 from deep_translator import GoogleTranslator
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
-from sklearn.linear_model import LogisticRegression
 import torch
 from torchvision import models, transforms
 from collections import Counter
@@ -67,7 +66,7 @@ def load_model():
             return model
         else:
             st.error("❌ Retrain failed. No model file saved.")
-            raise FileNotFoundError("Model retraining failed. Ensure valid data exists in Firestore and write access is enabled.")
+            return None
 
 def predict_with_model(model, features):
     try:
@@ -83,7 +82,7 @@ def predict_with_model(model, features):
 def retrain_model_from_firestore(db):
     import numpy as np
     import joblib
-    from sklearn.linear_model import LogisticRegression
+    from sklearn.ensemble import RandomForestClassifier
 
     st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
@@ -108,7 +107,7 @@ def retrain_model_from_firestore(db):
     st.write(f"📊 Label distribution: {dict(label_counts)}")
     st.info(f"✅ Training model with shape: {X.shape}")
 
-    model = LogisticRegression(max_iter=1000)
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X, y)
 
     os.makedirs("models", exist_ok=True)
@@ -183,6 +182,7 @@ def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
+
 
 # ---- FIREBASE SETUP ----
 try:

@@ -46,7 +46,6 @@ def extract_features(cv_img):
     features = mobilenet(tensor_img).squeeze().numpy()
     return features.tolist()
 
-
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
     if os.path.exists(model_path):
@@ -71,28 +70,23 @@ def retrain_model_from_firestore(db):
     import joblib
     from sklearn.linear_model import LogisticRegression
 
-    try:
-        docs = db.collection("tongue_features").stream()
-        data = [doc.to_dict() for doc in docs if doc.to_dict().get("features") and doc.to_dict().get("label")]
+    docs = db.collection("tongue_features").stream()
+    data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
 
-        if not data:
-            st.warning("❌ No labeled data available for retraining.")
-            return False
-
-        X = np.array([d["features"] for d in data])
-        y = np.array([d["label"] for d in data])
-
-        clf = LogisticRegression(max_iter=1000)
-        clf.fit(X, y)
-        joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
-
-        st.success("✅ Model retrained successfully using Firestore data.")
-        return True
-
-    except Exception as e:
-        st.error("❌ Failed to retrain model from Firestore.")
-        st.exception(e)
+    if not data:
+        st.warning("❌ No training data found.")
         return False
+
+    X = np.array([d["features"] for d in data])
+    y = np.array([d["label"] for d in data])
+
+    clf = LogisticRegression(max_iter=1000)
+    clf.fit(X, y)
+    joblib.dump(clf, "models/tcm_diagnosis_model.pkl")
+
+    st.success("✅ Model retrained with deep features.")
+    return True
+
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
@@ -132,23 +126,23 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
 
     return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 
+
 def store_features_to_firestore(db, submission_id, features, label, prob):
     def to_python_type(val):
         return val.item() if isinstance(val, (np.generic, np.bool_)) else val
 
     features = [to_python_type(f) for f in features]
 
-    db.collection("tongue_features").document(submission_id).set({
+    doc_ref = db.collection("tongue_features").document(submission_id)
+    doc_ref.set({
         "features": features,
-        "label": str(label),  # this becomes training label
+        "label": str(label),
         "confidence": float(prob),
         "timestamp": firestore.SERVER_TIMESTAMP,
-        "avg_r": float(features[0]),
+                "avg_r": float(features[0]),
         "avg_g": float(features[1]),
         "avg_b": float(features[2]),
-        "edges": int(features[3]),
-        "laplacian_var": float(features[4]),
-        "symptom_count": int(features[5]) if len(features) > 5 else 0,
+        "edges": int(features[3])
     }, merge=True)
 
 

@@ -73,43 +73,59 @@ def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
     if os.path.exists(model_path):
         model = joblib.load(model_path)
-        st.info(f"✅ Loaded model with {model.n_features_in_} features from `{model_path}`")
+        st.session_state.tcm_model = model  # ✅ refresh session cache
         return model
     else:
-        st.warning("⚠️ No model file found. Attempting to retrain automatically...")
-        retrain_model_from_firestore(db)
+        st.warning("⚠️ No model file found. Automatically retraining using Firestore data...")
+        retrain_model_from_firestore(get_firestore_client())
+
         if os.path.exists(model_path):
             model = joblib.load(model_path)
-            st.success(f"✅ Auto-retrained and loaded model from `{model_path}`")
+            st.session_state.tcm_model = model  # ✅ set again after retrain
             return model
         else:
             st.error("❌ Retrain failed. No model file saved.")
             return None
 
+
 def retrain_model_from_firestore(db):
+    import numpy as np
+    import joblib
+    from sklearn.ensemble import RandomForestClassifier
+
     st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
     raw = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
-    st.write(f"📦 Found {len(raw)} labeled documents")
 
-    filtered = [d for d in raw if isinstance(d["features"], list) and len(d["features"]) == 576]
-    st.write(f"✅ Valid training samples: {len(filtered)}")
+    st.write(f"📦 Total docs in Firestore: {len(raw)}")
 
-    if not filtered:
-        st.error("❌ No valid training samples found.")
+    filtered = [d for d in raw if isinstance(d["features"], list)]
+    st.write(f"🧪 Documents with list-type features: {len(filtered)}")
+
+    valid = [d for d in filtered if len(d["features"]) == 576]
+    st.write(f"✅ Valid training samples (576 features): {len(valid)}")
+
+    if not valid:
+        st.error("❌ No valid training samples found with 576 features.")
         return
 
-    X = np.array([d["features"] for d in filtered])
-    y = np.array([d["label"] for d in filtered])
-
-    st.write(f"📊 Label distribution: {dict(Counter(y))}")
+    X = np.array([d["features"] for d in valid])
+    y = np.array([d["label"] for d in valid])
 
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X, y)
 
     os.makedirs("models", exist_ok=True)
-    joblib.dump(model, "models/tcm_diagnosis_model.pkl")
-    st.success("✅ New model trained and saved.")
+    model_path = "models/tcm_diagnosis_model.pkl"
+
+    try:
+        joblib.dump(model, model_path)
+        st.success(f"✅ Model saved to: `{model_path}`")
+        st.session_state.tcm_model = model  # ✅ Ensure it's loaded into session
+    except Exception as e:
+        st.error("❌ Failed to save model.")
+        st.exception(e)
+
 
 def predict_with_model(model, features):
     try:
@@ -124,6 +140,7 @@ def predict_with_model(model, features):
         st.error("❌ Model feature mismatch.")
         st.exception(e)
         return "Model feature mismatch", 0
+
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
     avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
@@ -137,6 +154,7 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
         return "Feature extraction error", "N/A", avg_color_str, [], 0
 
     model = st.session_state.get("tcm_model")
+    st.code(f"🔍 Model present: {bool(model)} | Features: {len(features)}")
     prediction_TCM, confidence = "Model not trained", 0
 
     if model:

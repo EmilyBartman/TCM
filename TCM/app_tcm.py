@@ -17,15 +17,9 @@ from firebase_admin import storage, credentials, firestore
 import joblib
 from sklearn.ensemble import RandomForestClassifier
 from deep_translator import GoogleTranslator
-import streamlit as st
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
 from sklearn.linear_model import LogisticRegression
-import torch
-from torchvision import models, transforms
-
-
-
 import torch
 from torchvision import models, transforms
 
@@ -47,11 +41,8 @@ def extract_features(cv_img):
     features = mobilenet(img_tensor).squeeze().numpy()
     return features.tolist()
 
-
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
-    
-    # Safety check: remove old model with wrong feature count
     if os.path.exists(model_path):
         loaded_model = joblib.load(model_path)
         if hasattr(loaded_model, 'n_features_in_') and loaded_model.n_features_in_ != 576:
@@ -60,8 +51,6 @@ def load_model():
             return None
         return loaded_model
     return None
-
-
 
 def predict_with_model(model, features):
     try:
@@ -74,56 +63,34 @@ def predict_with_model(model, features):
         st.exception(e)
         return "Model feature mismatch", 0
 
-
 def retrain_model_from_firestore(db):
-    import numpy as np
-    import joblib
-    from sklearn.linear_model import LogisticRegression
-
     docs = db.collection("tongue_features").stream()
     data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
-
     if not data:
         st.warning("❌ No labeled training data found.")
         return
-
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
-
     if X.shape[1] != 576:
         st.warning(f"⚠️ Cannot retrain: expected 576 features, but found {X.shape[1]}.")
         return
-
-    # Overwrite old model
+    model = LogisticRegression(max_iter=1000)
+    model.fit(X, y)
     os.makedirs("models", exist_ok=True)
-    model_path = "models/tcm_diagnosis_model.pkl"
-    if os.path.exists(model_path):
-        os.remove(model_path)  # Delete old model to avoid mismatch
-
-        model = LogisticRegression(max_iter=1000)
-        st.write("Training shape:", X.shape)
-        
-        joblib.dump(model, "models/tcm_diagnosis_model.pkl")
-        st.success("✅ Model retrained on deep features!")
-
-
+    joblib.dump(model, "models/tcm_diagnosis_model.pkl")
+    st.success("✅ Model retrained on deep features!")
+    st.rerun()
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
-    # UI-only average color (not for model anymore)
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
     avg_color_str = f"RGB({int(avg_color[0])}, {int(avg_color[1])}, {int(avg_color[2])})"
-
-    # Extract deep features using PyTorch + MobileNetV3
     try:
         features = extract_features(cv_img)
     except Exception as e:
         st.error("❌ Failed to extract image features.")
         st.exception(e)
         return "Feature extraction error", "N/A", "N/A", [], 0
-
-    # Load trained model
     model = load_model()
-
     if model:
         try:
             prediction_TCM, confidence = predict_with_model(model, features)
@@ -132,42 +99,30 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
             prediction_TCM, confidence = "Model feature mismatch", 0
     else:
         prediction_TCM, confidence = "Model not trained", 0
-
     prediction_Western = "N/A"
-
-    # Store to Firebase
     if db:
         try:
-            store_features_to_firestore(db, submission_id, features, prediction_TCM, confidence)
+            store_features_to_firestore(db, submission_id, features, prediction_TCM, confidence, selected_symptoms)
         except Exception as e:
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
-
     return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 
-
-def store_features_to_firestore(db, submission_id, features, label, prob):
+def store_features_to_firestore(db, submission_id, features, label, prob, selected_symptoms):
     features = [float(f) for f in features]
-
     db.collection("tongue_features").document(submission_id).set({
         "features": features,
         "label": str(label),
         "confidence": float(prob),
         "timestamp": firestore.SERVER_TIMESTAMP
     }, merge=True)
-    
     db.collection("tongue_symptoms").document(submission_id).set({
-    "features": features,
-    "label": str(label),
-    "confidence": float(prob),
-    "symptom_count": len(selected_symptoms),
-    "timestamp": firestore.SERVER_TIMESTAMP
-}, merge=True)
-
-
-
-def export_firestore_to_bigquery():
-    pass  # Placeholder for actual implementation
+        "features": features,
+        "label": str(label),
+        "confidence": float(prob),
+        "symptom_count": len(selected_symptoms),
+        "timestamp": firestore.SERVER_TIMESTAMP
+    }, merge=True)
 
 def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     remedies_map = {
@@ -178,14 +133,11 @@ def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     }
     return remedies_map.get(tcm_pattern, ["Balanced diet", "Hydration", "Rest"])
 
-
-
 def render_dynamic_remedies(prediction_TCM, selected_symptoms):
     remedies = get_dynamic_remedies(prediction_TCM, selected_symptoms)
     st.markdown("**Suggestions:**")
     for item in remedies:
         st.markdown(f"- {item}")
-
 # ---- FIREBASE SETUP ----
 try:
     firebase_config = dict(st.secrets["firebase"])

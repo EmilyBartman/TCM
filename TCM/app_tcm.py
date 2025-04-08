@@ -58,12 +58,15 @@ def load_model():
 
 def predict_with_model(model, features):
     try:
+        st.write("🧪 Feature vector length:", len(features))
         pred = model.predict([features])[0]
         prob = model.predict_proba([features])[0].max()
         return pred, round(prob * 100, 2)
     except ValueError as e:
-        print("⚠️ Prediction error:", e)
+        st.error("❌ Model feature mismatch. Did you retrain?")
+        st.exception(e)
         return "Model feature mismatch", 0
+
 
 
 
@@ -434,9 +437,6 @@ elif page == "Tongue Health Check":
             }
             st.session_state.submissions.append(result)
             db.collection("tongue_scans").document(submission_id).set(result)
-            db.collection("tongue_features").document(submission_id).update({
-                "is_correct": True
-            })
             st.subheader(translate("🧪 Analysis Results", target_lang))
             st.info(f"🔍 {translate('Detected TCM Pattern:', target_lang)} **{prediction_TCM}** | {translate('Western View:', target_lang)} **{prediction_Western}**")         
             

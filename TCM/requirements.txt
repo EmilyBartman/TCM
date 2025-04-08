@@ -11,3 +11,4 @@ deep-translator
 tensorflow
 torch
 torchvision
+shared_utils

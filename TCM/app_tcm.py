@@ -18,7 +18,6 @@ import joblib
 from sklearn.ensemble import RandomForestClassifier
 from deep_translator import GoogleTranslator
 import streamlit as st
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2, preprocess_input
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.models import Model
 from sklearn.linear_model import LogisticRegression
@@ -121,7 +120,7 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     # Store to Firebase
     if db:
         try:
-            store_features_to_firestore(db, submission_id, features + [len(selected_symptoms)], prediction_TCM, confidence)
+            store_features_to_firestore(db, submission_id, features, prediction_TCM, confidence)
         except Exception as e:
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
@@ -136,12 +135,17 @@ def store_features_to_firestore(db, submission_id, features, label, prob):
         "features": features,
         "label": str(label),
         "confidence": float(prob),
-        "timestamp": firestore.SERVER_TIMESTAMP,
-                "avg_r": float(features[0]),
-        "avg_g": float(features[1]),
-        "avg_b": float(features[2]),
-        "edges": int(features[3])
+        "timestamp": firestore.SERVER_TIMESTAMP
     }, merge=True)
+    
+    db.collection("tongue_symptoms").document(submission_id).set({
+    "features": features,
+    "label": str(label),
+    "confidence": float(prob),
+    "symptom_count": len(selected_symptoms),
+    "timestamp": firestore.SERVER_TIMESTAMP
+}, merge=True)
+
 
 
 def export_firestore_to_bigquery():

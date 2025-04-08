@@ -265,7 +265,8 @@ pages = [
 ]
 page = st.sidebar.radio("Navigate", pages)
 
-
+if st.button("🔁 Retrain Model"):
+    retrain_model_from_firestore(db)
 
 # ---- EDUCATIONAL CONTENT ----
 if page == "Educational Content":

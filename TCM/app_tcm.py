@@ -130,32 +130,36 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
 
     try:
         features = extract_features(cv_img)
+        assert len(features) == 576
     except Exception as e:
         st.error("❌ Failed to extract image features.")
         st.exception(e)
-        return "Feature extraction error", "N/A", "N/A", [], 0
+        return "Feature extraction error", "N/A", avg_color_str, [], 0
 
-    ensure_model_loaded()
     model = st.session_state.get("tcm_model")
+    prediction_TCM, confidence = "Model not trained", 0
 
     if model:
         try:
             prediction_TCM, confidence = predict_with_model(model, features)
-        except ValueError as e:
-            st.warning("⚠️ Model feature mismatch – please retrain the model.")
-            prediction_TCM, confidence = "Model feature mismatch", 0
+        except Exception as e:
+            st.warning("⚠️ Error during prediction.")
+            st.exception(e)
+            prediction_TCM, confidence = "Prediction error", 0
     else:
-        prediction_TCM, confidence = "Model not trained", 0
+        st.error("⚠️ Model not available in session. You may need to reload or retrain.")
 
     prediction_Western = "N/A"
 
-    if db:
+    # Only store if features valid and not default message
+    if db and prediction_TCM not in ["Model not trained", "Prediction error"]:
         try:
             store_features_to_firestore(db, submission_id, features, prediction_TCM, confidence, selected_symptoms)
         except Exception as e:
             st.warning("⚠️ Could not store features to Firebase.")
             st.exception(e)
 
+    st.code(f"Prediction: {prediction_TCM} | Confidence: {confidence}")
     return prediction_TCM, prediction_Western, avg_color_str, features, confidence
 
 def store_features_to_firestore(db, submission_id, features, label, prob, selected_symptoms):

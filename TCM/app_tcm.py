@@ -50,13 +50,16 @@ def extract_features(cv_img):
 
 def load_model():
     model_path = "models/tcm_diagnosis_model.pkl"
+    
+    # Safety check: remove old model with wrong feature count
     if os.path.exists(model_path):
-        model = joblib.load(model_path)
-        st.info(f"✅ Loaded model with {model.n_features_in_} features.")
-        return model
-    else:
-        st.warning("⚠️ Model file not found.")
-        return None
+        loaded_model = joblib.load(model_path)
+        if hasattr(loaded_model, 'n_features_in_') and loaded_model.n_features_in_ != 576:
+            os.remove(model_path)
+            st.warning("⚠️ Deleted old model with wrong feature shape. Please retrain.")
+            return None
+        return loaded_model
+    return None
 
 
 
@@ -552,6 +555,7 @@ elif page == "Tongue Health Check":
 
             if st.button("🔁 Retrain Model"):
                 retrain_model_from_firestore(db)
+                st.rerun()  # Reloads the app to use the fresh model
 
                     
 # ---- SUBMISSION HISTORY ----

@@ -100,11 +100,12 @@ def retrain_model_from_firestore(db):
     if os.path.exists(model_path):
         os.remove(model_path)  # Delete old model to avoid mismatch
 
-    model = LogisticRegression(max_iter=1000)
-    model.fit(X, y)
+        model = LogisticRegression(max_iter=1000)
+        st.write("Training shape:", X.shape)
+        
+        joblib.dump(model, "models/tcm_diagnosis_model.pkl")
+        st.success("✅ Model retrained on deep features!")
 
-    joblib.dump(model, model_path)
-    st.success("✅ Retrained and replaced old model!")
 
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):

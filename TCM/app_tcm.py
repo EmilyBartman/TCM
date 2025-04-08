@@ -48,10 +48,15 @@ def load_model():
         st.info(f"✅ Loaded model with {model.n_features_in_} features from `{model_path}`")
         return model
     else:
-        st.warning("⚠️ No model file found. Please retrain.")
-        return None
-
-
+        st.warning("⚠️ No model file found. Automatically retraining using Firestore data...")
+        retrain_model_from_firestore(firestore.client())
+        if os.path.exists(model_path):
+            model = joblib.load(model_path)
+            st.success(f"✅ Auto-retrained and loaded model from `{model_path}`")
+            return model
+        else:
+            st.error("❌ Retrain failed. No model available.")
+            return None
 
 def predict_with_model(model, features):
     try:
@@ -71,18 +76,14 @@ def retrain_model_from_firestore(db):
 
     st.info("🧪 Fetching training data from Firestore...")
     docs = db.collection("tongue_features").stream()
-    data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict()]
+    data = [doc.to_dict() for doc in docs if "features" in doc.to_dict() and "label" in doc.to_dict() and len(doc.to_dict()["features"]) == 576]
 
     if not data:
-        st.warning("❌ No labeled training data found.")
+        st.warning("❌ No valid training data found (576 features required).")
         return
 
     X = np.array([d["features"] for d in data])
     y = np.array([d["label"] for d in data])
-
-    if X.shape[1] != 576:
-        st.error(f"❌ Cannot retrain: expected 576 features, got {X.shape[1]}")
-        return
 
     st.info(f"✅ Training model with shape: {X.shape}")
     model = LogisticRegression(max_iter=1000)
@@ -92,9 +93,6 @@ def retrain_model_from_firestore(db):
     model_path = "models/tcm_diagnosis_model.pkl"
     joblib.dump(model, model_path)
     st.success(f"✅ Model saved to: `{model_path}`")
-
-    # Force reload to pick up model
-    st.experimental_rerun()
 
 def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
     avg_color = np.mean(cv_img.reshape(-1, 3), axis=0)
@@ -125,19 +123,22 @@ def analyze_tongue_with_model(cv_img, submission_id, selected_symptoms, db):
 
 def store_features_to_firestore(db, submission_id, features, label, prob, selected_symptoms):
     features = [float(f) for f in features]
-    db.collection("tongue_features").document(submission_id).set({
-        "features": features,
-        "label": str(label),
-        "confidence": float(prob),
-        "timestamp": firestore.SERVER_TIMESTAMP
-    }, merge=True)
-    db.collection("tongue_symptoms").document(submission_id).set({
-        "features": features,
-        "label": str(label),
-        "confidence": float(prob),
-        "symptom_count": len(selected_symptoms),
-        "timestamp": firestore.SERVER_TIMESTAMP
-    }, merge=True)
+    if len(features) == 576:
+        db.collection("tongue_features").document(submission_id).set({
+            "features": features,
+            "label": str(label),
+            "confidence": float(prob),
+            "timestamp": firestore.SERVER_TIMESTAMP
+        }, merge=True)
+        db.collection("tongue_symptoms").document(submission_id).set({
+            "features": features,
+            "label": str(label),
+            "confidence": float(prob),
+            "symptom_count": len(selected_symptoms),
+            "timestamp": firestore.SERVER_TIMESTAMP
+        }, merge=True)
+    else:
+        st.warning(f"⚠️ Not storing to Firestore. Feature length is {len(features)}, expected 576.")
 
 def get_dynamic_remedies(tcm_pattern, symptoms=[]):
     remedies_map = {

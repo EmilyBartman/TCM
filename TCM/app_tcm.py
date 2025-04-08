@@ -29,8 +29,15 @@ from deep_translator import GoogleTranslator
 
 # in Tongue_Health_Page.py
 from shared_utils import ensure_model_loaded
-# in app_tcm.py
-from Tongue_Health_Page import render_tongue_health_check
+
+# utils_model.py
+import os, joblib, streamlit as st
+
+def ensure_model_loaded():
+    if "tcm_model" not in st.session_state or st.session_state.tcm_model is None:
+        from app_tcm import load_model  # or better, move load_model here too
+        st.session_state.tcm_model = load_model()
+
 
 
 # ---- FIREBASE SETUP ----

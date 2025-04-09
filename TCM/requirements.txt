@@ -16,4 +16,3 @@ ultralytics
 google-cloud-storage
 google-cloud-firestore
 reportlab
-

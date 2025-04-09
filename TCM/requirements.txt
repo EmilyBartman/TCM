@@ -11,8 +11,3 @@ deep-translator
 tensorflow
 torch
 torchvision
-mediapipe
-ultralytics
-google-cloud-storage
-google-cloud-firestore
-reportlab

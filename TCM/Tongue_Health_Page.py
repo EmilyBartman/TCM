@@ -1,5 +1,7 @@
 # Inside render_tongue_health_check()
+import streamlit as st
 from shared_utils import ensure_model_loaded
+
 ensure_model_loaded()  # 🔄 Force reload model from file into session state
 
 # Optional debug info

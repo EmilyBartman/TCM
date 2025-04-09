@@ -576,3 +576,4 @@ elif page == "About & Disclaimer":
     '''
     st.markdown(translate(about_text, target_lang))
 
+

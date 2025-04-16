@@ -336,48 +336,34 @@ elif page == "Medical Review Dashboard":
 
     def show_table_side_by_side(expected_dict, actual_dict):
         st.write("### Comparison Table")
-    
         table_data = []
         keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
         for key in keys:
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
-    
             if isinstance(expected, list):
                 expected = ", ".join(expected)
             if isinstance(actual, list):
                 actual = ", ".join(actual)
-    
             table_data.append([key, expected, actual])
-    
+
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
-    
-        # Apply Streamlit-native styling to center headers
         styled_df = df.style.set_table_styles([
             {"selector": "th", "props": [("text-align", "center")]}
-        ]).set_properties(**{"text-align": "left"})  # Align data left for readability
-    
+        ]).set_properties(**{"text-align": "left"})
         st.table(styled_df)
-    
-        
-
-    
-
-
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
         gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
 
-        # 📸 Tongue Image Preview
         st.subheader("📸 Tongue Image")
         if "image_url" in user_doc:
             st.image(user_doc["image_url"], caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
         else:
             st.info("No image uploaded.")
 
-        # 📄 Extracted User Inputs (flattened view)
         user_inputs = user_doc.get("user_inputs", {})
         input_fields = {
             **{f"Symptom {i+1}": s for i, s in enumerate(user_inputs.get("symptoms", []))},
@@ -385,7 +371,6 @@ elif page == "Medical Review Dashboard":
             **user_inputs.get("tongue_characteristics", {})
         }
 
-        # 🤖 GPT Output
         raw_gpt = gpt_doc.get("gpt_response", "")
         try:
             gpt_data = json.loads(raw_gpt) if isinstance(raw_gpt, str) else raw_gpt
@@ -399,25 +384,24 @@ elif page == "Medical Review Dashboard":
             st.warning("GPT response is not structured or is a fallback message.")
             st.text(raw_gpt)
 
-        # 🤖 Optional Model Output
         if model_doc and isinstance(model_doc, dict):
-            st.subheader("🧪 Model Output (Internal)")
+            st.subheader(translate("🧪 Model Output (Internal)", target_lang))
             st.json(model_doc.get("model_outputs", {}))
         else:
             st.info("No structured model output available.")
 
-        # 🧬 Expert Feedback
-        st.subheader(translate("🧬 Expert Feedback", target_lang))
+        st.subheader(translate("🧪 Expert Feedback", target_lang))
         agree = st.radio(
             translate("Do you agree with the GPT diagnosis?", target_lang),
-            [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
+            [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]],
+            key="agree_radio"
         )
-        corrected_syndrome = st.text_input("Correct TCM Syndrome")
-        corrected_equivalent = st.text_input("Correct Western Equivalent")
-        corrected_remedies = st.text_area("Correct Remedies (comma-separated)")
-        notes = st.text_area(translate("Correction notes", target_lang))
+        corrected_syndrome = st.text_input("Correct TCM Syndrome", key="syndrome_input")
+        corrected_equivalent = st.text_input("Correct Western Equivalent", key="equiv_input")
+        corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="remedies_input")
+        notes = st.text_area(translate("Correction notes", target_lang), key="notes_input")
 
-        if st.button(translate("Submit Feedback", target_lang)):
+        if st.button(translate("Submit Feedback", target_lang), key="submit_feedback_btn"):
             feedback = {
                 "submission_id": selected_id,
                 "agreement": agree,
@@ -432,88 +416,55 @@ elif page == "Medical Review Dashboard":
             db.collection("medical_feedback").document(selected_id).set(feedback)
             st.success("✅ Feedback saved.")
 
-            # 🧬 Expert Feedback
-            st.subheader(translate("🧬 Expert Feedback", target_lang))
-            agree = st.radio(
-                translate("Do you agree with the GPT diagnosis?", target_lang),
-                [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]],
-                key="expert_agree"  # 👈 Optional: add unique keys for safety
-            )
-            corrected_syndrome = st.text_input("Correct TCM Syndrome", key="expert_syndrome")
-            corrected_equivalent = st.text_input("Correct Western Equivalent", key="expert_equiv")
-            corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="expert_remedies")
-            notes = st.text_area(translate("Correction notes", target_lang), key="expert_notes")
-            
-            if st.button(translate("Submit Feedback", target_lang)):
-                feedback = {
-                    "submission_id": selected_id,
-                    "agreement": agree,
-                    "corrections": {
-                        "tcm_syndrome": corrected_syndrome,
-                        "western_equivalent": corrected_equivalent,
-                        "remedies": [r.strip() for r in corrected_remedies.split(",") if r.strip()]
-                    },
-                    "notes": notes,
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-                db.collection("medical_feedback").document(selected_id).set(feedback)
-                st.success("✅ Feedback saved.")
+        with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
+            try:
+                from utils.retrain import retrain_model_from_feedback
+                from utils.model_utils import predict_with_model, extract_features, load_model
+                from PIL import Image
+                import requests
+                from io import BytesIO
 
-            
-            # ✅ 🔄 Retrain UI appears ALWAYS below feedback
-            with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
-                try:
-                    from utils.retrain import retrain_model_from_feedback
-                    from utils.model_utils import predict_with_model, extract_features, load_model
-                    from PIL import Image
-                    import requests
-                    from io import BytesIO
-            
-                    retrain_clicked = st.button("🔁 Retrain Now")
-            
-                    if retrain_clicked or st.session_state.get("retrain_triggered"):
-                        st.session_state["retrain_triggered"] = False
-            
-                        st.toast("Retraining model...", icon="🧠")
-                        retrain_model_from_feedback(db)
-            
-                        st.toast("Reloading model...", icon="🔁")
-                        model = load_model()
-            
-                        image_url = gpt_doc.get("image_url")
-                        if not image_url:
-                            st.error("❌ No image URL found in the submission.")
-                        else:
-                            try:
-                                response = requests.get(image_url)
-                                if response.status_code != 200:
-                                    st.error(f"❌ Failed to load image: HTTP {response.status_code}")
-                                elif "image" not in response.headers.get("Content-Type", ""):
-                                    st.error("❌ The file at the provided URL is not an image.")
-                                else:
-                                    try:
-                                        img = Image.open(BytesIO(response.content))
-                                        st.image(img, caption="Image used for retrained prediction", width=300)
-            
-                                        features = extract_features(img)
-                                        new_output = predict_with_model(model, features)
-            
-                                        st.markdown("### 🧪 Retrained Diagnosis Result")
-                                        st.json({
-                                            "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
-                                            "western_equivalent": new_output.get("western_equivalent", "N/A"),
-                                            "remedies": new_output.get("remedies", []),
-                                            "confidence": new_output.get("confidence", "N/A")
-                                        })
-                                    except Exception as e:
-                                        st.error(f"❌ Image processing or prediction failed: {e}")
-                            except Exception as e:
-                                st.error(f"❌ Unexpected error while downloading image: {e}")
-            
-                except ModuleNotFoundError as e:
-                    st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
-            
-                    
+                retrain_clicked = st.button("🔁 Retrain Now", key="retrain_btn")
+
+                if retrain_clicked or st.session_state.get("retrain_triggered"):
+                    st.session_state["retrain_triggered"] = False
+
+                    st.toast("Retraining model...", icon="🧠")
+                    retrain_model_from_feedback(db)
+
+                    st.toast("Reloading model...", icon="🔄")
+                    model = load_model()
+
+                    image_url = gpt_doc.get("image_url")
+                    if not image_url:
+                        st.error("❌ No image URL found in the submission.")
+                    else:
+                        try:
+                            response = requests.get(image_url)
+                            if response.status_code != 200:
+                                st.error(f"❌ Failed to load image: HTTP {response.status_code}")
+                            elif "image" not in response.headers.get("Content-Type", ""):
+                                st.error("❌ The file at the provided URL is not an image.")
+                            else:
+                                img = Image.open(BytesIO(response.content))
+                                st.image(img, caption="Image used for retrained prediction", width=300)
+
+                                features = extract_features(img)
+                                new_output = predict_with_model(model, features)
+
+                                st.markdown("### 🧪 Retrained Diagnosis Result")
+                                st.json({
+                                    "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
+                                    "western_equivalent": new_output.get("western_equivalent", "N/A"),
+                                    "remedies": new_output.get("remedies", []),
+                                    "confidence": new_output.get("confidence", "N/A")
+                                })
+
+                        except Exception as e:
+                            st.error(f"❌ Unexpected error while processing image: {e}")
+
+            except ModuleNotFoundError as e:
+                st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)") 
 
 
 # ------------------------------

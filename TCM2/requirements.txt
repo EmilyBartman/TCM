@@ -9,4 +9,3 @@ firebase-admin
 deep-translator
 joblib
 pandas
-sklearn

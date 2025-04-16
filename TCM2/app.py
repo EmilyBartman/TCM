@@ -359,7 +359,7 @@ elif page == "Medical Review Dashboard":
         image_url = None
         if user_doc and user_doc.get("image_url"):
             image_url = user_doc["image_url"]
-            st.caption("🔍 Image from `tongue_submissions`")
+            
         elif gpt_doc and gpt_doc.get("image_url"):
             image_url = gpt_doc["image_url"]
             st.caption("🧠 Image from `gpt_diagnoses`")
@@ -372,7 +372,7 @@ elif page == "Medical Review Dashboard":
         image_url = None
         if user_doc and user_doc.get("image_url"):
             image_url = user_doc["image_url"]
-            st.caption("🔍 Image from `tongue_submissions`")
+            
         elif gpt_doc and gpt_doc.get("image_url"):
             image_url = gpt_doc["image_url"]
             st.caption("🧠 Image from `gpt_diagnoses`")
@@ -382,7 +382,7 @@ elif page == "Medical Review Dashboard":
                 response = requests.get(image_url)
                 content_type = response.headers.get("Content-Type", "")
                 content_length = len(response.content)
-                st.code(f"HTTP {response.status_code} | Content-Length: {content_length} | Content-Type: {content_type}")
+                
         
                 if response.status_code != 200:
                     st.error(f"❌ Failed to fetch image from Firebase. HTTP {response.status_code}")

@@ -281,7 +281,7 @@ if page == "Tongue Health Check":
         gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
         if gpt_response:
             if isinstance(gpt_response, dict):
-                st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
+                st.subheader(translate("Prediction Result", target_lang))
                 st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
                 st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
                 st.markdown("**🌿 Remedies:**")
@@ -290,7 +290,7 @@ if page == "Tongue Health Check":
                 st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
                 st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
             else:
-                st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
+                st.subheader(translate("Prediction Result", target_lang))
                 st.warning("Could not parse structured response. Displaying raw output:")
                 st.write(gpt_response)
 
@@ -303,19 +303,19 @@ if page == "Tongue Health Check":
                     "user_inputs": user_inputs,
                     "gpt_response": gpt_response
                 })
-                st.success(translate("📝 GPT diagnosis result saved to Firestore.", target_lang))
+                st.success(translate("📝 Prediction result saved to Firestore.", target_lang))
             except Exception as e:
-                st.warning(translate("⚠️ Failed to save GPT diagnosis result.", target_lang))
+                st.warning(translate("⚠️ Failed to save prediction result.", target_lang))
                 st.exception(e)
             
             st.markdown("---")
-            st.markdown(
+            st.markdown(translate(
                 f"📝 **Disclaimer:**\n\n"
                 f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
                 f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
                 f"are securely stored and may help improve future versions of this tool.\n\n"
-                f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider."
-            )
+                f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider.",
+            target_lang))
 
     # Reset just_submitted flag at the end of the run
     st.session_state.form_submitted = False

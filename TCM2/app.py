@@ -30,11 +30,15 @@ pages = [
     "Submission History",
     "About & Disclaimer"
 ]
-page = st.sidebar.markdown(f"### {translate('Navigate', target_lang)}")
-
 pages_translated = [translate(p, target_lang) for p in pages]
-page_selection = st.sidebar.radio("", pages_translated)
-page = pages[pages_translated.index(page_selection)]
+
+if "selected_page" not in st.session_state:
+    st.session_state.selected_page = pages_translated[0]  # default to first
+
+selected = st.sidebar.radio("", pages_translated, index=pages_translated.index(st.session_state.selected_page))
+st.session_state.selected_page = selected
+page = pages[pages_translated.index(selected)]
+
 
 
 

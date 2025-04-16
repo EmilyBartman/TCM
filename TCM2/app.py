@@ -160,25 +160,30 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 if page == "Tongue Health Check":
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
-    # Upload and preview image BEFORE the form
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
     
-    # Upload and preview image BEFORE the form
-    st.markdown(translate("Upload Tongue Image", target_lang))
-    st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
-    
-    # Only call file_uploader ONCE and manage session
+    # Ensure uploader runs only once
     if "uploaded_img" not in st.session_state:
         st.session_state.uploaded_img = None
     
-    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
+    new_upload = st.file_uploader("", type=["jpg", "jpeg", "png"])
+    if new_upload:
+        st.session_state.uploaded_img = new_upload
     
-    if uploaded_img is not None:
-        st.session_state.uploaded_img = uploaded_img
+    # Safely get final upload reference
+    uploaded_img = st.session_state.get("uploaded_img", None)
     
-    uploaded_img = st.session_state.uploaded_img
-
+    # Show preview only if the uploaded image is still valid
+    if uploaded_img:
+        try:
+            uploaded_img.seek(0)
+            img_bytes = uploaded_img.read()
+            img = Image.open(io.BytesIO(img_bytes))
+            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
+        except Exception as e:
+            st.warning(translate("⚠️ Unable to preview uploaded image. Please re-upload." , target_lang))
+            st.session_state.uploaded_img = None  # Clear invalid image
 
     
     # Preview image if available

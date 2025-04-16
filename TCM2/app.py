@@ -335,18 +335,17 @@ elif page == "Medical Review Dashboard":
 
     def show_table_side_by_side(expected_dict, actual_dict):
         st.write("### Comparison Table")
-        table_data = []  # ← This was missing
+        table_data = []
     
         keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
         for key in keys:
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
-            match = expected == actual
-            table_data.append((key, expected, actual, "✅" if match else "❌"))
+            table_data.append((key, expected, actual))
     
-        df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis", "Match"])
+        df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
         st.dataframe(df, use_container_width=True)
-    
+
         
 
 

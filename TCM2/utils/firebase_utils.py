@@ -33,20 +33,20 @@ def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     from tempfile import NamedTemporaryFile
     import os
 
-    # Save image temporarily
+    # Reset pointer and write to temp file
+    uploaded_img.seek(0)
     with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
         tmp.write(uploaded_img.read())
         tmp_path = tmp.name
 
-    # Double-check file size
+    # Block empty uploads
     if os.path.getsize(tmp_path) == 0:
-        raise ValueError("Uploaded image file is empty!")
+        raise ValueError("Uploaded image is empty. Please upload a valid image.")
 
-    # Upload to Firebase
     blob_path = f"tongue_images/{submission_id}.jpg"
     blob = bucket.blob(blob_path)
     blob.upload_from_filename(tmp_path)
-    blob.make_public()  # Optional: Make public
+    blob.make_public()
 
     return blob.public_url, tmp_path
 

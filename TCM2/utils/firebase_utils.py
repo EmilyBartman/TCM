@@ -13,12 +13,16 @@ def init_firebase():
     try:
         firebase_config = dict(st.secrets["firebase"])
         cred = credentials.Certificate(firebase_config)
+
         if not firebase_admin._apps:
-            initialize_app(cred, {
-                "storageBucket": firebase_config["project_id"] + ".appspot.com"
+            firebase_admin.initialize_app(cred, {
+                "storageBucket": "traditional-medicine-50518"  # ← hardcoded like old version
             })
 
-        return firestore.client(), storage.bucket()
+        db = firestore.client()
+        bucket = storage.bucket("traditional-medicine-50518")  # ← match exactly
+        return db, bucket
+
     except Exception as e:
         st.error("Firebase init failed")
         st.exception(e)

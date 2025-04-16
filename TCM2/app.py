@@ -342,7 +342,6 @@ elif page == "Medical Review Dashboard":
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
     
-            # Convert list values to strings
             if isinstance(expected, list):
                 expected = ", ".join(expected)
             if isinstance(actual, list):
@@ -352,8 +351,30 @@ elif page == "Medical Review Dashboard":
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
     
-        # Render without index/row numbers
-        st.markdown(df.to_html(index=False, escape=False), unsafe_allow_html=True)
+        # Clean HTML/CSS rendering
+        table_html = df.to_html(index=False, escape=False)
+        styled_html = f"""
+            <style>
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                }}
+                thead th {{
+                    text-align: center;
+                    white-space: nowrap;
+                    background-color: #f1f1f1;
+                    padding: 8px;
+                }}
+                tbody td {{
+                    vertical-align: top;
+                    padding: 6px;
+                }}
+            </style>
+            {table_html}
+        """
+    
+        st.markdown(styled_html, unsafe_allow_html=True)
+
     
 
 

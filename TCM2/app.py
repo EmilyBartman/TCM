@@ -168,8 +168,13 @@ if page == "Tongue Health Check":
         st.session_state.uploaded_img = None
     
     new_upload = st.file_uploader("", type=["jpg", "jpeg", "png"])
+
+    # Update or clear session state
     if new_upload:
         st.session_state.uploaded_img = new_upload
+    elif "uploaded_img" in st.session_state:
+        st.session_state.pop("uploaded_img")  # Remove old image if none uploaded this time
+
     
     # Safely get final upload reference
     uploaded_img = st.session_state.get("uploaded_img", None)

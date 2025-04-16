@@ -234,9 +234,13 @@ if page == "Tongue Health Check":
 
 
     if submit:
+        # Check for image and consent before continuing
         if not uploaded_img or not consent:
             st.warning(translate("Please upload image and give consent.", target_lang))
             st.stop()
+        
+        st.session_state.form_submitted = True  # Optional: to block language switch rerun
+
 
         submission_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()

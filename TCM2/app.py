@@ -466,23 +466,24 @@ elif page == "Medical Review Dashboard":
                                 elif "image" not in response.headers.get("Content-Type", ""):
                                     st.error("The file at the provided URL is not an image.")
                                 else:
-                                    img = Image.open(BytesIO(response.content))
-                                    st.image(img, caption="Image used for retrained prediction", width=300)
-                        
-                                    # continue with feature extraction
-                                    features = extract_features(img)
-                                    new_output = predict_with_model(model, features)
-                        
-                                    st.markdown("### 🧪 Retrained Diagnosis Result")
-                                    st.json({
-                                        "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
-                                        "western_equivalent": new_output.get("western_equivalent", "N/A"),
-                                        "remedies": new_output.get("remedies", []),
-                                        "confidence": new_output.get("confidence", "N/A")
-                                    })
-                        
-                            except Exception as e:
-                                st.exception(e)
+                                    try:
+                                        img = Image.open(BytesIO(response.content))
+                                        st.image(img, caption="Image used for retrained prediction", width=300)
+                                
+                                        features = extract_features(img)
+                                        new_output = predict_with_model(model, features)
+                                
+                                        st.markdown("### 🧪 Retrained Diagnosis Result")
+                                        st.json({
+                                            "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
+                                            "western_equivalent": new_output.get("western_equivalent", "N/A"),
+                                            "remedies": new_output.get("remedies", []),
+                                            "confidence": new_output.get("confidence", "N/A")
+                                        })
+                                
+                                    except Exception as e:
+                                        st.error(f"Image processing or prediction failed: {e}")
+                                
 
         
                         features = extract_features(img)

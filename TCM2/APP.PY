@@ -5,8 +5,8 @@ import streamlit as st
 import uuid
 from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
-from utils.model_utils import extract_features, load_model, predict_with_model, compare_user_vs_model, get_remedies
 from utils.translation import LANGUAGES, translate, set_language_selector
+from utils.gpt_diagnosis import run_gpt_diagnosis
 
 # Set page config and language setup
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -79,44 +79,12 @@ if page == "Tongue Health Check":
         }
         save_user_submission(submission_id, timestamp, url, user_inputs, db)
 
-        # Run model
-        features = extract_features(temp_path)
-        model = load_model()
-        prediction, confidence = predict_with_model(model, features)
+        st.info("🧠 Sending image and data to GPT-4o for TCM diagnosis...")
+        gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
 
-        model_outputs = {
-            "symptoms": ["Fatigue"],
-            "tongue_characteristics": {
-                "color": "pale",
-                "shape": "swollen",
-                "coating": "white",
-                "moisture": "dry",
-                "bumps": "prominent"
-            },
-            "tcm_syndrome": prediction,
-            "western_equiv": "Anemia",
-            "remedies": get_remedies(prediction)
-        }
-
-        diff, score = compare_user_vs_model(user_inputs, model_outputs)
-
-        db.collection("model_outputs").document(submission_id).set({
-            "submission_id": submission_id,
-            "model_outputs": model_outputs,
-            "confidence_score": score,
-            "features": features,
-            "timestamp": timestamp
-        })
-        db.collection("submission_diffs").document(submission_id).set({
-            "submission_id": submission_id,
-            "differences": diff,
-            "confidence_score": score,
-            "timestamp": timestamp
-        })
-
-        st.success(f"Prediction: {prediction} | Confidence: {score}%")
-        st.json(model_outputs)
-        st.json(diff)
+        if gpt_response:
+            st.subheader("🤖 GPT-4o Diagnosis Result")
+            st.code(gpt_response, language="json")
 
 # ------------------------------
 # Medical Review Dashboard

@@ -382,6 +382,15 @@ elif page == "Medical Review Dashboard":
 
     else:
         st.info(translate("GPT-4o response not found for this submission.", target_lang))
+    st.markdown("---")
+    st.markdown(
+        f"📝 **Disclaimer:**\n\n"
+        f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
+        f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
+        f"are securely stored and may help improve future versions of this tool.\n\n"
+        f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider."
+    )
+
 
     with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
         from utils.retrain import retrain_model_from_feedback

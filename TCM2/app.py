@@ -166,7 +166,7 @@ if page == "Tongue Health Check":
             uploaded_img.seek(0)
             image_bytes = uploaded_img.read()
             img = Image.open(io.BytesIO(image_bytes))
-            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_container_width=True)
+            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
         except Exception as e:
             st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
             st.exception(e)

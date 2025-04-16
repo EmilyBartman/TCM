@@ -29,30 +29,27 @@ def init_firebase():
         return None, None
 
 # Upload file to Firebase and return URL
-def upload_image_to_firebase(uploaded_file, submission_id, bucket):
-    import tempfile
-    import uuid
+def upload_image_to_firebase(uploaded_img, submission_id, bucket):
+    from tempfile import NamedTemporaryFile
+    import os
 
-    # Save image to a temp file
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-    temp_file.write(uploaded_file.read())
-    temp_file.flush()
+    # Save image temporarily
+    with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+        tmp.write(uploaded_img.read())
+        tmp_path = tmp.name
 
-    # Define path in Firebase Storage
+    # Double-check file size
+    if os.path.getsize(tmp_path) == 0:
+        raise ValueError("Uploaded image file is empty!")
+
+    # Upload to Firebase
     blob_path = f"tongue_images/{submission_id}.jpg"
     blob = bucket.blob(blob_path)
+    blob.upload_from_filename(tmp_path)
+    blob.make_public()  # Optional: Make public
 
-    # Upload file
-    blob.upload_from_filename(temp_file.name)
+    return blob.public_url, tmp_path
 
-    # Generate permanent token-based public URL
-    token = str(uuid.uuid4())
-    blob.metadata = {"firebaseStorageDownloadTokens": token}
-    blob.patch()
-
-    public_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{blob_path.replace('/', '%2F')}?alt=media&token={token}"
-
-    return public_url, temp_file.name
 
 
 # Save user inputs to Firestore

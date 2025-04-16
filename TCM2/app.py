@@ -166,7 +166,6 @@ if page == "Tongue Health Check":
 
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
-    uploaded_img.seek(0)
     # Ensure uploader runs only once
     if "uploaded_img" not in st.session_state:
         st.session_state.uploaded_img = None
@@ -245,17 +244,19 @@ if page == "Tongue Health Check":
 
 
     if submit:
-    # Check for image and consent before continuing
+        uploaded_img = st.session_state.get("uploaded_img", None)
+    
         if not uploaded_img or not consent:
-            st.warning(translate("Please upload image and give consent.", target_lang))
+            st.warning("Please upload image and give consent.")
             st.stop()
-        
+    
         submission_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
     
-        uploaded_img.seek(0)  # 🔥 ADD THIS HERE
+        uploaded_img.seek(0)  # ✅ CORRECT PLACEMENT here, not above
     
         url, temp_path = upload_image_to_firebase(uploaded_img, submission_id, bucket)
+
 
         user_inputs = {
             "symptoms": symptoms,

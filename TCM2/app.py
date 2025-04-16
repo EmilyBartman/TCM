@@ -24,6 +24,7 @@ db, bucket = init_firebase()
 target_lang = set_language_selector()
 
 # Page navigation
+# Page navigation
 pages = [
     "Educational Content",
     "Tongue Health Check",
@@ -35,39 +36,29 @@ pages = [
 # Create mapping of internal keys -> translated display names
 page_options = {p: translate(p, target_lang) for p in pages}
 
-# Default selected page
+# Initialize session state
 if "selected_page" not in st.session_state:
-    st.session_state.selected_page = pages[0]  # Default to first page
+    st.session_state.selected_page = pages[0]
 
-selected_page = st.sidebar.radio(
-    "Navigate",
-    pages,
-    index=pages.index(st.session_state.selected_page)
-)
-
-if selected_page != st.session_state.selected_page:
-    st.session_state.selected_page = selected_page
-page = st.session_state.selected_page  # ← Use this throughout
-
-
-# Reverse map to get the index for selected page
+# Translated names for UI
 display_names = list(page_options.values())
+
+# Sidebar radio with translated labels
 selected_display = st.sidebar.radio(
     translate("Navigate", target_lang),
     display_names,
     index=display_names.index(page_options[st.session_state.selected_page]),
-    key="page_navigation"  # 👈 unique key
+    key="page_navigation"
 )
 
-
-# Update internal page state based on selected display name
+# Set selected page from translated label
 for internal, display in page_options.items():
     if display == selected_display:
         st.session_state.selected_page = internal
         break
 
+# Final selected page
 page = st.session_state.selected_page
-
 
 
 

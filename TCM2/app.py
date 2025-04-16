@@ -140,6 +140,7 @@ if page == "Tongue Health Check":
         st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
         uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
 
+
         
         symptoms = st.multiselect(
             translate("Select Symptoms", target_lang),

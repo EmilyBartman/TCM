@@ -163,18 +163,16 @@ if page == "Tongue Health Check":
     # Upload and preview image BEFORE the form
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
-    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
-    
-    # Image preview - needs to be outside the form
-    if uploaded_img is not None:
+    uploaded_img = st.session_state.get("uploaded_img", None)
+    if uploaded_img:
         try:
             uploaded_img.seek(0)
             image_bytes = uploaded_img.read()
             img = Image.open(io.BytesIO(image_bytes))
             st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
-        except Exception as e:
-            st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
-            st.exception(e)
+        except:
+            st.warning("⚠️ Image preview failed.")
+
 
     with st.form("tongue_upload_form"):
                 
@@ -219,6 +217,10 @@ if page == "Tongue Health Check":
 
         consent = st.checkbox(translate("I consent to the use of my data for research.", target_lang))
         submit = st.form_submit_button(translate("Analyze", target_lang))
+        if submit:
+            st.session_state.form_submitted = True
+            st.session_state.uploaded_img = uploaded_img  # persist the file
+
 
     if submit:
         if not uploaded_img or not consent:

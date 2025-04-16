@@ -31,30 +31,25 @@ LANGUAGES = {
 
     
 def set_language_selector():
-    # Default to "English" on first load
-    if "selected_lang" not in st.session_state or st.session_state.selected_lang not in LANGUAGES:
+    if "selected_lang" not in st.session_state:
         st.session_state.selected_lang = "English"
 
-    # Translate label using fallback if available
-    label_lang_selector = "🌐 Choose Language"
-    try:
-        fallback_code = LANGUAGES.get(st.session_state.selected_lang, "en")
-        label_lang_selector = translate("🌐 Choose Language", fallback_code)
-    except:
-        pass
+    lang_names = list(LANGUAGES.keys())
+    current_lang = st.session_state.selected_lang
 
-    # Let user select language by native name
     new_lang = st.sidebar.selectbox(
-        label_lang_selector,
-        list(LANGUAGES.keys()),
-        index=list(LANGUAGES.keys()).index(st.session_state.selected_lang)
+        "🌐 Choose Language",
+        lang_names,
+        index=lang_names.index(current_lang)
     )
 
-    if new_lang != st.session_state.selected_lang:
+    if new_lang != current_lang:
         st.session_state.selected_lang = new_lang
-        st.rerun()
+        # prevent rerun from resetting page selection
+        st.experimental_rerun()
 
     return LANGUAGES[st.session_state.selected_lang]
+
 
 def clean_markdown(text):
     # Strip markdown elements that confuse the translator

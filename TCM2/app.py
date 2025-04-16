@@ -164,17 +164,21 @@ if page == "Tongue Health Check":
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
     
-    uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], key="tongue_uploader")
+    # Upload and preview image BEFORE the form
+    st.markdown(translate("Upload Tongue Image", target_lang))
+    st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
     
-    # Store uploaded file in session state if provided
-    if uploaded_file:
-        st.session_state.uploaded_img = uploaded_file
+    # Only call file_uploader ONCE and manage session
+    if "uploaded_img" not in st.session_state:
+        st.session_state.uploaded_img = None
     
-    # Safely access the uploaded image
-    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"], key="tongue_uploader")
-
-    if uploaded_img:
+    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_img is not None:
         st.session_state.uploaded_img = uploaded_img
+    
+    uploaded_img = st.session_state.uploaded_img
+
 
     
     # Preview image if available

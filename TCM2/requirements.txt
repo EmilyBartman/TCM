@@ -5,3 +5,4 @@ torchvision
 torch
 openai
 opencv-python-headless
+firebase-admin

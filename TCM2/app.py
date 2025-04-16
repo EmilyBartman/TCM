@@ -171,7 +171,11 @@ if page == "Tongue Health Check":
         st.session_state.uploaded_img = uploaded_file
     
     # Safely access the uploaded image
-    uploaded_img = st.session_state.get("uploaded_img", None)
+    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"], key="tongue_uploader")
+
+    if uploaded_img:
+        st.session_state.uploaded_img = uploaded_img
+
     
     # Preview image if available
     if uploaded_img:
@@ -230,7 +234,8 @@ if page == "Tongue Health Check":
         submit = st.form_submit_button(translate("Analyze", target_lang))
         if submit:
             st.session_state.form_submitted = True
-            st.session_state.uploaded_img = uploaded_img  # persist the file
+            uploaded_img = st.session_state.get("uploaded_img", None)
+ 
 
 
     if submit:

@@ -277,7 +277,7 @@ if page == "Tongue Health Check":
         }
         save_user_submission(submission_id, timestamp, url, user_inputs, db)
 
-        st.info(translate("🧠 Sending image and data to GPT-4o for TCM diagnosis...", target_lang))
+        st.info(translate("🧠 Processing data with GPT-4o for TCM prediction...", target_lang))
         gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
         if gpt_response:
             if isinstance(gpt_response, dict):

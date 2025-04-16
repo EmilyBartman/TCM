@@ -4,6 +4,7 @@
 import streamlit as st
 import uuid
 import openai
+import json
 import io
 from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
@@ -330,7 +331,28 @@ elif page == "Medical Review Dashboard":
     if gpt_doc:
         st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
         gpt_data = gpt_doc.get("gpt_response", "")
-        st.code(gpt_data, language="json")
+        if gpt_doc:
+            st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
+            gpt_data = gpt_doc.get("gpt_response", "")
+            
+            if isinstance(gpt_data, dict):
+                st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
+                st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
+                st.markdown("**🌿 Remedies:**")
+                for r in gpt_data.get("remedies", []):
+                    st.markdown(f"- {r}")
+                st.markdown(f"**⚖️ Discrepancies:** {gpt_data.get('discrepancies', 'N/A')}")
+                st.markdown(f"**📊 Confidence Score:** `{gpt_data.get('confidence', 'N/A')}%`")
+            else:
+                st.warning(translate("Could not parse structured GPT response. Displaying raw text:", target_lang))
+                st.write(gpt_data)
+        
+            raw_gpt = gpt_doc.get("gpt_response", "")
+            try:
+                gpt_data = raw_gpt if isinstance(raw_gpt, dict) else json.loads(raw_gpt)
+            except Exception:
+                gpt_data = raw_gpt 
+
     else:
         st.info(translate("GPT-4o response not found for this submission.", target_lang))
 

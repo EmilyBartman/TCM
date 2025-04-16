@@ -245,17 +245,16 @@ if page == "Tongue Health Check":
 
 
     if submit:
-        # Check for image and consent before continuing
+    # Check for image and consent before continuing
         if not uploaded_img or not consent:
             st.warning(translate("Please upload image and give consent.", target_lang))
             st.stop()
         
-        st.session_state.form_submitted = True  # Optional: to block language switch rerun
-
-
         submission_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
-
+    
+        uploaded_img.seek(0)  # 🔥 ADD THIS HERE
+    
         url, temp_path = upload_image_to_firebase(uploaded_img, submission_id, bucket)
 
         user_inputs = {
@@ -330,7 +329,7 @@ if page == "Tongue Health Check":
 elif page == "Medical Review Dashboard":
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
-
+    uploaded_img.seek(0)
     docs = db.collection("gpt_diagnoses").stream()
     ids = [d.id for d in docs]
     selected_id = st.selectbox(translate("Submission ID", target_lang), ids)

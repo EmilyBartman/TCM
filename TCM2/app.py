@@ -11,6 +11,7 @@ from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
 from utils.translation import LANGUAGES, translate, set_language_selector
 from utils.gpt_diagnosis import run_gpt_diagnosis
+from utils.retrain import retrain_model_from_feedback
 from torchvision import models, transforms
 from PIL import Image
 import torch

@@ -13,6 +13,8 @@ from utils.translation import LANGUAGES, translate, set_language_selector
 from utils.gpt_diagnosis import run_gpt_diagnosis
 from utils.retrain import retrain_model_from_feedback
 from torchvision import models, transforms
+import requests
+from io import BytesIO
 from PIL import Image
 import torch
 # GPT-4o key
@@ -364,15 +366,21 @@ elif page == "Medical Review Dashboard":
 
         
         st.subheader("📸 Tongue Image")
+
         if image_url:
             try:
-                st.image(image_url, caption="Preview of Uploaded Tongue Image", width=300)
+                response = requests.get(image_url)
+                if response.status_code == 200 and "image" in response.headers.get("Content-Type", ""):
+                    img = Image.open(BytesIO(response.content))
+                    st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
+                else:
+                    st.warning("⚠️ Image URL did not return a valid image.")
+                    st.code(image_url)
             except Exception as e:
-                st.warning("⚠️ Failed to load image. The image may be missing or the URL expired.")
-                st.code(image_url)
+                st.warning("⚠️ Error occurred while fetching image.")
+                st.exception(e)
         else:
-            st.info("No image URL found in this record.")
-
+            st.info("No image URL found.")
         
 
         # 📄 User Inputs

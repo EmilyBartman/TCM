@@ -364,13 +364,9 @@ elif page == "Medical Review Dashboard":
             })
             st.success(translate("Feedback saved.", target_lang))
 
-    if gpt_doc:
-        st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
-        gpt_data = gpt_doc.get("gpt_response", "")
         if gpt_doc:
             st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
             gpt_data = gpt_doc.get("gpt_response", "")
-            
             if isinstance(gpt_data, dict):
                 st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
                 st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
@@ -382,22 +378,19 @@ elif page == "Medical Review Dashboard":
             else:
                 st.warning(translate("Could not parse structured GPT response. Displaying raw text:", target_lang))
                 st.write(gpt_data)
-        
+
             raw_gpt = gpt_doc.get("gpt_response", "")
             try:
                 gpt_data = raw_gpt if isinstance(raw_gpt, dict) else json.loads(raw_gpt)
             except Exception:
                 gpt_data = raw_gpt 
+        else:
+            st.info(translate("GPT-4o response not found for this submission.", target_lang))
 
-    else:
-        st.info(translate("GPT-4o response not found for this submission.", target_lang))
-
-
-    with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
-        from utils.retrain import retrain_model_from_feedback
-        if st.button(translate("🔄 Retrain Now", target_lang)):
-            retrain_model_from_feedback(db)
-
+        with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
+            from utils.retrain import retrain_model_from_feedback
+            if st.button(translate("🔄 Retrain Now", target_lang)):
+                retrain_model_from_feedback(db)
 
 # ------------------------------
 # SUBMISSION HISTORY

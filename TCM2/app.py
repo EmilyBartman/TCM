@@ -158,6 +158,10 @@ if page == "Tongue Health Check":
         st.markdown(translate("Upload Tongue Image", target_lang))
         st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
         uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
+        if uploaded_img:
+            img = Image.open(uploaded_img)
+            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_column_width="auto")
+
 
 
         

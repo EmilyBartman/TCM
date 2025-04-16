@@ -46,8 +46,7 @@ def set_language_selector():
     if new_lang != current_lang:
         st.session_state.selected_lang = new_lang
         # prevent rerun from resetting page selection
-        st.experimental_rerun()
-
+        st.rerun()
     return LANGUAGES[st.session_state.selected_lang]
 
 

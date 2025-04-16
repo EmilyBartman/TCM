@@ -29,24 +29,31 @@ LANGUAGES = {
 
 
 def set_language_selector():
-    if "selected_lang" not in st.session_state:
+    # Default to "English" on first load
+    if "selected_lang" not in st.session_state or st.session_state.selected_lang not in LANGUAGES:
         st.session_state.selected_lang = "English"
 
-    label_lang = "🌐 Choose Language"
-    if "selected_lang" in st.session_state:
-        try:
-            fallback_lang_code = LANGUAGES[st.session_state.selected_lang]
-            label_lang = translate("🌐 Choose Language", fallback_lang_code)
-        except:
-            pass
-    
-    new_lang = st.sidebar.selectbox(label_lang, list(LANGUAGES.keys()),
-        index=list(LANGUAGES.keys()).index(st.session_state.selected_lang))
+    # Translate label using fallback if available
+    label_lang_selector = "🌐 Choose Language"
+    try:
+        fallback_code = LANGUAGES.get(st.session_state.selected_lang, "en")
+        label_lang_selector = translate("🌐 Choose Language", fallback_code)
+    except:
+        pass
+
+    # Let user select language by native name
+    new_lang = st.sidebar.selectbox(
+        label_lang_selector,
+        list(LANGUAGES.keys()),
+        index=list(LANGUAGES.keys()).index(st.session_state.selected_lang)
+    )
 
     if new_lang != st.session_state.selected_lang:
         st.session_state.selected_lang = new_lang
         st.rerun()
+
     return LANGUAGES[st.session_state.selected_lang]
+
 
 def translate(text, lang_code):
     try:

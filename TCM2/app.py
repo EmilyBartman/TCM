@@ -535,7 +535,16 @@ elif page == "Medical Review Dashboard":
                                 }
         
                                 st.markdown("### 🧪 Retrained Diagnosis Result")
-                                st.json(new_output)
+
+                                st.markdown(f"**🩺 TCM Syndrome:** `{new_output['tcm_syndrome']}`")
+                                st.markdown(f"**💊 Western Equivalent:** `{new_output['western_equivalent']}`")
+                                
+                                st.markdown("**🌿 Remedies:**")
+                                for r in new_output["remedies"]:
+                                    st.markdown(f"- {r}")
+                                
+                                st.markdown(f"**📊 Confidence Score:** `{new_output['confidence']}%`")
+
         
                             except Exception as e:
                                 st.error(f"❌ Image processing failed: {e}")

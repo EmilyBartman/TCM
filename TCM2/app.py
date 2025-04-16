@@ -463,13 +463,16 @@ elif page == "Medical Review Dashboard":
 
         # 🧬 Expert Feedback
         st.subheader("🧬 Expert Feedback")
-        agree = st.radio("Do you agree with the GPT diagnosis?", ["Yes", "Partially", "No"], key="agree_radio")
-        corrected_syndrome = st.text_input("Correct TCM Syndrome", key="syndrome_input")
-        corrected_equivalent = st.text_input("Correct Western Equivalent", key="equiv_input")
-        corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="remedies_input")
-        notes = st.text_area("Correction notes", key="notes_input")
-
-        if st.button("📤 Submit Feedback", key="submit_feedback"):
+        with st.form("expert_feedback_form"):
+            agree = st.radio("Do you agree with the GPT diagnosis?", ["Yes", "Partially", "No"], key="agree_radio")
+            corrected_syndrome = st.text_input("Correct TCM Syndrome", key="syndrome_input")
+            corrected_equivalent = st.text_input("Correct Western Equivalent", key="equiv_input")
+            corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="remedies_input")
+            notes = st.text_area("Correction notes", key="notes_input")
+        
+            submit_feedback = st.form_submit_button("📤 Submit Feedback")
+        
+        if submit_feedback:
             feedback = {
                 "submission_id": selected_id,
                 "agreement": agree,

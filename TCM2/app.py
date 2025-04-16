@@ -253,8 +253,20 @@ if page == "Tongue Health Check":
         st.info(translate("🧠 Sending image and data to GPT-4o for TCM diagnosis...", target_lang))
         gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
         if gpt_response:
-            st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
-            st.code(gpt_response, language="json")
+            if isinstance(gpt_response, dict):
+                st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
+                st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
+                st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
+                st.markdown("**🌿 Remedies:**")
+                for r in gpt_response.get("remedies", []):
+                    st.markdown(f"- {r}")
+                st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
+                st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
+            else:
+                st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
+                st.warning("Could not parse structured response. Displaying raw output:")
+                st.write(gpt_response)
+
 
             try:
                 db.collection("gpt_diagnoses").document(submission_id).set({

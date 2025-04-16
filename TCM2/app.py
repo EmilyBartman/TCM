@@ -468,6 +468,8 @@ elif page == "Medical Review Dashboard":
                                 "retrained_remedies": new_output.get("remedies", []),
                                 "confidence": new_output.get("confidence", "N/A")
                             })
+                            st.info("✅ Retrain logic executed.")
+
             
                         except Exception as e:
                             st.error(f"Failed to re-run prediction: {e}")

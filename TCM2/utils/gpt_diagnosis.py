@@ -4,6 +4,7 @@ import base64
 from PIL import Image
 import io
 import streamlit as st
+from openai import OpenAI
 
 # Configure OpenAI with secret
 openai.api_key = st.secrets["openai"]["api_key"]
@@ -36,7 +37,9 @@ You are a Traditional Chinese Medicine (TCM) practitioner and diagnostic assista
 Respond in JSON with these keys: tcm_syndrome, western_equivalent, remedies, discrepancies, confidence.
 """
 
-        response = openai.ChatCompletion.create(
+        client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You are a multimodal medical reasoning assistant for TCM."},
@@ -47,7 +50,6 @@ Respond in JSON with these keys: tcm_syndrome, western_equivalent, remedies, dis
             ],
             temperature=0.3
         )
-
         reply = response.choices[0].message.content
         return reply
 

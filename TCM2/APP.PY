@@ -7,6 +7,9 @@ from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
 from utils.translation import LANGUAGES, translate, set_language_selector
 from utils.gpt_diagnosis import run_gpt_diagnosis
+from torchvision import models, transforms
+from PIL import Image
+import torch
 
 # Set page config and language setup
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -24,75 +27,92 @@ pages = [
 page = st.sidebar.radio("Navigate", pages)
 
 
-
 # ------------------------------
 # EDUCATIONAL CONTENT 
 # ------------------------------
 if page == "Educational Content":
-    target_lang = languages[st.session_state.selected_lang]
+    target_lang = LANGUAGES[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
-    st.header(translate("Foundations of TCM", target_lang))
+    st.markdown("### 👥 For General Users & Beginners")
     st.markdown(translate("""
-- **Yin & Yang**: Balance of opposing but complementary forces.
-- **Qi (Chi)**: Vital life energy.
-- **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
-- **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
-- **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
+**What Is TCM?**
+Traditional Chinese Medicine (TCM) is a holistic approach to health practiced for over 2,500 years. It focuses on restoring balance in the body rather than just treating symptoms.
+
+**Core Principles:**
+- **Yin & Yang**: Balance of opposite energies (cold/hot, passive/active)
+- **Qi (Chi)**: Vital energy flowing through the body
+- **Five Elements**: Wood, Fire, Earth, Metal, Water — each linked to body systems and emotions
+- **How Diagnosis Works**: Practitioners look at your pulse, tongue, skin, and ask about your lifestyle
+- **Common Treatments**: Herbal remedies, acupuncture, gentle movement (Tai Chi/Qi Gong), and dietary therapy
 """, target_lang))
 
-    st.header(translate("🔎 Why the Tongue Matters in TCM", target_lang))
+    st.markdown("### 👅 Tongue Diagnosis Basics")
     st.markdown(translate("""
-In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
+In TCM, your tongue offers a visual map of your internal health. Changes in its appearance can signal imbalances before other symptoms appear.
 
-**What the tongue reveals:**
-- **Tongue Body Color**: Reflects blood, Qi, and organ health
-- **Tongue Shape**: Can indicate excess or deficiency syndromes
-- **Tongue Coating**: Suggests digestive heat, cold, or dampness
-- **Moisture Level**: Linked to fluid metabolism and Yin/Yang balance
-- **Tongue Movement**: Trembling or deviation may signal wind or weakness
+**What to look for:**
+- **Color**: Pale (deficiency), Red (heat), Purple (stagnation)
+- **Shape**: Swollen (damp retention), Thin (Yin deficiency)
+- **Coating**: White (cold), Yellow (heat), Thick (digestive imbalance)
+- **Moisture**: Dry (Yin deficiency), Wet (Yang deficiency)
+- **Movement**: Trembling or stiff may indicate internal disturbances
 
-Western medicine may not commonly use tongue inspection diagnostically, but it does correlate with:
-- Anemia (pale tongue)
-- Dehydration (dry tongue)
-- Oral candidiasis (thick white coating)
-- Circulatory issues (bluish-purple tongue)
+These insights help tailor your care plan.
 """, target_lang))
 
-    st.header(translate("🌐 Bridging TCM and Western Medicine", target_lang))
+    st.markdown("---")
+    st.markdown("### 🩺 For Medical Professionals & Practitioners")
     st.markdown(translate("""
-Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
+**Diagnostic Framework in TCM:**
+Tongue inspection is one of the four key diagnostic methods in TCM, alongside pulse taking, observation, and inquiry. It offers insights into the state of internal organs and their pathological changes.
 
-| Concept | TCM Interpretation | Western Medicine Analogy |
-|--------|---------------------|---------------------------|
-| Qi (Vital Energy) | Flow of life energy through meridians | Nervous & Circulatory System activity |
-| Yin/Yang | Balance of cold/hot, passive/active forces | Homeostasis (e.g., hormonal balance) |
-| Tongue Diagnosis | Reflects internal organ status | Inflammation markers, dehydration, anemia |
-| Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
+**Clinical Tongue Indicators:**
+- **Color**: Indicates blood and Qi flow, thermal state
+- **Shape & Texture**: Points to fluid metabolism, organ deficiency/excess
+- **Coating**: Derived from stomach Qi; helps assess dampness, heat, cold
+- **Sub-lingual veins**: Often inspected for blood stasis patterns
 
-Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
+**Crosswalk to Western Medicine:**
+| TCM Observation       | Possible Western Interpretation         |
+|----------------------|------------------------------------------|
+| Pale tongue           | Anemia, blood deficiency                |
+| Red with yellow coat  | Inflammatory conditions, infection      |
+| Purple tongue         | Circulatory issues                      |
+| Thick white coating   | Oral candidiasis, poor digestion        |
+
+**Applications in Integrative Care:**
+Tongue signs may support early detection of systemic imbalances before lab markers change. Use cases include GI disorders, hormonal imbalance, and fatigue-related syndromes.
 """, target_lang))
 
-    st.header(translate("TCM Syndrome Library", target_lang))
-    with st.expander(translate("🔎 Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
+    st.markdown("### 🧠 AI & Tongue Diagnostics")
+    st.markdown(translate("""
+This app uses AI (specifically GPT-4o) to analyze tongue images and user-reported symptoms. While not a replacement for clinical judgment, it offers a research-based wellness screening tool that may help with:
+- Tracking progress over time
+- Generating wellness recommendations
+- Supporting training and education in visual diagnosis
+""", target_lang))
+
+    st.header(translate("TCM Syndrome Reference", target_lang))
+    with st.expander(translate("📘 View 8 Major Syndromes and Their Signs", target_lang)):
         st.markdown(translate("""
-**Qi Deficiency**: Fatigue, pale tongue, short breath  
+**Qi Deficiency**: Fatigue, pale tongue, low voice  
 **Damp Retention**: Bloating, sticky tongue coat  
 **Blood Stasis**: Sharp pain, purple tongue  
-**Qi Stagnation**: Emotional blockage, rib pain  
-**Damp Heat**: Yellow tongue coat, foul smell  
-**Yang Deficiency**: Cold limbs, low energy  
-**Yin Deficiency**: Dry mouth, night sweats  
+**Qi Stagnation**: Mood swings, rib-side pain  
+**Damp Heat**: Yellow greasy coating, foul odor  
+**Yang Deficiency**: Cold limbs, weak pulse  
+**Yin Deficiency**: Night sweats, dry mouth  
 **Blood Deficiency**: Pale lips, dizziness
 """, target_lang))
 
     with st.expander(translate("📚 Recommended Reading", target_lang)):
         st.markdown(translate("""
-- *Foundations of Chinese Medicine* - Giovanni Maciocia  
-- *Healing with Whole Foods* - Paul Pitchford  
-- *The Web That Has No Weaver* - Ted J. Kaptchuk  
+- *Foundations of Chinese Medicine* – Giovanni Maciocia  
+- *Healing with Whole Foods* – Paul Pitchford  
+- *The Web That Has No Weaver* – Ted Kaptchuk  
 - [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)  
-- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
+- [PubMed TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
 """, target_lang))
 
 
@@ -158,6 +178,23 @@ if page == "Tongue Health Check":
 
         st.info("🧠 Sending image and data to GPT-4o for TCM diagnosis...")
         gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
+        if gpt_response:
+            st.subheader("🤖 GPT-4o Diagnosis Result")
+            st.code(gpt_response, language="json")
+        
+            try:
+                db.collection("gpt_diagnoses").document(submission_id).set({
+                    "submission_id": submission_id,
+                    "timestamp": timestamp,
+                    "image_url": url,
+                    "user_inputs": user_inputs,
+                    "gpt_response": gpt_response
+                })
+                st.success("📝 GPT diagnosis result saved to Firestore.")
+            except Exception as e:
+                st.warning("⚠️ Failed to save GPT diagnosis result.")
+                st.exception(e)
+
 
         if gpt_response:
             st.subheader("🤖 GPT-4o Diagnosis Result")
@@ -177,6 +214,7 @@ elif page == "Medical Review Dashboard":
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
+        gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
         diff_doc = db.collection("submission_diffs").document(selected_id).get().to_dict()
 
@@ -200,42 +238,82 @@ elif page == "Medical Review Dashboard":
                 "timestamp": datetime.utcnow().isoformat()
             })
             st.success("Feedback saved.")
-
-        with st.expander("🔄 Retrain From Feedback"):
-            from utils.retrain import retrain_model_from_feedback
-            if st.button("🔄 Retrain Now"):
-                retrain_model_from_feedback(db)
+    if gpt_doc:
+        st.subheader("🧠 GPT-4o Diagnosis Result")
+    
+        gpt_data = gpt_doc.get("gpt_response", "")
+        st.code(gpt_data, language="json")
+    else:
+        st.info("GPT-4o response not found for this submission.")
+    
+    with st.expander("🔄 Retrain From Feedback"):
+        from utils.retrain import retrain_model_from_feedback
+        if st.button("🔄 Retrain Now"):
+            retrain_model_from_feedback(db)
 
 # ------------------------------
 # SUBMISSION HISTORY
 # ------------------------------
 elif page == "Submission History":
-    st.title("📜 My Tongue Scan History")
-    if st.session_state.submissions:
-        df = pd.DataFrame(st.session_state.submissions)
-        st.dataframe(df)
+    st.title("📊 Model & App Performance Dashboard")
 
-        if "is_correct" in df.columns:
-            correct_count = df["is_correct"].sum()
-            total_feedback = df["is_correct"].notna().sum()
-            if total_feedback > 0:
-                accuracy = round((correct_count / total_feedback) * 100, 2)
-                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
+    try:
+        # Fetch Firestore data
+        usage_docs = db.collection("tongue_submissions").stream()
+        gpt_docs = db.collection("gpt_diagnoses").stream()
+        feedback_docs = db.collection("medical_feedback").stream()
 
-            st.subheader("📈 Accuracy Over Time")
-            df["timestamp"] = pd.to_datetime(df["timestamp"])
-            daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
-            st.line_chart(daily)
+        usage_data = [doc.to_dict() for doc in usage_docs]
+        gpt_data = [doc.to_dict() for doc in gpt_docs]
+        feedback_data = [doc.to_dict() for doc in feedback_docs]
 
-            st.subheader("🧪 Accuracy by TCM Syndrome")
-            if "prediction_TCM" in df.columns:
-                by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
-                st.bar_chart(by_syndrome)
+        # Submissions Over Time
+        st.subheader("📈 Tongue Submissions Over Time")
+        df_usage = pd.DataFrame(usage_data)
+        df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"])
+        last_30 = datetime.utcnow() - pd.Timedelta(days=30)
+        df_usage = df_usage[df_usage["timestamp"] >= last_30]
 
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
-    else:
-        st.info("You haven't submitted any scans yet.")
+        if not df_usage.empty:
+            df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"])
+            count_per_day = df_usage.groupby(df_usage["timestamp"].dt.date).size()
+            st.line_chart(count_per_day.rename("Submissions"))
+
+        # Feedback Summary
+        st.subheader("🧬 Expert Feedback Trends")
+        df_fb = pd.DataFrame(feedback_data)
+        df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"])
+        df_fb = df_fb[df_fb["timestamp"] >= last_30]
+
+
+        if not df_fb.empty and "agreement" in df_fb.columns:
+            agree_dist = df_fb["agreement"].value_counts()
+            st.bar_chart(agree_dist.rename("Agreement Distribution"))
+
+            df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"])
+            trend = df_fb.groupby(df_fb["timestamp"].dt.date)["agreement"].apply(lambda x: (x == "Yes").mean())
+            st.line_chart(trend.rename("% Agreement (Yes)"))
+
+        # GPT Diagnoses Summary
+        st.subheader("🧠 Recent GPT-4o Diagnoses")
+        df_gpt = pd.DataFrame(gpt_data)
+        df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"])
+        df_gpt = df_gpt[df_gpt["timestamp"] >= last_30]
+        if not df_gpt.empty:
+            df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"])
+            recent = df_gpt.sort_values("timestamp", ascending=False).head(10)
+            st.dataframe(recent[["timestamp", "submission_id", "gpt_response"]])
+
+            csv = df_gpt.to_csv(index=False).encode("utf-8")
+            st.download_button("⬇️ Download All GPT Diagnoses", csv, "gpt_diagnoses.csv", "text/csv")
+
+        if df_usage.empty and df_gpt.empty and df_fb.empty:
+            st.info("No diagnostic data has been submitted yet.")
+
+    except Exception as e:
+        st.error("⚠️ Failed to load metrics from Firestore.")
+        st.exception(e)
+
 
 # ------------------------------
 #  ABOUT & DISCLAIMER 
@@ -243,13 +321,21 @@ elif page == "Submission History":
 elif page == "About & Disclaimer":
     st.title(translate("About This App", target_lang))
     about_text = '''
-    This app is built for:
-    - Educating users about TCM tongue diagnostics
-    - Demonstrating how AI may assist in early wellness screening
-    - Researching global health variations using tongue + symptom data
-
-    Data Usage: All uploaded data is securely stored and used anonymously for improving model prediction.
-
-    Disclaimer: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
-    '''
+        **Wise Tongue: AI-Powered TCM Health Companion**
+        
+        This application is designed to:
+        - Provide accessible education on Traditional Chinese Medicine (TCM), with a focus on tongue-based diagnostics
+        - Allow users to upload tongue images and symptoms for AI-assisted analysis
+        - Use multimodal models (e.g., GPT-4o) to suggest potential TCM patterns, Western analogies, and wellness recommendations
+        - Enable healthcare professionals to review, validate, and improve AI predictions over time
+        
+        **Data Usage & Privacy**
+        - All user data, including images and self-reported symptoms, is securely stored in Firebase
+        - Data is used solely for improving the model's diagnostic accuracy and understanding global health trends
+        - Personal identities are not collected, and all data is reviewed anonymously
+        - Professional feedback is used to retrain the model and enhance future predictions
+        
+        **Disclaimer**
+        This application does not provide medical diagnosis or treatment. It is intended for educational, research, and wellness support purposes only. Users should consult qualified healthcare providers for any medical concerns.
+        '''
     st.markdown(translate(about_text, target_lang))

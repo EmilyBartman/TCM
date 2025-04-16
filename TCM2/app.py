@@ -455,6 +455,7 @@ elif page == "Medical Review Dashboard":
                         model = load_model()
         
                         image_url = user_doc.get("image_url")
+                        
                         if not image_url:
                             st.error("No image URL found in the submission.")
                         else:
@@ -469,10 +470,10 @@ elif page == "Medical Review Dashboard":
                                     try:
                                         img = Image.open(BytesIO(response.content))
                                         st.image(img, caption="Image used for retrained prediction", width=300)
-                                
+                        
                                         features = extract_features(img)
                                         new_output = predict_with_model(model, features)
-                                
+                        
                                         st.markdown("### 🧪 Retrained Diagnosis Result")
                                         st.json({
                                             "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
@@ -480,9 +481,12 @@ elif page == "Medical Review Dashboard":
                                             "remedies": new_output.get("remedies", []),
                                             "confidence": new_output.get("confidence", "N/A")
                                         })
-                                
                                     except Exception as e:
                                         st.error(f"Image processing or prediction failed: {e}")
+                        
+                            except Exception as e:
+                                st.error(f"Error downloading image: {e}")
+
                                 
 
         

@@ -499,14 +499,12 @@ elif page == "Medical Review Dashboard":
                     import requests
                     from tempfile import NamedTemporaryFile
                     from PIL import Image
-                    
+        
                     st.toast("Retraining model...", icon="🧠")
                     retrain_model_from_feedback(db)
         
                     st.toast("Reloading model...", icon="🔁")
                     model = load_model()
-                    st.code(f"Feature length: {len(features)}")
-                    st.code(f"Model loaded: {'yes' if model else 'no'}")
         
                     image_url = user_doc.get("image_url")
                     if not image_url:
@@ -527,6 +525,11 @@ elif page == "Medical Review Dashboard":
                                     tmp_path = tmp_file.name
         
                                 features = extract_features(tmp_path)
+        
+                                # 🛡️ Safe debug output
+                                st.code(f"Feature length: {len(features)}")
+                                st.code(f"Model loaded: {'yes' if model else 'no'}")
+        
                                 prediction, confidence = predict_with_model(model, features)
         
                                 new_output = {
@@ -537,22 +540,19 @@ elif page == "Medical Review Dashboard":
                                 }
         
                                 st.markdown("### 🧪 Retrained Diagnosis Result")
-
                                 st.markdown(f"**🩺 TCM Syndrome:** `{new_output['tcm_syndrome']}`")
                                 st.markdown(f"**💊 Western Equivalent:** `{new_output['western_equivalent']}`")
-                                
                                 st.markdown("**🌿 Remedies:**")
                                 for r in new_output["remedies"]:
                                     st.markdown(f"- {r}")
-                                
                                 st.markdown(f"**📊 Confidence Score:** `{new_output['confidence']}%`")
-
         
                             except Exception as e:
                                 st.error(f"❌ Image processing failed: {e}")
         
                 except ModuleNotFoundError as e:
                     st.error(f"Missing module: {e.name} — install with `pip install {e.name}`")
+
             
 # ------------------------------
 # SUBMISSION HISTORY

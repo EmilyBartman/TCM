@@ -359,7 +359,6 @@ elif page == "Medical Review Dashboard":
         st.subheader("📸 Tongue Image")
         image_url = user_doc.get("image_url", None)
         st.code(image_url or "No image URL found", language="text")
-        blob_path = f"tongue_images/{submission_id}.jpg"
         if image_url:
             try:
                 st.image(image_url, caption="Preview of Uploaded Tongue Image", width=300)

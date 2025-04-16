@@ -30,14 +30,29 @@ pages = [
     "Submission History",
     "About & Disclaimer"
 ]
-pages_translated = [translate(p, target_lang) for p in pages]
 
+# Create mapping of internal keys -> translated display names
+page_options = {p: translate(p, target_lang) for p in pages}
+
+# Default selected page
 if "selected_page" not in st.session_state:
-    st.session_state.selected_page = pages_translated[0]  # default to first
+    st.session_state.selected_page = pages[0]
 
-selected = st.sidebar.radio("", pages_translated, index=pages_translated.index(st.session_state.selected_page))
-st.session_state.selected_page = selected
-page = pages[pages_translated.index(selected)]
+# Reverse map to get the index for selected page
+display_names = list(page_options.values())
+selected_display = st.sidebar.radio(
+    translate("Navigate", target_lang),
+    display_names,
+    index=display_names.index(page_options[st.session_state.selected_page])
+)
+
+# Update internal page state based on selected display name
+for internal, display in page_options.items():
+    if display == selected_display:
+        st.session_state.selected_page = internal
+        break
+
+page = st.session_state.selected_page
 
 
 

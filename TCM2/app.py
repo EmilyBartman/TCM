@@ -516,7 +516,15 @@ elif page == "Medical Review Dashboard":
                             try:
                                 img = Image.open(BytesIO(response.content))
                                 st.image(img, caption="Image used for retrained prediction", width=300)
-                                features = extract_features(img)
+                                
+                                # ✅ Save temporarily so OpenCV can read it
+                                from tempfile import NamedTemporaryFile
+                                with NamedTemporaryFile(suffix=".jpg", delete=False) as tmp_file:
+                                    img.save(tmp_file, format="JPEG")
+                                    tmp_path = tmp_file.name
+                                
+                                # ✅ Now pass path to extract_features()
+                                features = extract_features(tmp_path)
                                 new_output = predict_with_model(model, features)
                                 st.markdown("### 🧪 Retrained Diagnosis Result")
                                 st.json({

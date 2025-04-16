@@ -1,7 +1,14 @@
 # utils/gpt_diagnosis.py
+import openai
+import base64
+from PIL import Image
+import io
 import streamlit as st
 from openai import OpenAI
-import json
+
+def image_to_base64(img_path):
+    with open(img_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
 
 def run_gpt_diagnosis(user_inputs, img_path=None):
     try:
@@ -20,44 +27,44 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
         )
 
         prompt = (
-            f"A user has submitted self-reported tongue characteristics and symptoms.\n\n"
-            f"Please help interpret the following from a Traditional Chinese Medicine (TCM) perspective, "
-            f"strictly for educational and wellness insights (not diagnosis).\n\n"
-
-            f"### Reported Tongue Description:\n{tongue_description}\n\n"
-            f"### Reported Symptoms:\n{symptoms}\n\n"
-            f"### Vitals / Lifestyle Info:\n{vitals}\n\n"
-
-            f"1. Suggest the most likely TCM pattern (e.g., Qi Deficiency, Damp Heat).\n"
-            f"2. Optionally map it to a general Western interpretation (e.g., fatigue, digestion issues).\n"
-            f"3. Suggest 2–3 supportive remedies (e.g., warm foods, stress reduction).\n"
-            f"4. If the tongue description is vague or inconsistent (e.g., pale but dry and swollen), flag that.\n"
-            f"5. If this doesn't sound like a real tongue description, politely ask for a clearer tongue photo upload.\n"
-            f"6. Estimate confidence (0–100) in your recommendation.\n\n"
-            f"Respond ONLY in valid JSON with these keys: "
-            f"`tcm_syndrome`, `western_equivalent`, `remedies`, `discrepancies`, `confidence`."
+            f"A user has submitted a tongue image and health input for educational TCM-based insight.\n\n"
+            f"---\n"
+            f"Symptoms: {symptoms}\n"
+            f"Tongue Description: {tongue_description}\n"
+            f"Vitals: {vitals}\n"
+            f"---\n"
+            f"Please:\n"
+            f"1. Suggest a likely TCM pattern (e.g., Qi Deficiency, Damp Heat)\n"
+            f"2. Suggest a Western analogy (if applicable)\n"
+            f"3. Suggest 2–3 lifestyle remedies\n"
+            f"4. Note any discrepancies in the tongue image vs the self-report\n"
+            f"5. Return a confidence score from 0–100\n"
+            f"Respond ONLY in JSON: `tcm_syndrome`, `western_equivalent`, `remedies`, `discrepancies`, `confidence`"
         )
+
+        messages = [
+            {"role": "system", "content": "You are a multimodal TCM diagnostic assistant for wellness education."},
+            {"role": "user", "content": [
+                {"type": "text", "text": prompt},
+                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_to_base64(img_path)}"}}
+            ]}
+        ]
 
         response = client.chat.completions.create(
             model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a friendly, wellness-focused Traditional Chinese Medicine assistant."},
-                {"role": "user", "content": prompt}
-            ],
+            messages=messages,
             temperature=0.3
         )
 
-        content = response.choices[0].message.content
-
-        # Attempt to parse structured JSON output
+        result = response.choices[0].message.content
         try:
-            start = content.index("{")
-            end = content.rindex("}") + 1
-            return json.loads(content[start:end])
+            json_start = result.index("{")
+            json_end = result.rindex("}") + 1
+            return json.loads(result[json_start:json_end])
         except Exception:
-            return content  # fallback to raw output
+            return result  # fallback
 
     except Exception as e:
-        st.error("GPT diagnosis failed.")
+        st.error("❌ GPT-4o image analysis failed.")
         st.exception(e)
         return None

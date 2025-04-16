@@ -354,7 +354,14 @@ elif page == "Medical Review Dashboard":
         gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         
         # Try fallback to gpt_doc if image_url is missing in user_doc
-        image_url = (user_doc or {}).get("image_url") or gpt_doc.get("image_url")
+        image_url = None
+        if user_doc and user_doc.get("image_url"):
+            image_url = user_doc["image_url"]
+            st.caption("🔍 Image from `tongue_submissions`")
+        elif gpt_doc and gpt_doc.get("image_url"):
+            image_url = gpt_doc["image_url"]
+            st.caption("🧠 Image from `gpt_diagnoses`")
+
         
         st.subheader("📸 Tongue Image")
         if image_url:

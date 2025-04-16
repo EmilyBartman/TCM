@@ -335,15 +335,18 @@ elif page == "Medical Review Dashboard":
 
     def show_table_side_by_side(expected_dict, actual_dict):
         st.write("### Comparison Table")
-        table_data = []
+        table_data = []  # ← This was missing
+    
         keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
         for key in keys:
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
             match = expected == actual
             table_data.append((key, expected, actual, "✅" if match else "❌"))
+    
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis", "Match"])
         st.dataframe(df, use_container_width=True)
+
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()

@@ -403,9 +403,13 @@ elif page == "Medical Review Dashboard":
         st.subheader("📊 User vs GPT-4o Comparison")
         if gpt_data:
             show_table_side_by_side(input_fields, gpt_data)
+        elif isinstance(raw_gpt, str) and not gpt_data:
+            # Avoid double message — fallback already shown above
+            pass
         else:
             st.warning("⚠️ GPT response is not structured. Displaying raw fallback message:")
             st.code(raw_gpt if raw_gpt else "No data available", language="text")
+
 
 
         # 🧪 Optional Model Output

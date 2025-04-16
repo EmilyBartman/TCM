@@ -30,20 +30,22 @@ def init_firebase():
 
 # Upload file to Firebase and return URL
 def upload_image_to_firebase(uploaded_file, submission_id, bucket):
-    from google.cloud import storage
     import tempfile
     import uuid
 
     # Save image to a temp file
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
     temp_file.write(uploaded_file.read())
     temp_file.flush()
 
+    # Define path in Firebase Storage
     blob_path = f"tongue_images/{submission_id}.jpg"
     blob = bucket.blob(blob_path)
+
+    # Upload file
     blob.upload_from_filename(temp_file.name)
 
-    # Set public read access or generate token
+    # Generate permanent token-based public URL
     token = str(uuid.uuid4())
     blob.metadata = {"firebaseStorageDownloadTokens": token}
     blob.patch()
@@ -51,6 +53,7 @@ def upload_image_to_firebase(uploaded_file, submission_id, bucket):
     public_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{blob_path.replace('/', '%2F')}?alt=media&token={token}"
 
     return public_url, temp_file.name
+
 
 # Save user inputs to Firestore
 def save_user_submission(submission_id, timestamp, image_url, user_inputs, db):

@@ -373,19 +373,20 @@ elif page == "Medical Review Dashboard":
         raw_gpt = gpt_doc.get("gpt_response", "")
         gpt_data = {}
         
-        # Handle dict case
+        # Detect fallback message or empty response
+        fallback_phrases = [
+            "i'm sorry", "i cannot", "unable to", "cannot analyze",
+            "no valid", "please provide", "i can't", "not sure how"
+        ]
+        
         if isinstance(raw_gpt, dict):
             gpt_data = raw_gpt
         
-        # Handle string response
         elif isinstance(raw_gpt, str):
-            if raw_gpt.strip().lower() in [
-                "i'm sorry, i can't assist with that.",
-                "i cannot help with that.",
-                "no valid input provided.",
-                "unable to process."
-            ] or raw_gpt.strip() == "":
-                st.warning("⚠️ GPT returned a fallback or empty message.")
+            raw_trimmed = raw_gpt.strip().lower()
+            if raw_trimmed == "" or any(p in raw_trimmed for p in fallback_phrases):
+                st.warning("⚠️ GPT returned a fallback or non-actionable message.")
+                st.code(raw_gpt if raw_gpt else "No data available", language="text")
             else:
                 try:
                     parsed = json.loads(raw_gpt)
@@ -395,8 +396,8 @@ elif page == "Medical Review Dashboard":
                         st.warning("⚠️ Parsed GPT output is not a dictionary.")
                 except json.JSONDecodeError as e:
                     st.warning(f"⚠️ Failed to parse GPT response as JSON: {e}")
-        else:
-            st.warning("⚠️ GPT response is neither a dict nor a valid string.")
+                    st.code(raw_gpt, language="text")
+        
 
 
         st.subheader("📊 User vs GPT-4o Comparison")

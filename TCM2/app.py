@@ -163,15 +163,26 @@ if page == "Tongue Health Check":
     # Upload and preview image BEFORE the form
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
+    
+    uploaded_file = st.file_uploader("", type=["jpg", "jpeg", "png"], key="tongue_uploader")
+    
+    # Store uploaded file in session state if provided
+    if uploaded_file:
+        st.session_state.uploaded_img = uploaded_file
+    
+    # Safely access the uploaded image
     uploaded_img = st.session_state.get("uploaded_img", None)
+    
+    # Preview image if available
     if uploaded_img:
         try:
             uploaded_img.seek(0)
             image_bytes = uploaded_img.read()
             img = Image.open(io.BytesIO(image_bytes))
             st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
-        except:
-            st.warning("⚠️ Image preview failed.")
+        except Exception as e:
+            st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
+            st.exception(e)
 
 
     with st.form("tongue_upload_form"):

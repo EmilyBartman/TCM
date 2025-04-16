@@ -5,7 +5,6 @@ import streamlit as st
 import uuid
 import openai
 import json
-import sklearn
 import io
 import pandas as pd
 from datetime import datetime

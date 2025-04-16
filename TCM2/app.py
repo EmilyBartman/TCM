@@ -371,20 +371,30 @@ elif page == "Medical Review Dashboard":
 
         # 🤖 GPT Output
         raw_gpt = gpt_doc.get("gpt_response", "")
-        
-        # Attempt robust parsing
         gpt_data = {}
+        
+        # Handle dict case
         if isinstance(raw_gpt, dict):
             gpt_data = raw_gpt
+        
+        # Handle string response
         elif isinstance(raw_gpt, str):
-            try:
-                parsed = json.loads(raw_gpt)
-                if isinstance(parsed, dict):
-                    gpt_data = parsed
-                else:
-                    st.warning("⚠️ Parsed GPT output is not a dictionary.")
-            except json.JSONDecodeError as e:
-                st.warning(f"⚠️ Failed to parse GPT response as JSON: {e}")
+            if raw_gpt.strip().lower() in [
+                "i'm sorry, i can't assist with that.",
+                "i cannot help with that.",
+                "no valid input provided.",
+                "unable to process."
+            ] or raw_gpt.strip() == "":
+                st.warning("⚠️ GPT returned a fallback or empty message.")
+            else:
+                try:
+                    parsed = json.loads(raw_gpt)
+                    if isinstance(parsed, dict):
+                        gpt_data = parsed
+                    else:
+                        st.warning("⚠️ Parsed GPT output is not a dictionary.")
+                except json.JSONDecodeError as e:
+                    st.warning(f"⚠️ Failed to parse GPT response as JSON: {e}")
         else:
             st.warning("⚠️ GPT response is neither a dict nor a valid string.")
 

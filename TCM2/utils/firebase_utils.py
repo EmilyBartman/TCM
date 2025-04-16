@@ -3,6 +3,7 @@ import os
 import cv2
 import tempfile
 from datetime import timedelta
+import firebase_admin  
 from firebase_admin import credentials, firestore, storage, initialize_app
 import streamlit as st
 
@@ -12,10 +13,11 @@ def init_firebase():
     try:
         firebase_config = dict(st.secrets["firebase"])
         cred = credentials.Certificate(firebase_config)
-        if not len(initialize_app._apps):
+        if not firebase_admin._apps:
             initialize_app(cred, {
                 "storageBucket": firebase_config["project_id"] + ".appspot.com"
             })
+
         return firestore.client(), storage.bucket()
     except Exception as e:
         st.error("Firebase init failed")

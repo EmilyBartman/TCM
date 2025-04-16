@@ -7,3 +7,4 @@ openai
 opencv-python-headless
 firebase-admin
 deep-translator
+joblib

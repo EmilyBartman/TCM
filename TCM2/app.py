@@ -37,7 +37,18 @@ page_options = {p: translate(p, target_lang) for p in pages}
 
 # Default selected page
 if "selected_page" not in st.session_state:
-    st.session_state.selected_page = pages[0]
+    st.session_state.selected_page = pages[0]  # Default to first page
+
+selected_page = st.sidebar.radio(
+    "Navigate",
+    pages,
+    index=pages.index(st.session_state.selected_page)
+)
+
+if selected_page != st.session_state.selected_page:
+    st.session_state.selected_page = selected_page
+page = st.session_state.selected_page  # ← Use this throughout
+
 
 # Reverse map to get the index for selected page
 display_names = list(page_options.values())

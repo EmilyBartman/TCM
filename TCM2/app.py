@@ -278,8 +278,8 @@ if page == "Tongue Health Check":
                 st.warning(translate("⚠️ Failed to save GPT diagnosis result.", target_lang))
                 st.exception(e)
 
-# Reset just_submitted flag at the end of the run
-st.session_state.just_submitted = False
+    # Reset just_submitted flag at the end of the run
+    st.session_state.just_submitted = False
 
 
 

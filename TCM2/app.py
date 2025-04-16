@@ -436,18 +436,29 @@ elif page == "Medical Review Dashboard":
             st.subheader(translate("🧬 Expert Feedback", target_lang))
             agree = st.radio(
                 translate("Do you agree with the GPT diagnosis?", target_lang),
-                [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
+                [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]],
+                key="expert_agree"  # 👈 Optional: add unique keys for safety
             )
-            corrected_syndrome = st.text_input("Correct TCM Syndrome")
-            corrected_equivalent = st.text_input("Correct Western Equivalent")
-            corrected_remedies = st.text_area("Correct Remedies (comma-separated)")
-            notes = st.text_area(translate("Correction notes", target_lang))
-
+            corrected_syndrome = st.text_input("Correct TCM Syndrome", key="expert_syndrome")
+            corrected_equivalent = st.text_input("Correct Western Equivalent", key="expert_equiv")
+            corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="expert_remedies")
+            notes = st.text_area(translate("Correction notes", target_lang), key="expert_notes")
             
             if st.button(translate("Submit Feedback", target_lang)):
-                feedback = {...}
+                feedback = {
+                    "submission_id": selected_id,
+                    "agreement": agree,
+                    "corrections": {
+                        "tcm_syndrome": corrected_syndrome,
+                        "western_equivalent": corrected_equivalent,
+                        "remedies": [r.strip() for r in corrected_remedies.split(",") if r.strip()]
+                    },
+                    "notes": notes,
+                    "timestamp": datetime.utcnow().isoformat()
+                }
                 db.collection("medical_feedback").document(selected_id).set(feedback)
                 st.success("✅ Feedback saved.")
+
             
             # ✅ 🔄 Retrain UI appears ALWAYS below feedback
             with st.expander(translate("🔄 Retrain From Feedback", target_lang)):

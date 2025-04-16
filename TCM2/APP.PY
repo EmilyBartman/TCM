@@ -15,10 +15,87 @@ target_lang = set_language_selector()
 
 # Page navigation
 pages = [
+    "Educational Content",
     "Tongue Health Check",
-    "Medical Review Dashboard"
+    "Medical Review Dashboard",
+    "Submission History",
+    "About & Disclaimer"
 ]
 page = st.sidebar.radio("Navigate", pages)
+
+
+
+# ------------------------------
+# EDUCATIONAL CONTENT 
+# ------------------------------
+if page == "Educational Content":
+    target_lang = languages[st.session_state.selected_lang]
+    st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
+
+    st.header(translate("Foundations of TCM", target_lang))
+    st.markdown(translate("""
+- **Yin & Yang**: Balance of opposing but complementary forces.
+- **Qi (Chi)**: Vital life energy.
+- **Five Elements**: Wood, Fire, Earth, Metal, Water—linked to organs/emotions.
+- **Diagnostic Tools**: Pulse, tongue, face, symptom observation.
+- **Modalities**: Acupuncture, herbal therapy, dietary therapy, Qi Gong.
+""", target_lang))
+
+    st.header(translate("🔎 Why the Tongue Matters in TCM", target_lang))
+    st.markdown(translate("""
+In Traditional Chinese Medicine, the tongue is seen as a mirror to the body’s internal state. Its color, shape, moisture, coating, and movement all provide clues about organ function and systemic imbalances.
+
+**What the tongue reveals:**
+- **Tongue Body Color**: Reflects blood, Qi, and organ health
+- **Tongue Shape**: Can indicate excess or deficiency syndromes
+- **Tongue Coating**: Suggests digestive heat, cold, or dampness
+- **Moisture Level**: Linked to fluid metabolism and Yin/Yang balance
+- **Tongue Movement**: Trembling or deviation may signal wind or weakness
+
+Western medicine may not commonly use tongue inspection diagnostically, but it does correlate with:
+- Anemia (pale tongue)
+- Dehydration (dry tongue)
+- Oral candidiasis (thick white coating)
+- Circulatory issues (bluish-purple tongue)
+""", target_lang))
+
+    st.header(translate("🌐 Bridging TCM and Western Medicine", target_lang))
+    st.markdown(translate("""
+Traditional Chinese Medicine (TCM) and Western medicine differ in philosophy and methods but can be complementary:
+
+| Concept | TCM Interpretation | Western Medicine Analogy |
+|--------|---------------------|---------------------------|
+| Qi (Vital Energy) | Flow of life energy through meridians | Nervous & Circulatory System activity |
+| Yin/Yang | Balance of cold/hot, passive/active forces | Homeostasis (e.g., hormonal balance) |
+| Tongue Diagnosis | Reflects internal organ status | Inflammation markers, dehydration, anemia |
+| Syndrome Differentiation | Pattern-based holistic assessment | Evidence-based diagnosis (labs, scans) |
+
+Integrative medicine combines both paradigms to enhance wellness, prevention, and personalized care.
+""", target_lang))
+
+    st.header(translate("TCM Syndrome Library", target_lang))
+    with st.expander(translate("🔎 Click to view 8 Major Tongue Syndromes and Signs", target_lang)):
+        st.markdown(translate("""
+**Qi Deficiency**: Fatigue, pale tongue, short breath  
+**Damp Retention**: Bloating, sticky tongue coat  
+**Blood Stasis**: Sharp pain, purple tongue  
+**Qi Stagnation**: Emotional blockage, rib pain  
+**Damp Heat**: Yellow tongue coat, foul smell  
+**Yang Deficiency**: Cold limbs, low energy  
+**Yin Deficiency**: Dry mouth, night sweats  
+**Blood Deficiency**: Pale lips, dizziness
+""", target_lang))
+
+    with st.expander(translate("📚 Recommended Reading", target_lang)):
+        st.markdown(translate("""
+- *Foundations of Chinese Medicine* - Giovanni Maciocia  
+- *Healing with Whole Foods* - Paul Pitchford  
+- *The Web That Has No Weaver* - Ted J. Kaptchuk  
+- [WHO on TCM](https://www.who.int/health-topics/traditional-complementary-and-integrative-medicine)  
+- [PubMed on TCM Research](https://pubmed.ncbi.nlm.nih.gov/?term=traditional+chinese+medicine)
+""", target_lang))
+
+
 
 # ------------------------------
 # Tongue Health Check
@@ -86,6 +163,7 @@ if page == "Tongue Health Check":
             st.subheader("🤖 GPT-4o Diagnosis Result")
             st.code(gpt_response, language="json")
 
+
 # ------------------------------
 # Medical Review Dashboard
 # ------------------------------
@@ -127,3 +205,51 @@ elif page == "Medical Review Dashboard":
             from utils.retrain import retrain_model_from_feedback
             if st.button("🔄 Retrain Now"):
                 retrain_model_from_feedback(db)
+
+# ------------------------------
+# SUBMISSION HISTORY
+# ------------------------------
+elif page == "Submission History":
+    st.title("📜 My Tongue Scan History")
+    if st.session_state.submissions:
+        df = pd.DataFrame(st.session_state.submissions)
+        st.dataframe(df)
+
+        if "is_correct" in df.columns:
+            correct_count = df["is_correct"].sum()
+            total_feedback = df["is_correct"].notna().sum()
+            if total_feedback > 0:
+                accuracy = round((correct_count / total_feedback) * 100, 2)
+                st.metric("📊 Model Accuracy (based on feedback)", f"{accuracy}%")
+
+            st.subheader("📈 Accuracy Over Time")
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            daily = df[df["is_correct"].notna()].groupby(df["timestamp"].dt.date)["is_correct"].mean()
+            st.line_chart(daily)
+
+            st.subheader("🧪 Accuracy by TCM Syndrome")
+            if "prediction_TCM" in df.columns:
+                by_syndrome = df[df["is_correct"].notna()].groupby("prediction_TCM")["is_correct"].mean().sort_values(ascending=False)
+                st.bar_chart(by_syndrome)
+
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("⬇️ Download CSV", csv, "my_tongue_scans.csv", "text/csv")
+    else:
+        st.info("You haven't submitted any scans yet.")
+
+# ------------------------------
+#  ABOUT & DISCLAIMER 
+# ------------------------------
+elif page == "About & Disclaimer":
+    st.title(translate("About This App", target_lang))
+    about_text = '''
+    This app is built for:
+    - Educating users about TCM tongue diagnostics
+    - Demonstrating how AI may assist in early wellness screening
+    - Researching global health variations using tongue + symptom data
+
+    Data Usage: All uploaded data is securely stored and used anonymously for improving model prediction.
+
+    Disclaimer: This tool is for educational purposes only. It does not replace medical diagnosis or professional care.
+    '''
+    st.markdown(translate(about_text, target_lang))

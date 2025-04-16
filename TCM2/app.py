@@ -4,6 +4,7 @@
 import streamlit as st
 import uuid
 import openai
+from utils.model_utils import get_remedies
 import json
 import io
 import pandas as pd
@@ -493,16 +494,18 @@ elif page == "Medical Review Dashboard":
             if retrain_clicked:
                 try:
                     from utils.retrain import retrain_model_from_feedback
-                    from utils.model_utils import predict_with_model, extract_features, load_model
+                    from utils.model_utils import predict_with_model, extract_features, load_model, get_remedies
                     from io import BytesIO
                     import requests
-
+                    from tempfile import NamedTemporaryFile
+                    from PIL import Image
+        
                     st.toast("Retraining model...", icon="🧠")
                     retrain_model_from_feedback(db)
-
+        
                     st.toast("Reloading model...", icon="🔁")
                     model = load_model()
-
+        
                     image_url = user_doc.get("image_url")
                     if not image_url:
                         st.error("❌ No image URL found in the submission.")
@@ -516,29 +519,30 @@ elif page == "Medical Review Dashboard":
                             try:
                                 img = Image.open(BytesIO(response.content))
                                 st.image(img, caption="Image used for retrained prediction", width=300)
-                                
-                                # ✅ Save temporarily so OpenCV can read it
-                                from tempfile import NamedTemporaryFile
+        
                                 with NamedTemporaryFile(suffix=".jpg", delete=False) as tmp_file:
                                     img.save(tmp_file, format="JPEG")
                                     tmp_path = tmp_file.name
-                                
-                                # ✅ Now pass path to extract_features()
+        
                                 features = extract_features(tmp_path)
                                 prediction, confidence = predict_with_model(model, features)
+        
                                 new_output = {
                                     "tcm_syndrome": prediction,
-                                    "western_equivalent": "Unknown",  # Or use your own mapping
+                                    "western_equivalent": "Unknown",
                                     "remedies": get_remedies(prediction),
                                     "confidence": confidence
                                 }
+        
                                 st.markdown("### 🧪 Retrained Diagnosis Result")
                                 st.json(new_output)
-                                                            except Exception as e:
+        
+                            except Exception as e:
                                 st.error(f"❌ Image processing failed: {e}")
+        
                 except ModuleNotFoundError as e:
                     st.error(f"Missing module: {e.name} — install with `pip install {e.name}`")
-
+            
 # ------------------------------
 # SUBMISSION HISTORY
 # ------------------------------

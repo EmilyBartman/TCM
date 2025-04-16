@@ -3,6 +3,7 @@
 
 import streamlit as st
 import uuid
+import openai
 from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
 from utils.translation import LANGUAGES, translate, set_language_selector
@@ -10,6 +11,11 @@ from utils.gpt_diagnosis import run_gpt_diagnosis
 from torchvision import models, transforms
 from PIL import Image
 import torch
+# GPT-4o key
+openai.api_key = st.secrets["openai"]["api_key"]
+
+# Firebase config
+firebase_config = dict(st.secrets["firebase"])
 
 # Set page config and language setup
 st.set_page_config(page_title="TCM Health App", layout="wide")
@@ -194,11 +200,6 @@ if page == "Tongue Health Check":
             except Exception as e:
                 st.warning("⚠️ Failed to save GPT diagnosis result.")
                 st.exception(e)
-
-
-        if gpt_response:
-            st.subheader("🤖 GPT-4o Diagnosis Result")
-            st.code(gpt_response, language="json")
 
 
 # ------------------------------

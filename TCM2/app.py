@@ -335,23 +335,26 @@ elif page == "Medical Review Dashboard":
 
     def show_table_side_by_side(expected_dict, actual_dict):
         st.write("### Comparison Table")
-        table_data = []
     
+        table_data = []
         keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
         for key in keys:
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
     
-            # Convert lists to readable strings
+            # Convert list values to strings
             if isinstance(expected, list):
                 expected = ", ".join(expected)
             if isinstance(actual, list):
                 actual = ", ".join(actual)
     
-            table_data.append((key, expected, actual))
+            table_data.append([key, expected, actual])
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
-        st.table(df)
+    
+        # Render without index/row numbers
+        st.markdown(df.to_html(index=False, escape=False), unsafe_allow_html=True)
+    
 
 
     if selected_id:

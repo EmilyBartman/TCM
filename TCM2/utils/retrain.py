@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import streamlit as st
+# Set page config and language setup
+st.set_page_config(page_title="TCM Health App", layout="wide")
+
 import uuid
 from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
 from utils.model_utils import extract_features, load_model, predict_with_model, compare_user_vs_model, get_remedies
 from utils.translation import LANGUAGES, translate, set_language_selector
 
-# Set page config and language setup
-st.set_page_config(page_title="TCM Health App", layout="wide")
+
 db, bucket = init_firebase()
 target_lang = set_language_selector()
 

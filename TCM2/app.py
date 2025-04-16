@@ -455,7 +455,7 @@ elif page == "Medical Review Dashboard":
                         model = load_model()
         
                         image_url = user_doc.get("image_url")
-                        
+
                         if not image_url:
                             st.error("❌ No image URL found in the submission.")
                         else:
@@ -488,28 +488,6 @@ elif page == "Medical Review Dashboard":
                             except Exception as e:
                                 st.error(f"❌ Unexpected error while downloading image: {e}")
 
-                                
-
-        
-                        features = extract_features(img)
-                        new_output = predict_with_model(model, features)
-        
-                        st.markdown("### 🧪 Retrained Diagnosis Result")
-                        st.json({
-                            "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
-                            "western_equivalent": new_output.get("western_equivalent", "N/A"),
-                            "remedies": new_output.get("remedies", []),
-                            "confidence": new_output.get("confidence", "N/A")
-                        })
-        
-                        # Optional: Reset to prevent repeat prediction on next rerun
-                        st.session_state["retrain_triggered"] = False
-        
-                    except Exception as e:
-                        st.exception(e)
-        
-            except ModuleNotFoundError as e:
-                st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
         
 
 

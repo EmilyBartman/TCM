@@ -28,12 +28,7 @@ LANGUAGES = {
     "한국어": "ko"               # Korean
 }
 
-def clean_markdown(text):
-    # Remove markdown emphasis and titles
-    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
-    text = re.sub(r"\*(.*?)\*", r"\1", text)
-    text = re.sub(r"#", "", text)
-    return text
+
     
 def set_language_selector():
     # Default to "English" on first load
@@ -61,11 +56,19 @@ def set_language_selector():
 
     return LANGUAGES[st.session_state.selected_lang]
 
+def clean_markdown(text):
+    # Strip markdown elements that confuse the translator
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"`(.*?)`", r"\1", text)
+    text = re.sub(r"#+ ", "", text)  # headers like ### or ##
+    return text
+
 
 def translate(text, lang_code):
     try:
         clean_text = clean_markdown(text)
-        return GoogleTranslator(source="auto", target=lang_code).translate(clean_text)
+        translated = GoogleTranslator(source="auto", target=lang_code).translate(clean_text)
+        return translated
     except Exception:
         return text
 

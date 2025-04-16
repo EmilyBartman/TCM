@@ -56,8 +56,8 @@ def retrain_model_from_feedback(db):
             continue
 
     if not X or not y:
-    print("⚠️ No valid data found for retraining.")
-    return
+        print("⚠️ No valid data found for retraining.")
+        return
 
     if len(set(y)) < 2:
         print("❌ Cannot train: need at least two distinct classes. Found:", set(y))

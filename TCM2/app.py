@@ -454,7 +454,7 @@ elif page == "Medical Review Dashboard":
                         st.toast("Reloading model...", icon="🔁")
                         model = load_model()
         
-                        image_url = user_doc.get("image_url")
+                        image_url = gpt_doc.get("image_url")
 
                         if not image_url:
                             st.error("❌ No image URL found in the submission.")

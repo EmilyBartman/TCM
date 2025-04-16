@@ -432,7 +432,20 @@ elif page == "Medical Review Dashboard":
             db.collection("medical_feedback").document(selected_id).set(feedback)
             st.success("✅ Feedback saved.")
 
-            # 🔄 Retraining Trigger
+            # 🧬 Expert Feedback
+            st.subheader(translate("🧬 Expert Feedback", target_lang))
+            agree = st.radio(...)
+            corrected_syndrome = ...
+            corrected_equivalent = ...
+            corrected_remedies = ...
+            notes = ...
+            
+            if st.button(translate("Submit Feedback", target_lang)):
+                feedback = {...}
+                db.collection("medical_feedback").document(selected_id).set(feedback)
+                st.success("✅ Feedback saved.")
+            
+            # ✅ 🔄 Retrain UI appears ALWAYS below feedback
             with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
                 try:
                     from utils.retrain import retrain_model_from_feedback
@@ -440,20 +453,18 @@ elif page == "Medical Review Dashboard":
                     from PIL import Image
                     import requests
                     from io import BytesIO
-    
-                    # Show the button always
+            
                     retrain_clicked = st.button("🔁 Retrain Now")
-                    
-                    # Only retrain when clicked
+            
                     if retrain_clicked or st.session_state.get("retrain_triggered"):
-                        st.session_state["retrain_triggered"] = False  # reset it immediately
-                    
+                        st.session_state["retrain_triggered"] = False
+            
                         st.toast("Retraining model...", icon="🧠")
                         retrain_model_from_feedback(db)
-                    
+            
                         st.toast("Reloading model...", icon="🔁")
                         model = load_model()
-                    
+            
                         image_url = gpt_doc.get("image_url")
                         if not image_url:
                             st.error("❌ No image URL found in the submission.")
@@ -468,10 +479,10 @@ elif page == "Medical Review Dashboard":
                                     try:
                                         img = Image.open(BytesIO(response.content))
                                         st.image(img, caption="Image used for retrained prediction", width=300)
-                    
+            
                                         features = extract_features(img)
                                         new_output = predict_with_model(model, features)
-                    
+            
                                         st.markdown("### 🧪 Retrained Diagnosis Result")
                                         st.json({
                                             "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
@@ -479,18 +490,15 @@ elif page == "Medical Review Dashboard":
                                             "remedies": new_output.get("remedies", []),
                                             "confidence": new_output.get("confidence", "N/A")
                                         })
-                    
                                     except Exception as e:
                                         st.error(f"❌ Image processing or prediction failed: {e}")
                             except Exception as e:
                                 st.error(f"❌ Unexpected error while downloading image: {e}")
-                    
-                        
+            
                 except ModuleNotFoundError as e:
                     st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
-
-
-        
+            
+                    
 
 
 # ------------------------------

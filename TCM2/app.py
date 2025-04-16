@@ -434,11 +434,15 @@ elif page == "Medical Review Dashboard":
 
             # 🧬 Expert Feedback
             st.subheader(translate("🧬 Expert Feedback", target_lang))
-            agree = st.radio(...)
-            corrected_syndrome = ...
-            corrected_equivalent = ...
-            corrected_remedies = ...
-            notes = ...
+            agree = st.radio(
+                translate("Do you agree with the GPT diagnosis?", target_lang),
+                [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
+            )
+            corrected_syndrome = st.text_input("Correct TCM Syndrome")
+            corrected_equivalent = st.text_input("Correct Western Equivalent")
+            corrected_remedies = st.text_area("Correct Remedies (comma-separated)")
+            notes = st.text_area(translate("Correction notes", target_lang))
+
             
             if st.button(translate("Submit Feedback", target_lang)):
                 feedback = {...}

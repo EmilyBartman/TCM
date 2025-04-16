@@ -31,7 +31,7 @@ def set_language_selector():
     if "selected_lang" not in st.session_state:
         st.session_state.selected_lang = "English"
 
-    new_lang = st.sidebar.selectbox("🌐 Choose Language", list(LANGUAGES.keys()),
+    new_lang = st.sidebar.selectbox(translate("🌐 Choose Language", target_lang), list(LANGUAGES.keys()),
         index=list(LANGUAGES.keys()).index(st.session_state.selected_lang))
     if new_lang != st.session_state.selected_lang:
         st.session_state.selected_lang = new_lang

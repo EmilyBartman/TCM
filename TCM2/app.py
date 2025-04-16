@@ -454,6 +454,7 @@ elif page == "Medical Review Dashboard":
 
 
         # 🧪 Optional Model Output
+        model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
         if model_doc:
             st.subheader("🧪 Model Output (Internal)")
             st.json(model_doc.get("model_outputs", {}))

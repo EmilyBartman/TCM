@@ -307,6 +307,15 @@ if page == "Tongue Health Check":
             except Exception as e:
                 st.warning(translate("⚠️ Failed to save GPT diagnosis result.", target_lang))
                 st.exception(e)
+            
+            st.markdown("---")
+            st.markdown(
+                f"📝 **Disclaimer:**\n\n"
+                f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
+                f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
+                f"are securely stored and may help improve future versions of this tool.\n\n"
+                f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider."
+            )
 
     # Reset just_submitted flag at the end of the run
     st.session_state.form_submitted = False
@@ -382,14 +391,6 @@ elif page == "Medical Review Dashboard":
 
     else:
         st.info(translate("GPT-4o response not found for this submission.", target_lang))
-    st.markdown("---")
-    st.markdown(
-        f"📝 **Disclaimer:**\n\n"
-        f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
-        f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
-        f"are securely stored and may help improve future versions of this tool.\n\n"
-        f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider."
-    )
 
 
     with st.expander(translate("🔄 Retrain From Feedback", target_lang)):

@@ -333,30 +333,20 @@ elif page == "Medical Review Dashboard":
     ids = [d.id for d in docs]
     selected_id = st.selectbox(translate("Submission ID", target_lang), ids)
 
-    def show_table_side_by_side(user_inputs, gpt_data):
-        st.write("### GPT Diagnosis Comparison")
+    def show_table_side_by_side(expected_dict, actual_dict):
+        st.write("### Comparison Table")
+        table_data = []  # ← This was missing
     
-        expected_fields = {
-            "tcm_syndrome": user_inputs.get("user_inputs", {}).get("tcm_syndrome", "—"),
-            "western_equivalent": user_inputs.get("user_inputs", {}).get("western_equivalent", "—"),
-            "remedies": ", ".join(user_inputs.get("user_inputs", {}).get("remedies", [])) if isinstance(user_inputs.get("user_inputs", {}).get("remedies", []), list) else "—"
-        }
-    
-        actual_fields = {
-            "tcm_syndrome": gpt_data.get("tcm_syndrome", "—"),
-            "western_equivalent": gpt_data.get("western_equivalent", "—"),
-            "remedies": ", ".join(gpt_data.get("remedies", [])) if isinstance(gpt_data.get("remedies", []), list) else "—"
-        }
-    
-        comparison = []
-        for key in expected_fields:
-            expected = expected_fields[key]
-            actual = actual_fields[key]
+        keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
+        for key in keys:
+            expected = expected_dict.get(key, "—")
+            actual = actual_dict.get(key, "—")
             match = expected == actual
-            comparison.append((key.replace("_", " ").title(), expected, actual, "✅" if match else "❌"))
+            table_data.append((key, expected, actual, "✅" if match else "❌"))
     
-        df = pd.DataFrame(comparison, columns=["Field", "User Input", "GPT Diagnosis", "Match"])
+        df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis", "Match"])
         st.dataframe(df, use_container_width=True)
+    
 
 
 

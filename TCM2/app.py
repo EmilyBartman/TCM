@@ -525,15 +525,16 @@ elif page == "Medical Review Dashboard":
                                 
                                 # ✅ Now pass path to extract_features()
                                 features = extract_features(tmp_path)
-                                new_output = predict_with_model(model, features)
+                                prediction, confidence = predict_with_model(model, features)
+                                new_output = {
+                                    "tcm_syndrome": prediction,
+                                    "western_equivalent": "Unknown",  # Or use your own mapping
+                                    "remedies": get_remedies(prediction),
+                                    "confidence": confidence
+                                }
                                 st.markdown("### 🧪 Retrained Diagnosis Result")
-                                st.json({
-                                    "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
-                                    "western_equivalent": new_output.get("western_equivalent", "N/A"),
-                                    "remedies": new_output.get("remedies", []),
-                                    "confidence": new_output.get("confidence", "N/A")
-                                })
-                            except Exception as e:
+                                st.json(new_output)
+                                                            except Exception as e:
                                 st.error(f"❌ Image processing failed: {e}")
                 except ModuleNotFoundError as e:
                     st.error(f"Missing module: {e.name} — install with `pip install {e.name}`")

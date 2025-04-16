@@ -4,4 +4,4 @@ datetime
 torchvision
 torch
 openai
-opencv-python
+opencv-python-headless

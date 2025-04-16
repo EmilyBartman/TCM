@@ -166,7 +166,7 @@ if page == "Tongue Health Check":
 
     st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
-    
+    uploaded_img.seek(0)
     # Ensure uploader runs only once
     if "uploaded_img" not in st.session_state:
         st.session_state.uploaded_img = None
@@ -329,7 +329,7 @@ if page == "Tongue Health Check":
 elif page == "Medical Review Dashboard":
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
-    uploaded_img.seek(0)
+    
     docs = db.collection("gpt_diagnoses").stream()
     ids = [d.id for d in docs]
     selected_id = st.selectbox(translate("Submission ID", target_lang), ids)

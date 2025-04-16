@@ -364,29 +364,41 @@ elif page == "Medical Review Dashboard":
             st.caption("🧠 Image from `gpt_diagnoses`")
 
         
+        # 📸 Tongue Image
         st.subheader("📸 Tongue Image")
-
+        
+        # Get image URL from either user_doc or gpt_doc
+        image_url = None
+        if user_doc and user_doc.get("image_url"):
+            image_url = user_doc["image_url"]
+            st.caption("🔍 Image from `tongue_submissions`")
+        elif gpt_doc and gpt_doc.get("image_url"):
+            image_url = gpt_doc["image_url"]
+            st.caption("🧠 Image from `gpt_diagnoses`")
+        
         if image_url:
             try:
                 response = requests.get(image_url)
+                content_type = response.headers.get("Content-Type", "")
+                content_length = len(response.content)
+                st.code(f"HTTP {response.status_code} | Content-Length: {content_length} | Content-Type: {content_type}")
         
-                # Debug response headers
-                st.code(f"HTTP {response.status_code} | Content-Length: {len(response.content)} | Content-Type: {response.headers.get('Content-Type')}")
-        
-                # Save file locally for inspection
-                with open("debug_image.jpg", "wb") as f:
-                    f.write(response.content)
-                st.success("🧪 Saved image as debug_image.jpg for local inspection.")
-        
-                # Try to load with PIL
-                img = Image.open(BytesIO(response.content))
-                st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
-        
+                if response.status_code != 200:
+                    st.error(f"❌ Failed to fetch image from Firebase. HTTP {response.status_code}")
+                elif content_length == 0:
+                    st.error("❌ The image file is empty (0 bytes). This likely means the upload failed.")
+                elif "image" not in content_type:
+                    st.error("❌ The returned file is not a valid image.")
+                    st.code(image_url)
+                else:
+                    img = Image.open(BytesIO(response.content))
+                    st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
             except Exception as e:
                 st.warning("⚠️ Failed to decode image.")
                 st.exception(e)
         else:
             st.info("No image URL available.")
+
         
 
         # 📄 User Inputs

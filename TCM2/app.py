@@ -455,10 +455,35 @@ elif page == "Medical Review Dashboard":
                         model = load_model()
         
                         image_url = user_doc.get("image_url")
-                        response = requests.get(image_url)
-                        img = Image.open(BytesIO(response.content))
-        
-                        st.image(img, caption="Image used for retrained prediction", width=300)
+                        if not image_url:
+                            st.error("No image URL found in the submission.")
+                        else:
+                            try:
+                                response = requests.get(image_url)
+                        
+                                if response.status_code != 200:
+                                    st.error(f"Failed to load image: HTTP {response.status_code}")
+                                elif "image" not in response.headers.get("Content-Type", ""):
+                                    st.error("The file at the provided URL is not an image.")
+                                else:
+                                    img = Image.open(BytesIO(response.content))
+                                    st.image(img, caption="Image used for retrained prediction", width=300)
+                        
+                                    # continue with feature extraction
+                                    features = extract_features(img)
+                                    new_output = predict_with_model(model, features)
+                        
+                                    st.markdown("### 🧪 Retrained Diagnosis Result")
+                                    st.json({
+                                        "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
+                                        "western_equivalent": new_output.get("western_equivalent", "N/A"),
+                                        "remedies": new_output.get("remedies", []),
+                                        "confidence": new_output.get("confidence", "N/A")
+                                    })
+                        
+                            except Exception as e:
+                                st.exception(e)
+
         
                         features = extract_features(img)
                         new_output = predict_with_model(model, features)

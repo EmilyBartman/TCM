@@ -366,24 +366,28 @@ elif page == "Medical Review Dashboard":
 
         
         st.subheader("📸 Tongue Image")
-        
+
         if image_url:
             try:
                 response = requests.get(image_url)
-                st.code(f"HTTP {response.status_code} | Content-Type: {response.headers.get('Content-Type')}")
-                
-                if "image" in response.headers.get("Content-Type", ""):
-                    img = Image.open(BytesIO(response.content))
-                    st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
-                else:
-                    st.warning("⚠️ URL did not return an image. Showing response content for debugging.")
-                    st.code(response.text[:500])  # Show start of response body
-                    st.code(image_url)
+        
+                # Debug response headers
+                st.code(f"HTTP {response.status_code} | Content-Length: {len(response.content)} | Content-Type: {response.headers.get('Content-Type')}")
+        
+                # Save file locally for inspection
+                with open("debug_image.jpg", "wb") as f:
+                    f.write(response.content)
+                st.success("🧪 Saved image as debug_image.jpg for local inspection.")
+        
+                # Try to load with PIL
+                img = Image.open(BytesIO(response.content))
+                st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
+        
             except Exception as e:
-                st.warning("⚠️ Error occurred while fetching image.")
+                st.warning("⚠️ Failed to decode image.")
                 st.exception(e)
         else:
-            st.info("No image URL found.")
+            st.info("No image URL available.")
         
 
         # 📄 User Inputs

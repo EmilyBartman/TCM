@@ -2,6 +2,7 @@
 import base64
 from PIL import Image
 from openai import OpenAI
+import json
 import streamlit as st
 
 def image_to_base64(img_path):
@@ -38,17 +39,24 @@ Respond only in valid JSON with these keys: tcm_syndrome, western_equivalent, re
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a multimodal medical reasoning assistant trained in Traditional Chinese Medicine."},
+                {"role": "system", "content": "You are a multimodal medical assistant that ALWAYS interprets the uploaded image before giving a diagnosis."},
                 {"role": "user", "content": [
-                    {"type": "text", "text": prompt},
+                    {"type": "text", "text": "Here is the patient's tongue image. You MUST analyze it directly as part of the diagnosis. Please follow the steps described."},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"}}
                 ]}
-            ],
+            ]
+            ,
             temperature=0.3
         )
 
         reply = response.choices[0].message.content
-        return reply
+        try:
+            start = reply.index("{")
+            end = reply.rindex("}") + 1
+            parsed = json.loads(reply[start:end])
+            return parsed  # 💡 return as dict
+        except Exception:
+            return reply 
 
     except Exception as e:
         st.error("GPT diagnosis failed.")

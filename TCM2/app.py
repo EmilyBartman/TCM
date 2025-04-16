@@ -366,15 +366,18 @@ elif page == "Medical Review Dashboard":
 
         
         st.subheader("📸 Tongue Image")
-
+        
         if image_url:
             try:
                 response = requests.get(image_url)
-                if response.status_code == 200 and "image" in response.headers.get("Content-Type", ""):
+                st.code(f"HTTP {response.status_code} | Content-Type: {response.headers.get('Content-Type')}")
+                
+                if "image" in response.headers.get("Content-Type", ""):
                     img = Image.open(BytesIO(response.content))
                     st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
                 else:
-                    st.warning("⚠️ Image URL did not return a valid image.")
+                    st.warning("⚠️ URL did not return an image. Showing response content for debugging.")
+                    st.code(response.text[:500])  # Show start of response body
                     st.code(image_url)
             except Exception as e:
                 st.warning("⚠️ Error occurred while fetching image.")

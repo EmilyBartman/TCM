@@ -162,10 +162,13 @@ if page == "Tongue Health Check":
         # 🖼 Preview uploaded image before submit
         if uploaded_img is not None:
             try:
-                image = Image.open(uploaded_img)
-                st.image(image, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_column_width="auto")
+                # Reset file pointer and read image
+                uploaded_img.seek(0)
+                image_bytes = uploaded_img.read()
+                img = Image.open(io.BytesIO(image_bytes))
+                st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_column_width="auto")
             except Exception as e:
-                st.warning(translate("Unable to preview image", target_lang))
+                st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
                 st.exception(e)
 
 

@@ -351,13 +351,13 @@ elif page == "Medical Review Dashboard":
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
     
-        # Clean HTML/CSS rendering
         table_html = df.to_html(index=False, escape=False)
         styled_html = f"""
             <style>
                 table {{
                     width: 100%;
                     border-collapse: collapse;
+                    font-size: 14px;
                 }}
                 thead th {{
                     text-align: center;
@@ -373,7 +373,9 @@ elif page == "Medical Review Dashboard":
             {table_html}
         """
     
+        # ✅ Required for HTML table to render!
         st.markdown(styled_html, unsafe_allow_html=True)
+    
 
     
 

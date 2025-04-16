@@ -305,7 +305,8 @@ if page == "Tongue Health Check":
                 st.exception(e)
 
     # Reset just_submitted flag at the end of the run
-    st.session_state.just_submitted = False
+    st.session_state.form_submitted = False
+
 
 
 

@@ -328,67 +328,90 @@ elif page == "Medical Review Dashboard":
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
 
-    docs = db.collection("submission_diffs").stream()
+    docs = db.collection("gpt_diagnoses").stream()
     ids = [d.id for d in docs]
     selected_id = st.selectbox(translate("Submission ID", target_lang), ids)
+
+    def compare_fields(user_data, gpt_data):
+        diffs = {}
+        try:
+            expected = user_data.get("user_inputs", {})
+            actual = gpt_data.get("gpt_response", {})
+
+            for key in ["tcm_syndrome", "western_equivalent", "remedies"]:
+                user_val = expected.get(key, "")
+                gpt_val = actual.get(key, "")
+                if user_val != gpt_val:
+                    diffs[key] = {"expected": user_val, "actual": gpt_val}
+        except Exception as e:
+            diffs["error"] = str(e)
+        return diffs
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
         gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
-        diff_doc = db.collection("submission_diffs").document(selected_id).get().to_dict()
 
+        # 📄 User Input
         st.subheader(translate("📄 User Input", target_lang))
-        st.json(user_doc["user_inputs"])
+        st.json(user_doc.get("user_inputs", {}))
 
+        # 🤖 Model Output
         st.subheader(translate("🤖 Model Output", target_lang))
-        st.json(model_doc["model_outputs"])
+        st.json(model_doc.get("model_outputs", {}))
 
+        # ⚖️ Differences
         st.subheader(translate("⚖️ Differences", target_lang))
-        st.json(diff_doc["differences"])
+        diffs = compare_fields(user_doc, gpt_doc)
+        st.json(diffs)
 
-        st.subheader(translate("🧬 Feedback", target_lang))
+        # 🧠 GPT Diagnosis Structured View
+        st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
+        gpt_data = gpt_doc.get("gpt_response", {})
+        if isinstance(gpt_data, dict):
+            st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
+            st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
+            st.markdown("**🌿 Remedies:**")
+            for r in gpt_data.get("remedies", []):
+                st.markdown(f"- {r}")
+            st.markdown(f"**⚖️ Discrepancies:** {gpt_data.get('discrepancies', 'N/A')}")
+            st.markdown(f"**📊 Confidence Score:** `{gpt_data.get('confidence', 'N/A')}%`")
+        else:
+            st.warning(translate("Could not parse structured GPT response. Displaying raw text:", target_lang))
+            st.write(gpt_data)
+
+        # 🧬 Expert Feedback
+        st.subheader(translate("🧬 Expert Feedback", target_lang))
         agree = st.radio(
-            translate("Do you agree with model?", target_lang),
+            translate("Do you agree with the GPT diagnosis?", target_lang),
             [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
         )
+        corrected_syndrome = st.text_input("Correct TCM Syndrome")
+        corrected_equivalent = st.text_input("Correct Western Equivalent")
+        corrected_remedies = st.text_area("Correct Remedies (comma-separated)")
         notes = st.text_area(translate("Correction notes", target_lang))
+
         if st.button(translate("Submit Feedback", target_lang)):
-            db.collection("medical_feedback").document(selected_id).set({
+            feedback = {
                 "submission_id": selected_id,
                 "agreement": agree,
-                "correction_notes": notes,
+                "corrections": {
+                    "tcm_syndrome": corrected_syndrome,
+                    "western_equivalent": corrected_equivalent,
+                    "remedies": [r.strip() for r in corrected_remedies.split(",") if r.strip()]
+                },
+                "notes": notes,
                 "timestamp": datetime.utcnow().isoformat()
-            })
+            }
+            db.collection("medical_feedback").document(selected_id).set(feedback)
             st.success(translate("Feedback saved.", target_lang))
 
-        if gpt_doc:
-            st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
-            gpt_data = gpt_doc.get("gpt_response", "")
-            if isinstance(gpt_data, dict):
-                st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
-                st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
-                st.markdown("**🌿 Remedies:**")
-                for r in gpt_data.get("remedies", []):
-                    st.markdown(f"- {r}")
-                st.markdown(f"**⚖️ Discrepancies:** {gpt_data.get('discrepancies', 'N/A')}")
-                st.markdown(f"**📊 Confidence Score:** `{gpt_data.get('confidence', 'N/A')}%`")
-            else:
-                st.warning(translate("Could not parse structured GPT response. Displaying raw text:", target_lang))
-                st.write(gpt_data)
-
-            raw_gpt = gpt_doc.get("gpt_response", "")
-            try:
-                gpt_data = raw_gpt if isinstance(raw_gpt, dict) else json.loads(raw_gpt)
-            except Exception:
-                gpt_data = raw_gpt 
-        else:
-            st.info(translate("GPT-4o response not found for this submission.", target_lang))
-
+        # 🔄 Retrain From Feedback
         with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
             from utils.retrain import retrain_model_from_feedback
             if st.button(translate("🔄 Retrain Now", target_lang)):
                 retrain_model_from_feedback(db)
+
 
 # ------------------------------
 # SUBMISSION HISTORY

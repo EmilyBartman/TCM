@@ -55,8 +55,10 @@ display_names = list(page_options.values())
 selected_display = st.sidebar.radio(
     translate("Navigate", target_lang),
     display_names,
-    index=display_names.index(page_options[st.session_state.selected_page])
+    index=display_names.index(page_options[st.session_state.selected_page]),
+    key="page_navigation"  # 👈 unique key
 )
+
 
 # Update internal page state based on selected display name
 for internal, display in page_options.items():

@@ -6,6 +6,7 @@ import uuid
 import openai
 import json
 import io
+import pandas as pd
 from datetime import datetime
 from utils.firebase_utils import init_firebase, upload_image_to_firebase, save_user_submission
 from utils.translation import LANGUAGES, translate, set_language_selector

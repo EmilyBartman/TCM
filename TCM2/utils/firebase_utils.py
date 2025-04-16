@@ -29,20 +29,28 @@ def init_firebase():
         return None, None
 
 # Upload file to Firebase and return URL
-def upload_image_to_firebase(uploaded_img, submission_id, bucket):
-    extension = uploaded_img.name.split(".")[-1]
-    file_name = f"{submission_id}.{extension}"
-    firebase_path = f"tongue_images/{file_name}"
+def upload_image_to_firebase(uploaded_file, submission_id, bucket):
+    from google.cloud import storage
+    import tempfile
+    import uuid
 
-    temp_dir = tempfile.mkdtemp()
-    temp_path = os.path.join(temp_dir, file_name)
-    with open(temp_path, "wb") as f:
-        f.write(uploaded_img.getbuffer())
+    # Save image to a temp file
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    temp_file.write(uploaded_file.read())
+    temp_file.flush()
 
-    blob = bucket.blob(firebase_path)
-    blob.upload_from_filename(temp_path)
-    url = blob.generate_signed_url(expiration=timedelta(hours=1), method="GET")
-    return url, temp_path
+    blob_path = f"tongue_images/{submission_id}.jpg"
+    blob = bucket.blob(blob_path)
+    blob.upload_from_filename(temp_file.name)
+
+    # Set public read access or generate token
+    token = str(uuid.uuid4())
+    blob.metadata = {"firebaseStorageDownloadTokens": token}
+    blob.patch()
+
+    public_url = f"https://firebasestorage.googleapis.com/v0/b/{bucket.name}/o/{blob_path.replace('/', '%2F')}?alt=media&token={token}"
+
+    return public_url, temp_file.name
 
 # Save user inputs to Firestore
 def save_user_submission(submission_id, timestamp, image_url, user_inputs, db):

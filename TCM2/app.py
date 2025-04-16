@@ -351,31 +351,14 @@ elif page == "Medical Review Dashboard":
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
     
-        table_html = df.to_html(index=False, escape=False)
-        styled_html = f"""
-            <style>
-                table {{
-                    width: 100%;
-                    border-collapse: collapse;
-                    font-size: 14px;
-                }}
-                thead th {{
-                    text-align: center;
-                    white-space: nowrap;
-                    background-color: #f1f1f1;
-                    padding: 8px;
-                }}
-                tbody td {{
-                    vertical-align: top;
-                    padding: 6px;
-                }}
-            </style>
-            {table_html}
-        """
+        # Apply Streamlit-native styling to center headers
+        styled_df = df.style.set_table_styles([
+            {"selector": "th", "props": [("text-align", "center")]}
+        ]).set_properties(**{"text-align": "left"})  # Align data left for readability
     
-        # ✅ Required for HTML table to render!
-        st.markdown(styled_html, unsafe_allow_html=True)
+        st.table(styled_df)
     
+        
 
     
 

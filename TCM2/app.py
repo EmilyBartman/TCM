@@ -30,7 +30,12 @@ pages = [
     "Submission History",
     "About & Disclaimer"
 ]
-page = st.sidebar.radio("Navigate", pages)
+page = st.sidebar.markdown(f"### {translate('Navigate', target_lang)}")
+
+pages_translated = [translate(p, target_lang) for p in pages]
+page_selection = st.sidebar.radio("", pages_translated)
+page = pages[pages_translated.index(page_selection)]
+
 
 
 # ------------------------------

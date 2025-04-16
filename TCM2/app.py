@@ -136,37 +136,60 @@ if page == "Tongue Health Check":
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
     with st.form("tongue_upload_form"):
-        uploaded_img = st.file_uploader("Upload Tongue Image", type=["jpg", "jpeg", "png"])
-        symptoms = st.multiselect("Select Symptoms", ["Fatigue", "Stress", "Stomach ache", "Dizziness"])
+        uploaded_img = st.file_uploader(translate("Upload Tongue Image", target_lang), type=["jpg", "jpeg", "png"])
+        
+        symptoms = st.multiselect(
+            translate("Select Symptoms", target_lang),
+            [translate(opt, target_lang) for opt in ["Fatigue", "Stress", "Stomach ache", "Dizziness"]]
+        )
 
-        tongue_color = st.selectbox("Tongue Color", ["Red", "Pale", "Purple"])
-        tongue_shape = st.selectbox("Tongue Shape", ["Swollen", "Thin", "Tooth-marked"])
-        tongue_coating = st.selectbox("Tongue Coating", ["White", "Yellow", "None"])
-        tongue_moisture = st.selectbox("Moisture Level", ["Dry", "Wet", "Normal"])
-        tongue_bumps = st.selectbox("Tongue Bumps", ["Smooth", "Raised", "Prominent"])
+        tongue_color = st.selectbox(
+            translate("Tongue Color", target_lang),
+            [translate(opt, target_lang) for opt in ["Red", "Pale", "Purple"]]
+        )
+        tongue_shape = st.selectbox(
+            translate("Tongue Shape", target_lang),
+            [translate(opt, target_lang) for opt in ["Swollen", "Thin", "Tooth-marked"]]
+        )
+        tongue_coating = st.selectbox(
+            translate("Tongue Coating", target_lang),
+            [translate(opt, target_lang) for opt in ["White", "Yellow", "None"]]
+        )
+        tongue_moisture = st.selectbox(
+            translate("Moisture Level", target_lang),
+            [translate(opt, target_lang) for opt in ["Dry", "Wet", "Normal"]]
+        )
+        tongue_bumps = st.selectbox(
+            translate("Tongue Bumps", target_lang),
+            [translate(opt, target_lang) for opt in ["Smooth", "Raised", "Prominent"]]
+        )
 
-        heart_rate = st.number_input("Heart Rate (bpm)", 40, 180)
-        sleep_hours = st.slider("Hours of Sleep", 0, 12, 6)
-        stress_level = st.slider("Stress Level", 0, 10, 5)
-        hydration = st.radio("Do you feel thirsty often?", ["Yes", "No"])
-        bowel = st.selectbox("Bowel Regularity", ["Regular", "Irregular"])
-        medication = st.text_input("Current Medication (optional)")
+        heart_rate = st.number_input(translate("Heart Rate (bpm)", target_lang), 40, 180)
+        sleep_hours = st.slider(translate("Hours of Sleep", target_lang), 0, 12, 6)
+        stress_level = st.slider(translate("Stress Level", target_lang), 0, 10, 5)
+        hydration = st.radio(
+            translate("Do you feel thirsty often?", target_lang),
+            [translate(opt, target_lang) for opt in ["Yes", "No"]]
+        )
+        bowel = st.selectbox(
+            translate("Bowel Regularity", target_lang),
+            [translate(opt, target_lang) for opt in ["Regular", "Irregular"]]
+        )
+        medication = st.text_input(translate("Current Medication (optional)", target_lang))
 
-        consent = st.checkbox("I consent to the use of my data for research.")
-        submit = st.form_submit_button("Analyze")
+        consent = st.checkbox(translate("I consent to the use of my data for research.", target_lang))
+        submit = st.form_submit_button(translate("Analyze", target_lang))
 
     if submit:
         if not uploaded_img or not consent:
-            st.warning("Please upload image and give consent.")
+            st.warning(translate("Please upload image and give consent.", target_lang))
             st.stop()
 
         submission_id = str(uuid.uuid4())
         timestamp = datetime.utcnow().isoformat()
 
-        # Save image
         url, temp_path = upload_image_to_firebase(uploaded_img, submission_id, bucket)
 
-        # Save user input
         user_inputs = {
             "symptoms": symptoms,
             "tongue_characteristics": {
@@ -188,12 +211,12 @@ if page == "Tongue Health Check":
         }
         save_user_submission(submission_id, timestamp, url, user_inputs, db)
 
-        st.info("🧠 Sending image and data to GPT-4o for TCM diagnosis...")
+        st.info(translate("🧠 Sending image and data to GPT-4o for TCM diagnosis...", target_lang))
         gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
         if gpt_response:
-            st.subheader("🤖 GPT-4o Diagnosis Result")
+            st.subheader(translate("🤖 GPT-4o Diagnosis Result", target_lang))
             st.code(gpt_response, language="json")
-        
+
             try:
                 db.collection("gpt_diagnoses").document(submission_id).set({
                     "submission_id": submission_id,
@@ -202,10 +225,11 @@ if page == "Tongue Health Check":
                     "user_inputs": user_inputs,
                     "gpt_response": gpt_response
                 })
-                st.success("📝 GPT diagnosis result saved to Firestore.")
+                st.success(translate("📝 GPT diagnosis result saved to Firestore.", target_lang))
             except Exception as e:
-                st.warning("⚠️ Failed to save GPT diagnosis result.")
+                st.warning(translate("⚠️ Failed to save GPT diagnosis result.", target_lang))
                 st.exception(e)
+
 
 
 # ------------------------------
@@ -213,11 +237,11 @@ if page == "Tongue Health Check":
 # ------------------------------
 elif page == "Medical Review Dashboard":
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
-    st.info("Select a submission to review and give expert feedback.")
+    st.info(translate("Select a submission to review and give expert feedback.", target_lang))
 
     docs = db.collection("submission_diffs").stream()
     ids = [d.id for d in docs]
-    selected_id = st.selectbox("Submission ID", ids)
+    selected_id = st.selectbox(translate("Submission ID", target_lang), ids)
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
@@ -225,38 +249,42 @@ elif page == "Medical Review Dashboard":
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
         diff_doc = db.collection("submission_diffs").document(selected_id).get().to_dict()
 
-        st.subheader("📄 User Input")
+        st.subheader(translate("📄 User Input", target_lang))
         st.json(user_doc["user_inputs"])
 
-        st.subheader("🤖 Model Output")
+        st.subheader(translate("🤖 Model Output", target_lang))
         st.json(model_doc["model_outputs"])
 
-        st.subheader("⚖️ Differences")
+        st.subheader(translate("⚖️ Differences", target_lang))
         st.json(diff_doc["differences"])
 
-        st.subheader("🧬 Feedback")
-        agree = st.radio("Do you agree with model?", ["Yes", "Partially", "No"])
-        notes = st.text_area("Correction notes")
-        if st.button("Submit Feedback"):
+        st.subheader(translate("🧬 Feedback", target_lang))
+        agree = st.radio(
+            translate("Do you agree with model?", target_lang),
+            [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
+        )
+        notes = st.text_area(translate("Correction notes", target_lang))
+        if st.button(translate("Submit Feedback", target_lang)):
             db.collection("medical_feedback").document(selected_id).set({
                 "submission_id": selected_id,
                 "agreement": agree,
                 "correction_notes": notes,
                 "timestamp": datetime.utcnow().isoformat()
             })
-            st.success("Feedback saved.")
+            st.success(translate("Feedback saved.", target_lang))
+
     if gpt_doc:
-        st.subheader("🧠 GPT-4o Diagnosis Result")
-    
+        st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
         gpt_data = gpt_doc.get("gpt_response", "")
         st.code(gpt_data, language="json")
     else:
-        st.info("GPT-4o response not found for this submission.")
-    
-    with st.expander("🔄 Retrain From Feedback"):
+        st.info(translate("GPT-4o response not found for this submission.", target_lang))
+
+    with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
         from utils.retrain import retrain_model_from_feedback
-        if st.button("🔄 Retrain Now"):
+        if st.button(translate("🔄 Retrain Now", target_lang)):
             retrain_model_from_feedback(db)
+
 
 # ------------------------------
 # SUBMISSION HISTORY
@@ -265,7 +293,6 @@ elif page == "Submission History":
     st.title(translate("📊 Model & App Performance Dashboard", target_lang))
 
     try:
-        # Fetch Firestore data
         usage_docs = db.collection("tongue_submissions").stream()
         gpt_docs = db.collection("gpt_diagnoses").stream()
         feedback_docs = db.collection("medical_feedback").stream()
@@ -274,51 +301,52 @@ elif page == "Submission History":
         gpt_data = [doc.to_dict() for doc in gpt_docs]
         feedback_data = [doc.to_dict() for doc in feedback_docs]
 
-        # Submissions Over Time
-        st.subheader("📈 Tongue Submissions Over Time")
+        st.subheader(translate("📈 Tongue Submissions Over Time", target_lang))
         df_usage = pd.DataFrame(usage_data)
         df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"])
         last_30 = datetime.utcnow() - pd.Timedelta(days=30)
         df_usage = df_usage[df_usage["timestamp"] >= last_30]
 
         if not df_usage.empty:
-            df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"])
             count_per_day = df_usage.groupby(df_usage["timestamp"].dt.date).size()
-            st.line_chart(count_per_day.rename("Submissions"))
+            st.line_chart(count_per_day.rename(translate("Submissions", target_lang)))
 
-        # Feedback Summary
-        st.subheader("🧬 Expert Feedback Trends")
+        st.subheader(translate("🧬 Expert Feedback Trends", target_lang))
         df_fb = pd.DataFrame(feedback_data)
         df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"])
         df_fb = df_fb[df_fb["timestamp"] >= last_30]
 
-
         if not df_fb.empty and "agreement" in df_fb.columns:
             agree_dist = df_fb["agreement"].value_counts()
-            st.bar_chart(agree_dist.rename("Agreement Distribution"))
+            agree_dist.index = [translate(opt, target_lang) for opt in agree_dist.index]
+            st.bar_chart(agree_dist.rename(translate("Agreement Distribution", target_lang)))
 
-            df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"])
-            trend = df_fb.groupby(df_fb["timestamp"].dt.date)["agreement"].apply(lambda x: (x == "Yes").mean())
-            st.line_chart(trend.rename("% Agreement (Yes)"))
+            trend = df_fb.groupby(df_fb["timestamp"].dt.date)["agreement"].apply(
+                lambda x: (x == "Yes").mean()
+            )
+            st.line_chart(trend.rename(translate("% Agreement (Yes)", target_lang)))
 
-        # GPT Diagnoses Summary
-        st.subheader("🧠 Recent GPT-4o Diagnoses")
+        st.subheader(translate("🧠 Recent GPT-4o Diagnoses", target_lang))
         df_gpt = pd.DataFrame(gpt_data)
         df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"])
         df_gpt = df_gpt[df_gpt["timestamp"] >= last_30]
         if not df_gpt.empty:
-            df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"])
             recent = df_gpt.sort_values("timestamp", ascending=False).head(10)
             st.dataframe(recent[["timestamp", "submission_id", "gpt_response"]])
 
             csv = df_gpt.to_csv(index=False).encode("utf-8")
-            st.download_button("⬇️ Download All GPT Diagnoses", csv, "gpt_diagnoses.csv", "text/csv")
+            st.download_button(
+                label=translate("⬇️ Download All GPT Diagnoses", target_lang),
+                data=csv,
+                file_name="gpt_diagnoses.csv",
+                mime="text/csv"
+            )
 
         if df_usage.empty and df_gpt.empty and df_fb.empty:
-            st.info("No diagnostic data has been submitted yet.")
+            st.info(translate("No diagnostic data has been submitted yet.", target_lang))
 
     except Exception as e:
-        st.error("⚠️ Failed to load metrics from Firestore.")
+        st.error(translate("⚠️ Failed to load metrics from Firestore.", target_lang))
         st.exception(e)
 
 

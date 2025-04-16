@@ -4,3 +4,4 @@ datetime
 torchvision
 torch
 openai
+opencv-python

@@ -4,28 +4,29 @@ from deep_translator import GoogleTranslator
 
 LANGUAGES = {
     "English": "en",
-    "Spanish": "es",
-    "Chinese (Simplified)": "zh-CN",
-    "Chinese (Traditional)": "zh-TW",
-    "French": "fr",
-    "Hindi": "hi",
-    "Arabic": "ar",
-    "Swahili": "sw",
-    "Zulu": "zu",
-    "Amharic": "am",
+    "Español": "es",
+    "简体中文": "zh-CN",          # Chinese (Simplified)
+    "繁體中文": "zh-TW",          # Chinese (Traditional)
+    "Français": "fr",
+    "हिन्दी": "hi",              # Hindi
+    "العربية": "ar",            # Arabic
+    "Kiswahili": "sw",          # Swahili
+    "IsiZulu": "zu",            # Zulu
+    "አማርኛ": "am",              # Amharic
     "Igbo": "ig",
-    "Yoruba": "yo",
-    "Tamil": "ta",
-    "Telugu": "te",
-    "Urdu": "ur",
-    "Bengali": "bn",
-    "Malay": "ms",
-    "Vietnamese": "vi",
-    "Thai": "th",
+    "Yorùbá": "yo",
+    "தமிழ்": "ta",               # Tamil
+    "తెలుగు": "te",             # Telugu
+    "اردو": "ur",               # Urdu
+    "বাংলা": "bn",              # Bengali
+    "Bahasa Melayu": "ms",      # Malay
+    "Tiếng Việt": "vi",         # Vietnamese
+    "ไทย": "th",                # Thai
     "Filipino": "fil",
-    "Japanese": "ja",
-    "Korean": "ko"
+    "日本語": "ja",              # Japanese
+    "한국어": "ko"               # Korean
 }
+
 
 def set_language_selector():
     if "selected_lang" not in st.session_state:

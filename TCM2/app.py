@@ -433,51 +433,53 @@ elif page == "Medical Review Dashboard":
             st.success("✅ Feedback saved.")
 
         # 🔄 Retraining Trigger
-            with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
-                try:
-                    from utils.retrain import retrain_model_from_feedback
-                    from utils.model_utils import predict_with_model, extract_features, load_model  # You likely already have these
-            
-                    if st.button("🔁 Retrain Now"):
-                        retrain_model_from_feedback(db)  # This updates your model
-            
-                        # Reload the newly trained model
+        with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
+            try:
+                from utils.retrain import retrain_model_from_feedback
+                from utils.model_utils import predict_with_model, extract_features, load_model
+                from PIL import Image
+                import requests
+                from io import BytesIO
+        
+                # Button click sets session flag (button disappears after rerun)
+                if st.button("🔁 Retrain Now"):
+                    st.session_state["retrain_triggered"] = True
+        
+                # If retrain was triggered (on rerun), do the work
+                if st.session_state.get("retrain_triggered"):
+                    try:
+                        st.toast("Retraining model...", icon="🧠")
+                        retrain_model_from_feedback(db)
+        
+                        st.toast("Reloading model...", icon="🔁")
                         model = load_model()
-            
-                        # Re-run the image + input through the model
+        
+                        image_url = user_doc.get("image_url")
+                        response = requests.get(image_url)
+                        img = Image.open(BytesIO(response.content))
+        
+                        st.image(img, caption="Image used for retrained prediction", width=300)
+        
+                        features = extract_features(img)
+                        new_output = predict_with_model(model, features)
+        
                         st.markdown("### 🧪 Retrained Diagnosis Result")
-            
-                        try:
-                            # Load image bytes again from Firebase URL
-                            from PIL import Image
-                            import requests
-                            from io import BytesIO
-            
-                            image_url = user_doc.get("image_url")
-                            response = requests.get(image_url)
-                            img = Image.open(BytesIO(response.content))
-            
-                            # Extract features and run prediction
-                            features = extract_features(img)
-                            new_output = predict_with_model(model, features)
-            
-                            # Show the new results
-                            st.json({
-                                "retrained_tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
-                                "retrained_western_equivalent": new_output.get("western_equivalent", "N/A"),
-                                "retrained_remedies": new_output.get("remedies", []),
-                                "confidence": new_output.get("confidence", "N/A")
-                            })
-                            st.info("✅ Retrain logic executed.")
-
-            
-                        except Exception as e:
-                            st.error(f"Failed to re-run prediction: {e}")
-            
-                except ModuleNotFoundError as e:
-                    st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
-
-
+                        st.json({
+                            "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
+                            "western_equivalent": new_output.get("western_equivalent", "N/A"),
+                            "remedies": new_output.get("remedies", []),
+                            "confidence": new_output.get("confidence", "N/A")
+                        })
+        
+                        # Optional: Reset to prevent repeat prediction on next rerun
+                        st.session_state["retrain_triggered"] = False
+        
+                    except Exception as e:
+                        st.exception(e)
+        
+            except ModuleNotFoundError as e:
+                st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
+        
 
 
 # ------------------------------

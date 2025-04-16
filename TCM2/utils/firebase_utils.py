@@ -4,6 +4,7 @@ import cv2
 import tempfile
 from datetime import timedelta
 import firebase_admin  
+from datetime import timedelta
 from firebase_admin import credentials, firestore, storage, initialize_app
 import streamlit as st
 
@@ -33,23 +34,22 @@ def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     from tempfile import NamedTemporaryFile
     import os
 
-    # Reset pointer and write to temp file
     uploaded_img.seek(0)
     with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
         tmp.write(uploaded_img.read())
         tmp_path = tmp.name
 
-    # Block empty uploads
     if os.path.getsize(tmp_path) == 0:
         raise ValueError("Uploaded image is empty. Please upload a valid image.")
 
     blob_path = f"tongue_images/{submission_id}.jpg"
     blob = bucket.blob(blob_path)
     blob.upload_from_filename(tmp_path)
-    blob.make_public()
 
-    return blob.public_url, tmp_path
+    # 🔐 Use signed URL (expires in 1 hour)
+    url = blob.generate_signed_url(version="v4", expiration=timedelta(hours=1), method="GET")
 
+    return url, tmp_path
 
 
 # Save user inputs to Firestore

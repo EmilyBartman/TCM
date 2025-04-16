@@ -432,36 +432,35 @@ elif page == "Medical Review Dashboard":
             db.collection("medical_feedback").document(selected_id).set(feedback)
             st.success("✅ Feedback saved.")
 
-        # 🔄 Retraining Trigger
-        with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
-            try:
-                from utils.retrain import retrain_model_from_feedback
-                from utils.model_utils import predict_with_model, extract_features, load_model
-                from PIL import Image
-                import requests
-                from io import BytesIO
-        
-                # Button click sets session flag (button disappears after rerun)
-                if st.button("🔁 Retrain Now"):
-                    st.session_state["retrain_triggered"] = True
-        
-                # If retrain was triggered (on rerun), do the work
-                if st.session_state.get("retrain_triggered"):
-                    try:
+            # 🔄 Retraining Trigger
+            with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
+                try:
+                    from utils.retrain import retrain_model_from_feedback
+                    from utils.model_utils import predict_with_model, extract_features, load_model
+                    from PIL import Image
+                    import requests
+                    from io import BytesIO
+    
+                    # Button click sets session flag
+                    if st.button("🔁 Retrain Now"):
+                        st.session_state["retrain_triggered"] = True
+    
+                    # If retrain was triggered (on rerun), do the work
+                    if st.session_state.get("retrain_triggered"):
                         st.toast("Retraining model...", icon="🧠")
                         retrain_model_from_feedback(db)
-        
+    
                         st.toast("Reloading model...", icon="🔁")
                         model = load_model()
-        
-                        image_url = gpt_doc.get("image_url")
-
+    
+                        image_url = gpt_doc.get("image_url")  # ✅ Pull from correct doc
+    
                         if not image_url:
                             st.error("❌ No image URL found in the submission.")
                         else:
                             try:
                                 response = requests.get(image_url)
-                        
+    
                                 if response.status_code != 200:
                                     st.error(f"❌ Failed to load image: HTTP {response.status_code}")
                                 elif "image" not in response.headers.get("Content-Type", ""):
@@ -470,10 +469,10 @@ elif page == "Medical Review Dashboard":
                                     try:
                                         img = Image.open(BytesIO(response.content))
                                         st.image(img, caption="Image used for retrained prediction", width=300)
-                                    
+    
                                         features = extract_features(img)
                                         new_output = predict_with_model(model, features)
-                                    
+    
                                         st.markdown("### 🧪 Retrained Diagnosis Result")
                                         st.json({
                                             "tcm_syndrome": new_output.get("tcm_syndrome", "N/A"),
@@ -481,13 +480,18 @@ elif page == "Medical Review Dashboard":
                                             "remedies": new_output.get("remedies", []),
                                             "confidence": new_output.get("confidence", "N/A")
                                         })
-                                    
+    
                                     except Exception as e:
                                         st.error(f"❌ Image processing or prediction failed: {e}")
-
-                        
                             except Exception as e:
                                 st.error(f"❌ Unexpected error while downloading image: {e}")
+    
+                        # Optional: reset trigger so retrain doesn't rerun again on page reload
+                        st.session_state["retrain_triggered"] = False
+    
+                except ModuleNotFoundError as e:
+                    st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
+
 
         
 

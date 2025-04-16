@@ -499,12 +499,14 @@ elif page == "Medical Review Dashboard":
                     import requests
                     from tempfile import NamedTemporaryFile
                     from PIL import Image
-        
+                    
                     st.toast("Retraining model...", icon="🧠")
                     retrain_model_from_feedback(db)
         
                     st.toast("Reloading model...", icon="🔁")
                     model = load_model()
+                    st.code(f"Feature length: {len(features)}")
+                    st.code(f"Model loaded: {'yes' if model else 'no'}")
         
                     image_url = user_doc.get("image_url")
                     if not image_url:

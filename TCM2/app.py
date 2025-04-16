@@ -457,15 +457,15 @@ elif page == "Medical Review Dashboard":
                         image_url = user_doc.get("image_url")
                         
                         if not image_url:
-                            st.error("No image URL found in the submission.")
+                            st.error("❌ No image URL found in the submission.")
                         else:
                             try:
                                 response = requests.get(image_url)
                         
                                 if response.status_code != 200:
-                                    st.error(f"Failed to load image: HTTP {response.status_code}")
+                                    st.error(f"❌ Failed to load image: HTTP {response.status_code}")
                                 elif "image" not in response.headers.get("Content-Type", ""):
-                                    st.error("The file at the provided URL is not an image.")
+                                    st.error("❌ The file at the provided URL is not an image.")
                                 else:
                                     try:
                                         img = Image.open(BytesIO(response.content))
@@ -481,11 +481,12 @@ elif page == "Medical Review Dashboard":
                                             "remedies": new_output.get("remedies", []),
                                             "confidence": new_output.get("confidence", "N/A")
                                         })
+                        
                                     except Exception as e:
-                                        st.error(f"Image processing or prediction failed: {e}")
+                                        st.error(f"❌ Image processing or prediction failed: {e}")
                         
                             except Exception as e:
-                                st.error(f"Error downloading image: {e}")
+                                st.error(f"❌ Unexpected error while downloading image: {e}")
 
                                 
 

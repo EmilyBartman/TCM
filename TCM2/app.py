@@ -341,13 +341,17 @@ elif page == "Medical Review Dashboard":
         for key in keys:
             expected = expected_dict.get(key, "—")
             actual = actual_dict.get(key, "—")
+    
+            # Convert lists to readable strings
+            if isinstance(expected, list):
+                expected = ", ".join(expected)
+            if isinstance(actual, list):
+                actual = ", ".join(actual)
+    
             table_data.append((key, expected, actual))
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
-        st.dataframe(df, use_container_width=True)
-
-        
-
+        st.table(df)
 
 
     if selected_id:

@@ -45,7 +45,7 @@ if page == "Educational Content":
     target_lang = LANGUAGES[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
-    st.markdown("### 👥 For General Users & Beginners")
+    st.markdown(f"### 👥 **{translate('For General Users & Beginners', target_lang)}**")
     st.markdown(translate("""
 **What Is TCM?**
 Traditional Chinese Medicine (TCM) is a holistic approach to health practiced for over 2,500 years. It focuses on restoring balance in the body rather than just treating symptoms.
@@ -58,7 +58,8 @@ Traditional Chinese Medicine (TCM) is a holistic approach to health practiced fo
 - **Common Treatments**: Herbal remedies, acupuncture, gentle movement (Tai Chi/Qi Gong), and dietary therapy
 """, target_lang))
 
-    st.markdown("### 👅 Tongue Diagnosis Basics")
+    st.markdown(f"### 👅 **{translate('Tongue Diagnosis Basics', target_lang)}**")
+
     st.markdown(translate("""
 In TCM, your tongue offers a visual map of your internal health. Changes in its appearance can signal imbalances before other symptoms appear.
 
@@ -73,7 +74,7 @@ These insights help tailor your care plan.
 """, target_lang))
 
     st.markdown("---")
-    st.markdown("### 🩺 For Medical Professionals & Practitioners")
+    st.markdown(f"### 🩺 **{translate('For Medical Professionals & Practitioners', target_lang)}**")
     st.markdown(translate("""
 **Diagnostic Framework in TCM:**
 Tongue inspection is one of the four key diagnostic methods in TCM, alongside pulse taking, observation, and inquiry. It offers insights into the state of internal organs and their pathological changes.
@@ -96,7 +97,7 @@ Tongue inspection is one of the four key diagnostic methods in TCM, alongside pu
 Tongue signs may support early detection of systemic imbalances before lab markers change. Use cases include GI disorders, hormonal imbalance, and fatigue-related syndromes.
 """, target_lang))
 
-    st.markdown("### 🧠 AI & Tongue Diagnostics")
+    st.markdown(f"### 🧠 **{translate('AI & Tongue Diagnostics', target_lang)}**")
     st.markdown(translate("""
 This app uses AI (specifically GPT-4o) to analyze tongue images and user-reported symptoms. While not a replacement for clinical judgment, it offers a research-based wellness screening tool that may help with:
 - Tracking progress over time
@@ -211,7 +212,7 @@ if page == "Tongue Health Check":
 # Medical Review Dashboard
 # ------------------------------
 elif page == "Medical Review Dashboard":
-    st.title("🧠 Medical Review Dashboard")
+    st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info("Select a submission to review and give expert feedback.")
 
     docs = db.collection("submission_diffs").stream()
@@ -261,7 +262,7 @@ elif page == "Medical Review Dashboard":
 # SUBMISSION HISTORY
 # ------------------------------
 elif page == "Submission History":
-    st.title("📊 Model & App Performance Dashboard")
+    st.title(translate("📊 Model & App Performance Dashboard", target_lang))
 
     try:
         # Fetch Firestore data

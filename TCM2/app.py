@@ -154,26 +154,24 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 if page == "Tongue Health Check":
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
+    # Upload and preview image BEFORE the form
+    st.markdown(translate("Upload Tongue Image", target_lang))
+    st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
+    uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
+    
+    # Image preview - needs to be outside the form
+    if uploaded_img is not None:
+        try:
+            uploaded_img.seek(0)
+            image_bytes = uploaded_img.read()
+            img = Image.open(io.BytesIO(image_bytes))
+            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_column_width="auto")
+        except Exception as e:
+            st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
+            st.exception(e)
+
     with st.form("tongue_upload_form"):
-        st.markdown(translate("Upload Tongue Image", target_lang))
-        st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
-        uploaded_img = st.file_uploader("", type=["jpg", "jpeg", "png"])
-        
-        # 🖼 Preview uploaded image before submit
-        if uploaded_img is not None:
-            try:
-                # Reset file pointer and read image
-                uploaded_img.seek(0)
-                image_bytes = uploaded_img.read()
-                img = Image.open(io.BytesIO(image_bytes))
-                st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), use_column_width="auto")
-            except Exception as e:
-                st.warning(translate("⚠️ Unable to preview uploaded image.", target_lang))
-                st.exception(e)
-
-
-
-        
+                
         symptoms = st.multiselect(
             translate("Select Symptoms", target_lang),
             [translate(opt, target_lang) for opt in ["Fatigue", "Stress", "Stomach ache", "Dizziness"]]

@@ -332,68 +332,58 @@ elif page == "Medical Review Dashboard":
     ids = [d.id for d in docs]
     selected_id = st.selectbox(translate("Submission ID", target_lang), ids)
 
-    def compare_fields(user_data, gpt_data):
-        diffs = {}
-        try:
-            expected = user_data.get("user_inputs", {})
-            actual = gpt_data if isinstance(gpt_data, dict) else {}
-
-            for key in ["tcm_syndrome", "western_equivalent", "remedies"]:
-                user_val = expected.get(key, "")
-                gpt_val = actual.get(key, "")
-                if user_val != gpt_val:
-                    diffs[key] = {"expected": user_val, "actual": gpt_val}
-        except Exception as e:
-            diffs["error"] = str(e)
-        return diffs
+    def show_table_side_by_side(expected_dict, actual_dict):
+        st.write("### Comparison Table")
+        table_data = []
+        keys = sorted(set(expected_dict.keys()) | set(actual_dict.keys()))
+        for key in keys:
+            expected = expected_dict.get(key, "—")
+            actual = actual_dict.get(key, "—")
+            match = expected == actual
+            table_data.append((key, expected, actual, "✅" if match else "❌"))
+        df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis", "Match"])
+        st.dataframe(df, use_container_width=True)
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
         gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
 
-        # 📸 Show Image (if URL saved in user_doc)
-        st.subheader("📸 Uploaded Tongue Image")
+        # 📸 Tongue Image Preview
+        st.subheader("📸 Tongue Image")
         if "image_url" in user_doc:
-            st.image(user_doc["image_url"], use_container_width=True)
+            st.image(user_doc["image_url"], caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
         else:
-            st.info("No image URL found in the submission.")
+            st.info("No image uploaded.")
 
-        # 📄 User Input
-        st.subheader(translate("📄 User Input", target_lang))
-        st.json(user_doc.get("user_inputs", {}))
+        # 📄 Extracted User Inputs (flattened view)
+        user_inputs = user_doc.get("user_inputs", {})
+        input_fields = {
+            **{f"Symptom {i+1}": s for i, s in enumerate(user_inputs.get("symptoms", []))},
+            **user_inputs.get("vitals", {}),
+            **user_inputs.get("tongue_characteristics", {})
+        }
 
-        # 🤖 Model Output
-        st.subheader(translate("🤖 Model Output", target_lang))
-        if model_doc and isinstance(model_doc, dict):
-            st.json(model_doc.get("model_outputs", {}))
-        else:
-            st.warning("No structured model output found.")
-
-        # 🧠 GPT-4o Structured View
-        st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
+        # 🤖 GPT Output
         raw_gpt = gpt_doc.get("gpt_response", "")
         try:
-            gpt_data = raw_gpt if isinstance(raw_gpt, dict) else json.loads(raw_gpt)
+            gpt_data = json.loads(raw_gpt) if isinstance(raw_gpt, str) else raw_gpt
         except Exception:
-            gpt_data = raw_gpt  # Keep as string if JSON parsing fails
+            gpt_data = {}
 
-        if isinstance(gpt_data, dict):
-            st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
-            st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
-            st.markdown("**🌿 Remedies:**")
-            for r in gpt_data.get("remedies", []):
-                st.markdown(f"- {r}")
-            st.markdown(f"**⚖️ Discrepancies:** {gpt_data.get('discrepancies', 'N/A')}")
-            st.markdown(f"**📊 Confidence Score:** `{gpt_data.get('confidence', 'N/A')}%`")
+        st.subheader("📊 User vs GPT-4o Comparison")
+        if isinstance(gpt_data, dict) and gpt_data:
+            show_table_side_by_side(input_fields, gpt_data)
         else:
-            st.warning("Could not parse structured GPT response. Displaying raw text:")
-            st.write(gpt_data)
+            st.warning("GPT response is not structured or is a fallback message.")
+            st.text(raw_gpt)
 
-        # ⚖️ Differences
-        st.subheader(translate("⚖️ Differences", target_lang))
-        diffs = compare_fields(user_doc, gpt_data)
-        st.json(diffs)
+        # 🤖 Optional Model Output
+        if model_doc and isinstance(model_doc, dict):
+            st.subheader("🧪 Model Output (Internal)")
+            st.json(model_doc.get("model_outputs", {}))
+        else:
+            st.info("No structured model output available.")
 
         # 🧬 Expert Feedback
         st.subheader(translate("🧬 Expert Feedback", target_lang))
@@ -419,13 +409,16 @@ elif page == "Medical Review Dashboard":
                 "timestamp": datetime.utcnow().isoformat()
             }
             db.collection("medical_feedback").document(selected_id).set(feedback)
-            st.success(translate("Feedback saved.", target_lang))
+            st.success("✅ Feedback saved.")
 
-        # 🔄 Retrain From Feedback
+        # 🔄 Retraining Trigger
         with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
-            from utils.retrain import retrain_model_from_feedback
-            if st.button(translate("🔄 Retrain Now", target_lang)):
-                retrain_model_from_feedback(db)
+            try:
+                from utils.retrain import retrain_model_from_feedback
+                if st.button(translate("🔄 Retrain Now", target_lang)):
+                    retrain_model_from_feedback(db)
+            except ModuleNotFoundError as e:
+                st.error(f"Missing module: {e.name}. Install it in your environment (e.g., `pip install {e.name}`)")
 
 
 

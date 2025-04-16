@@ -1,5 +1,6 @@
 # utils/translation.py
 import streamlit as st
+import re
 from deep_translator import GoogleTranslator
 
 LANGUAGES = {
@@ -27,7 +28,13 @@ LANGUAGES = {
     "한국어": "ko"               # Korean
 }
 
-
+def clean_markdown(text):
+    # Remove markdown emphasis and titles
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"\*(.*?)\*", r"\1", text)
+    text = re.sub(r"#", "", text)
+    return text
+    
 def set_language_selector():
     # Default to "English" on first load
     if "selected_lang" not in st.session_state or st.session_state.selected_lang not in LANGUAGES:
@@ -57,6 +64,8 @@ def set_language_selector():
 
 def translate(text, lang_code):
     try:
-        return GoogleTranslator(source="auto", target=lang_code).translate(text)
+        clean_text = clean_markdown(text)
+        return GoogleTranslator(source="auto", target=lang_code).translate(clean_text)
     except Exception:
         return text
+

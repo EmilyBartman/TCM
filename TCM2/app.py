@@ -351,15 +351,22 @@ elif page == "Medical Review Dashboard":
 
     if selected_id:
         user_doc = db.collection("tongue_submissions").document(selected_id).get().to_dict()
+        st.code(json.dumps(user_doc, indent=2), language="json")
         gpt_doc = db.collection("gpt_diagnoses").document(selected_id).get().to_dict()
         model_doc = db.collection("model_outputs").document(selected_id).get().to_dict()
 
         # 📸 Tongue Image
         st.subheader("📸 Tongue Image")
-        if "image_url" in user_doc:
-            st.image(user_doc["image_url"], caption="Preview of Uploaded Tongue Image", width=300)
+        image_url = user_doc.get("image_url", None)
+        if image_url:
+            try:
+                st.image(image_url, caption="Preview of Uploaded Tongue Image", width=300)
+            except Exception as e:
+                st.warning("⚠️ Failed to load image. The image may be missing or the URL expired.")
+                st.code(image_url)
         else:
-            st.info("No image uploaded.")
+            st.info("No image URL found in this record.")
+        
 
         # 📄 User Inputs
         user_inputs = user_doc.get("user_inputs", {})

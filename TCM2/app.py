@@ -336,7 +336,7 @@ elif page == "Medical Review Dashboard":
         diffs = {}
         try:
             expected = user_data.get("user_inputs", {})
-            actual = gpt_data.get("gpt_response", {})
+            actual = gpt_data if isinstance(gpt_data, dict) else {}
 
             for key in ["tcm_syndrome", "western_equivalent", "remedies"]:
                 user_val = expected.get(key, "")
@@ -355,7 +355,7 @@ elif page == "Medical Review Dashboard":
         # 📸 Show Image (if URL saved in user_doc)
         st.subheader("📸 Uploaded Tongue Image")
         if "image_url" in user_doc:
-            st.image(user_doc["image_url"], use_column_width=True)
+            st.image(user_doc["image_url"], use_container_width=True)
         else:
             st.info("No image URL found in the submission.")
 
@@ -363,21 +363,21 @@ elif page == "Medical Review Dashboard":
         st.subheader(translate("📄 User Input", target_lang))
         st.json(user_doc.get("user_inputs", {}))
 
-        # 🤖 Model Output (safe)
+        # 🤖 Model Output
         st.subheader(translate("🤖 Model Output", target_lang))
         if model_doc and isinstance(model_doc, dict):
             st.json(model_doc.get("model_outputs", {}))
         else:
             st.warning("No structured model output found.")
 
-        # ⚖️ Differences
-        st.subheader(translate("⚖️ Differences", target_lang))
-        diffs = compare_fields(user_doc, gpt_doc)
-        st.json(diffs)
-
         # 🧠 GPT-4o Structured View
         st.subheader(translate("🧠 GPT-4o Diagnosis Result", target_lang))
-        gpt_data = gpt_doc.get("gpt_response", {})
+        raw_gpt = gpt_doc.get("gpt_response", "")
+        try:
+            gpt_data = raw_gpt if isinstance(raw_gpt, dict) else json.loads(raw_gpt)
+        except Exception:
+            gpt_data = raw_gpt  # Keep as string if JSON parsing fails
+
         if isinstance(gpt_data, dict):
             st.markdown(f"**🩺 TCM Syndrome:** {gpt_data.get('tcm_syndrome', 'N/A')}")
             st.markdown(f"**💊 Western Equivalent:** {gpt_data.get('western_equivalent', 'N/A')}")
@@ -387,11 +387,45 @@ elif page == "Medical Review Dashboard":
             st.markdown(f"**⚖️ Discrepancies:** {gpt_data.get('discrepancies', 'N/A')}")
             st.markdown(f"**📊 Confidence Score:** `{gpt_data.get('confidence', 'N/A')}%`")
         else:
-            st.warning(translate("Could not parse structured GPT response. Displaying raw text:", target_lang))
+            st.warning("Could not parse structured GPT response. Displaying raw text:")
             st.write(gpt_data)
 
+        # ⚖️ Differences
+        st.subheader(translate("⚖️ Differences", target_lang))
+        diffs = compare_fields(user_doc, gpt_data)
+        st.json(diffs)
+
         # 🧬 Expert Feedback
-        st.sub
+        st.subheader(translate("🧬 Expert Feedback", target_lang))
+        agree = st.radio(
+            translate("Do you agree with the GPT diagnosis?", target_lang),
+            [translate(opt, target_lang) for opt in ["Yes", "Partially", "No"]]
+        )
+        corrected_syndrome = st.text_input("Correct TCM Syndrome")
+        corrected_equivalent = st.text_input("Correct Western Equivalent")
+        corrected_remedies = st.text_area("Correct Remedies (comma-separated)")
+        notes = st.text_area(translate("Correction notes", target_lang))
+
+        if st.button(translate("Submit Feedback", target_lang)):
+            feedback = {
+                "submission_id": selected_id,
+                "agreement": agree,
+                "corrections": {
+                    "tcm_syndrome": corrected_syndrome,
+                    "western_equivalent": corrected_equivalent,
+                    "remedies": [r.strip() for r in corrected_remedies.split(",") if r.strip()]
+                },
+                "notes": notes,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+            db.collection("medical_feedback").document(selected_id).set(feedback)
+            st.success(translate("Feedback saved.", target_lang))
+
+        # 🔄 Retrain From Feedback
+        with st.expander(translate("🔄 Retrain From Feedback", target_lang)):
+            from utils.retrain import retrain_model_from_feedback
+            if st.button(translate("🔄 Retrain Now", target_lang)):
+                retrain_model_from_feedback(db)
 
 
 

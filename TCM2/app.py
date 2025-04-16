@@ -352,26 +352,9 @@ elif page == "Medical Review Dashboard":
     
         df = pd.DataFrame(table_data, columns=["Field", "User Input", "GPT Diagnosis"])
     
-        # Center-align headers and wrap content using HTML/CSS
-        table_html = df.to_html(index=False, escape=False)
-        table_html = f"""
-            <style>
-            table {{
-                width: 100%;
-                border-collapse: collapse;
-            }}
-            th {{
-                text-align: center !important;
-                background-color: #f1f1f1;
-            }}
-            td {{
-                vertical-align: top;
-            }}
-            </style>
-            {table_html}
-        """
+        # Render without index/row numbers
+        st.markdown(df.to_html(index=False, escape=False), unsafe_allow_html=True)
     
-        st.markdown(table_html, unsafe_allow_html=True)
 
 
 

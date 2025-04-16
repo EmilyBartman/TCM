@@ -56,13 +56,17 @@ def retrain_model_from_feedback(db):
             continue
 
     if not X or not y:
-        print("⚠️ No valid data found for retraining.")
-        return
+    print("⚠️ No valid data found for retraining.")
+    return
 
+    if len(set(y)) < 2:
+        print("❌ Cannot train: need at least two distinct classes. Found:", set(y))
+        return
+    
     # Train model
     model = LogisticRegression(max_iter=1000)
     model.fit(X, y)
-
+    
     # Save model
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/tcm_diagnosis_model.pkl")

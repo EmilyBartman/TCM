@@ -371,17 +371,31 @@ elif page == "Medical Review Dashboard":
 
         # 🤖 GPT Output
         raw_gpt = gpt_doc.get("gpt_response", "")
-        try:
-            gpt_data = json.loads(raw_gpt) if isinstance(raw_gpt, str) else raw_gpt
-        except Exception:
-            gpt_data = {}
+        
+        # Attempt robust parsing
+        gpt_data = {}
+        if isinstance(raw_gpt, dict):
+            gpt_data = raw_gpt
+        elif isinstance(raw_gpt, str):
+            try:
+                parsed = json.loads(raw_gpt)
+                if isinstance(parsed, dict):
+                    gpt_data = parsed
+                else:
+                    st.warning("⚠️ Parsed GPT output is not a dictionary.")
+            except json.JSONDecodeError as e:
+                st.warning(f"⚠️ Failed to parse GPT response as JSON: {e}")
+        else:
+            st.warning("⚠️ GPT response is neither a dict nor a valid string.")
+
 
         st.subheader("📊 User vs GPT-4o Comparison")
-        if isinstance(gpt_data, dict) and gpt_data:
+        if gpt_data:
             show_table_side_by_side(input_fields, gpt_data)
         else:
-            st.warning("GPT response is not structured or is a fallback message.")
-            st.text(raw_gpt)
+            st.warning("⚠️ GPT response is not structured. Displaying raw fallback message:")
+            st.code(raw_gpt if raw_gpt else "No data available", language="text")
+
 
         # 🧪 Optional Model Output
         if model_doc:

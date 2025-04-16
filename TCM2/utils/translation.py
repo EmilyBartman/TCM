@@ -51,6 +51,7 @@ def set_language_selector():
         if not st.session_state.get("form_submitted", False):
             st.rerun()
 
+
     return LANGUAGES[st.session_state.selected_lang]
 
 

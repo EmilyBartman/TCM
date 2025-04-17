@@ -374,10 +374,8 @@ with tabs[2]:
             st.caption("🧠 Image from `gpt_diagnoses`")
         
         # 📸 Tongue Image Display - Iterate over the image data
-        # Ensure image_data is initialized correctly
-        image_data = []  # Initialize as an empty list before processing each set of uploads
-        
-        # Process the uploaded images and store image URLs with their characteristics
+       # Handle the uploaded images and get their URLs
+        image_data = []  # List to store image data and their characteristics
         for img_file in uploaded_imgs:
             img_file.seek(0)  # ✅ CORRECT PLACEMENT here, not above
             submission_id = str(uuid.uuid4())
@@ -405,9 +403,8 @@ with tabs[2]:
                 }
             })
         
-        # After this block, image_data will contain the newly uploaded images and their details
-        
-        if image_data:  # Ensure image_data is populated
+        # After processing the uploaded images, display each image
+        if image_data:  # Ensure image_data is populated with image URLs
             for img_data in image_data:
                 img_url = img_data.get('image_url')  # Extract the image URL
                 if img_url:
@@ -431,8 +428,8 @@ with tabs[2]:
                         st.exception(e)
         else:
             st.info("No image URL available.")
-
-
+        
+        
 
         
 

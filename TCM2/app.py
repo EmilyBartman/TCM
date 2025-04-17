@@ -36,7 +36,7 @@ with st.container():
     col1, col2 = st.columns([1, 1])  # Adjust ratio if you want more width
 
     with col1:
-        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
+        #st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
         target_lang = set_language_selector()
 
     with col2:

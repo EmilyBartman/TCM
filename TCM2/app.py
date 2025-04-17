@@ -40,27 +40,27 @@ st.markdown("""
 db, bucket = init_firebase()
 
 
-# ✨ Improve Tabs Style
 st.markdown("""
     <style>
-    /* Make the tabs bigger and spaced */
-    .stTabs [data-baseweb="tab"] {
-        font-size: 18px;
-        padding: 12px 24px;
-        border-bottom: 3px solid transparent;
+    div[data-baseweb="select"] > div {
+        padding-top: 4px !important;
+        padding-bottom: 4px !important;
+        font-size: 15px !important;
     }
-    /* Highlight active tab */
-    .stTabs [data-baseweb="tab"][aria-selected="true"] {
-        border-bottom: 3px solid #ff4b4b; /* Bright red underline */
-        color: #ff4b4b; /* Bright red text */
-        font-weight: bold;
-        background-color: #f9f9f9;
-        border-radius: 8px 8px 0 0;
+
+    /* Fix box width and vertical centering */
+    .stSelectbox > div {
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
     }
-    /* On hover over tabs */
-    .stTabs [data-baseweb="tab"]:hover {
-        background-color: #f0f2f6;
+
+    /* Reduce spacing between rows if needed */
+    .block-container {
+        padding-top: 1rem;
     }
+    </style>
+""", unsafe_allow_html=True)
+
     </style>
 """, unsafe_allow_html=True)
 
@@ -75,32 +75,36 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 🌍 Language and Navigation Bar (Same Row)
-col1, col2 = st.columns([1, 3])  # Adjust width ratio as needed
+# 🌍 Language and Navigation Bar (Same Row, Equal Style)
+with st.container():
+    col1, col2 = st.columns([1, 1])  # Adjust ratio if you want more width
 
-with col1:
-    target_lang = set_language_selector()
+    with col1:
+        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
+        target_lang = set_language_selector()
 
-with col2:
-    st.markdown(f"#### {translate('🔀 Navigate To', target_lang)}", unsafe_allow_html=True)
-    tab_labels = [
-        translate("🌿 Educational Content", target_lang),
-        translate("👅 Tongue Health Check", target_lang),
-        translate("🧠 Medical Review Dashboard", target_lang),
-        translate("📊 TCM App Usage & Quality Dashboard", target_lang),
-        translate("📚 About & Disclaimer", target_lang)
-    ]
-    selected_tab = st.selectbox("", tab_labels, key="tab_selector", label_visibility="collapsed")
+    with col2:
+        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🔀 Navigate To', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
+        tab_labels = [
+            translate("🌿 Educational Content", target_lang),
+            translate("👅 Tongue Health Check", target_lang),
+            translate("🧠 Medical Review Dashboard", target_lang),
+            translate("📊 TCM App Usage & Quality Dashboard", target_lang),
+            translate("📚 About & Disclaimer", target_lang)
+        ]
+        selected_tab = st.selectbox("", tab_labels, key="tab_selector", label_visibility="collapsed")
 
-# 🌟 Reset form when switching tabs
+
+# 🧹 Reset logic when switching tabs
 if "last_selected_tab" not in st.session_state:
     st.session_state.last_selected_tab = selected_tab
 
 if selected_tab != st.session_state.last_selected_tab:
     for key in list(st.session_state.keys()):
-        if key not in ["selected_lang", "language_selector", "last_selected_tab"]:
+        if key not in ["selected_lang", "language_selector", "last_selected_tab", "tab_selector"]:
             del st.session_state[key]
     st.session_state.last_selected_tab = selected_tab
+
 
 # ------------------------------
 # EDUCATIONAL CONTENT 

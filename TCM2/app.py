@@ -29,27 +29,28 @@ st.set_page_config(page_title="TCM Health App", layout="wide")
 # 🔧 CSS: Reduce whitespace + unify dropdown style
 st.markdown("""
     <style>
-    /* Page Padding */
-    .block-container {
-        padding-top: 1rem;
-        padding-bottom: 2rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
-    }
-
-    /* Dropdowns (Language + Tab Nav) */
+    /* 🔧 Make dropdowns visually consistent */
     div[data-baseweb="select"] > div {
-        padding-top: 4px !important;
-        padding-bottom: 4px !important;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
         font-size: 15px !important;
+        min-height: 45px;
     }
 
     .stSelectbox > div {
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.8rem;
         border-radius: 0.5rem;
+        background-color: #f3f4f6;
+        border: 1px solid #d0d7de;
+    }
+
+    /* 🧼 Clean up margin spacing */
+    .block-container {
+        padding-top: 1rem;
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # 🌍 Language and Navigation Bar (Same Row, Equal Style)
 with st.container():

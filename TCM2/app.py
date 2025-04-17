@@ -223,7 +223,7 @@ with tabs[1]:
                 st.stop()
 
             # Process and upload all images
-            image_data = user_doc.get("image_data", []) or gpt_doc.get("image_data", [])
+            image_data = user_doc.get("image_url", []) or gpt_doc.get("image_url", [])
             if image_data:
                 for img in image_data:
                     img_url = img.get("image_url")

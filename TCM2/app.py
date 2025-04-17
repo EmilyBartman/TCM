@@ -140,38 +140,38 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 with tabs[1]:
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
-    st.markdown(translate("Upload Tongue Image", target_lang))
-    st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
+    st.markdown(translate("Upload Tongue Images", target_lang))
+    st.markdown(translate("Drag and drop multiple files below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
+
     # Ensure uploader runs only once
-    if "uploaded_img" not in st.session_state:
-        st.session_state.uploaded_img = None
-    
-    new_upload = st.file_uploader("", type=["jpg", "jpeg", "png"])
+    if "uploaded_imgs" not in st.session_state:
+        st.session_state.uploaded_imgs = []
+
+    # Multiple file uploader
+    new_uploads = st.file_uploader("", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
     # Update or clear session state
-    if new_upload:
-        st.session_state.uploaded_img = new_upload
-    elif "uploaded_img" in st.session_state:
-        st.session_state.pop("uploaded_img")  # Remove old image if none uploaded this time
+    if new_uploads:
+        st.session_state.uploaded_imgs = new_uploads
+    elif not new_uploads and "uploaded_imgs" in st.session_state:
+        st.session_state.pop("uploaded_imgs")  # Remove old images if none uploaded this time
 
-    
     # Safely get final upload reference
-    uploaded_img = st.session_state.get("uploaded_img", None)
-    
-    # Show preview only if the uploaded image is still valid
-    if uploaded_img:
-        try:
-            uploaded_img.seek(0)
-            img_bytes = uploaded_img.read()
-            img = Image.open(io.BytesIO(img_bytes))
-            st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
-        except Exception as e:
-            st.warning(translate("⚠️ Unable to preview uploaded image. Please re-upload." , target_lang))
-            st.session_state.uploaded_img = None  # Clear invalid image
+    uploaded_imgs = st.session_state.get("uploaded_imgs", [])
 
+    # Show preview for each uploaded image
+    if uploaded_imgs:
+        for img_file in uploaded_imgs:
+            try:
+                img_bytes = img_file.read()
+                img = Image.open(io.BytesIO(img_bytes))
+                st.image(img, caption=translate("Preview of Uploaded Tongue Image", target_lang), width=300)
+            except Exception as e:
+                st.warning(translate("⚠️ Unable to preview uploaded image. Please re-upload.", target_lang))
+                st.session_state.uploaded_imgs = []  # Clear invalid images
 
     with st.form("tongue_upload_form"):
-                
+        # Collecting user inputs
         symptoms = st.multiselect(
             translate("Select Symptoms", target_lang),
             [translate(opt, target_lang) for opt in ["Fatigue", "Stress", "Stomach ache", "Dizziness"]]
@@ -213,90 +213,110 @@ with tabs[1]:
 
         consent = st.checkbox(translate("I consent to the use of my data for research.", target_lang))
         submit = st.form_submit_button(translate("Analyze", target_lang))
+        
         if submit:
             st.session_state.form_submitted = True
-            uploaded_img = st.session_state.get("uploaded_img", None)
- 
+            uploaded_imgs = st.session_state.get("uploaded_imgs", [])
 
+            if not uploaded_imgs or not consent:
+                st.warning("Please upload images and give consent.")
+                st.stop()
 
-    if submit:
-        uploaded_img = st.session_state.get("uploaded_img", None)
-    
-        if not uploaded_img or not consent:
-            st.warning("Please upload image and give consent.")
-            st.stop()
-    
-        submission_id = str(uuid.uuid4())
-        timestamp = datetime.utcnow().isoformat()
-    
-        uploaded_img.seek(0)  # ✅ CORRECT PLACEMENT here, not above
-    
-        url, temp_path = upload_image_to_firebase(uploaded_img, submission_id, bucket)
+            # Process and upload all images
+            image_data = []  # List to store image paths and their associated characteristics
+            for img_file in uploaded_imgs:
+                img_file.seek(0)  # ✅ CORRECT PLACEMENT here, not above
+                submission_id = str(uuid.uuid4())
+                timestamp = datetime.utcnow().isoformat()
 
+                # Save the image to Firebase Storage
+                image_path = f"tongue_images/{submission_id}.jpg"  # Define the path to save the image
+                image_ref = bucket.blob(image_path)  # Firebase Storage reference
 
-        user_inputs = {
-            "symptoms": symptoms,
-            "tongue_characteristics": {
-                "color": tongue_color,
-                "shape": tongue_shape,
-                "coating": tongue_coating,
-                "moisture": tongue_moisture,
-                "bumps": tongue_bumps
-            },
-            "vitals": {
-                "heart_rate": heart_rate,
-                "sleep_hours": sleep_hours,
-                "hydration": hydration,
-                "stress_level": stress_level,
-                "bowel_movement": bowel,
-                "medication": medication
-            },
-            "consent_given": consent
-        }
-        save_user_submission(submission_id, timestamp, url, user_inputs, db)
+                # Upload image to Firebase Storage
+                image_ref.upload_from_file(img_file, content_type=img_file.type)
 
-        st.info(translate("🧠 Processing data with GPT-4o for TCM prediction...", target_lang))
-        gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
-        if gpt_response:
-            if isinstance(gpt_response, dict):
-                st.subheader(translate("Prediction Result", target_lang))
-                st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
-                st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
-                st.markdown("**🌿 Remedies:**")
-                for r in gpt_response.get("remedies", []):
-                    st.markdown(f"- {r}")
-                st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
-                st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
-            else:
-                st.subheader(translate("Prediction Result", target_lang))
-                st.warning("Could not parse structured response. Displaying raw output:")
-                st.write(gpt_response)
+                # Get image URL after upload
+                image_url = image_ref.public_url
 
-
-            try:
-                db.collection("gpt_diagnoses").document(submission_id).set({
-                    "submission_id": submission_id,
-                    "timestamp": timestamp,
-                    "image_url": url,
-                    "user_inputs": user_inputs,
-                    "gpt_response": gpt_response
+                # Store image data and its characteristics in a list
+                image_data.append({
+                    "image_url": image_url,
+                    "tongue_characteristics": {
+                        "color": tongue_color,
+                        "shape": tongue_shape,
+                        "coating": tongue_coating,
+                        "moisture": tongue_moisture,
+                        "bumps": tongue_bumps
+                    }
                 })
-                st.success(translate("📝 Prediction result saved to Firestore.", target_lang))
-            except Exception as e:
-                st.warning(translate("⚠️ Failed to save prediction result.", target_lang))
-                st.exception(e)
-            
-            st.markdown("---")
-            st.markdown(translate(
-                f"📝 **Disclaimer:**\n\n"
-                f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
-                f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
-                f"are securely stored and may help improve future versions of this tool.\n\n"
-                f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider.",
-            target_lang))
 
-    # Reset just_submitted flag at the end of the run
-    st.session_state.form_submitted = False
+            # Save all the image data to Firestore
+            user_inputs = {
+                "symptoms": symptoms,
+                "vitals": {
+                    "heart_rate": heart_rate,
+                    "sleep_hours": sleep_hours,
+                    "hydration": hydration,
+                    "stress_level": stress_level,
+                    "bowel_movement": bowel,
+                    "medication": medication
+                },
+                "consent_given": consent,
+                "image_data": image_data  # Save the images and their characteristics together
+            }
+
+            # Save to Firestore
+            submission_id = str(uuid.uuid4())
+            save_user_submission(submission_id, timestamp, image_data, user_inputs, db)
+            
+            st.info(translate("🧠 Processing data with GPT-4o for TCM prediction...", target_lang))
+            
+            # Adjust user_inputs to include the updated structure with images and their characteristics
+            # If needed, you might adjust the GPT function to handle multiple images properly
+            gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
+            
+            if gpt_response:
+                if isinstance(gpt_response, dict):
+                    st.subheader(translate("Prediction Result", target_lang))
+                    st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
+                    st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
+                    st.markdown("**🌿 Remedies:**")
+                    for r in gpt_response.get("remedies", []):
+                        st.markdown(f"- {r}")
+                    st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
+                    st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
+                else:
+                    st.subheader(translate("Prediction Result", target_lang))
+                    st.warning("Could not parse structured response. Displaying raw output:")
+                    st.write(gpt_response)
+            
+                try:
+                    # Save the GPT diagnosis result to Firestore
+                    db.collection("gpt_diagnoses").document(submission_id).set({
+                        "submission_id": submission_id,
+                        "timestamp": timestamp,
+                        "image_data": image_data,  # Save image data with characteristics
+                        "user_inputs": user_inputs,
+                        "gpt_response": gpt_response
+                    })
+                    st.success(translate("📝 Prediction result saved to Firestore.", target_lang))
+                except Exception as e:
+                    st.warning(translate("⚠️ Failed to save prediction result.", target_lang))
+                    st.exception(e)
+            
+                st.markdown("---")
+                st.markdown(translate(
+                    f"📝 **Disclaimer:**\n\n"
+                    f"The insights above are based primarily on the symptoms and tongue characteristics you reported — "
+                    f"the AI model is not trained to directly interpret tongue images. However, your submitted image and input data "
+                    f"are securely stored and may help improve future versions of this tool.\n\n"
+                    f"This is not a medical diagnosis. For any health concerns, please consult a licensed healthcare provider.",
+                target_lang))
+            
+            # Reset just_submitted flag at the end of the run
+            st.session_state.form_submitted = False
+            
 
 
 

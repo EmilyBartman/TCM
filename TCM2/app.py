@@ -494,62 +494,13 @@ elif page == "Medical Review Dashboard":
             if retrain_clicked:
                 try:
                     from utils.retrain import retrain_model_from_feedback
-                    from utils.model_utils import predict_with_model, extract_features, load_model, get_remedies
-                    from io import BytesIO
-                    import requests
-                    from tempfile import NamedTemporaryFile
-                    from PIL import Image
         
-                    st.toast("Retraining model...", icon="🧠")
+                    st.toast("Collecting feedback corrections...", icon="🧠")
                     retrain_model_from_feedback(db)
-        
-                    st.toast("Reloading model...", icon="🔁")
-                    model = load_model()
-        
-                    image_url = user_doc.get("image_url")
-                    if not image_url:
-                        st.error("❌ No image URL found in the submission.")
-                    else:
-                        response = requests.get(image_url)
-                        if response.status_code != 200:
-                            st.error(f"❌ Failed to load image: HTTP {response.status_code}")
-                        elif "image" not in response.headers.get("Content-Type", ""):
-                            st.error("❌ The file at the URL is not an image.")
-                        else:
-                            try:
-                                img = Image.open(BytesIO(response.content))
-                                st.image(img, caption="Image used for retrained prediction", width=300)
-        
-                                with NamedTemporaryFile(suffix=".jpg", delete=False) as tmp_file:
-                                    img.save(tmp_file, format="JPEG")
-                                    tmp_path = tmp_file.name
-        
-                                features = extract_features(tmp_path)
-        
-                                # 🛡️ Safe debug output
-                                st.code(f"Feature length: {len(features)}")
-                                st.code(f"Model loaded: {'yes' if model else 'no'}")
-        
-                                prediction, confidence = predict_with_model(model, features)
-        
-                                new_output = {
-                                    "tcm_syndrome": prediction,
-                                    "western_equivalent": "Unknown",
-                                    "remedies": get_remedies(prediction),
-                                    "confidence": confidence
-                                }
-        
-                                st.markdown("### 🧪 Retrained Diagnosis Result")
-                                st.markdown(f"**🩺 TCM Syndrome:** `{new_output['tcm_syndrome']}`")
-                                st.markdown(f"**💊 Western Equivalent:** `{new_output['western_equivalent']}`")
-                                st.markdown("**🌿 Remedies:**")
-                                for r in new_output["remedies"]:
-                                    st.markdown(f"- {r}")
-                                st.markdown(f"**📊 Confidence Score:** `{new_output['confidence']}%`")
-        
-                            except Exception as e:
-                                st.error(f"❌ Image processing failed: {e}")
-        
+                    st.success("✅ Feedback collected! Future GPT improvements can be made.")
+                except Exception as e:
+                    st.error(f"❌ Failed to process feedback: {e}")
+       
                 except ModuleNotFoundError as e:
                     st.error(f"Missing module: {e.name} — install with `pip install {e.name}`")
 

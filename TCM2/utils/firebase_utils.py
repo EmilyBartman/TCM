@@ -3,6 +3,8 @@ import os
 import cv2
 import tempfile
 from datetime import timedelta
+from tempfile import NamedTemporaryFile
+import os
 import firebase_admin  
 from datetime import timedelta
 from firebase_admin import credentials, firestore, storage, initialize_app
@@ -29,11 +31,9 @@ def init_firebase():
         st.exception(e)
         return None, None
 
-# Upload file to Firebase and return URL
-def upload_image_to_firebase(uploaded_img, submission_id, bucket):
-    from tempfile import NamedTemporaryFile
-    import os
 
+
+def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     uploaded_img.seek(0)
     with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
         tmp.write(uploaded_img.read())
@@ -46,10 +46,12 @@ def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     blob = bucket.blob(blob_path)
     blob.upload_from_filename(tmp_path)
 
-    # 🔐 Use signed URL (expires in 1 hour)
-    url = blob.generate_signed_url(version="v4", expiration=timedelta(hours=1), method="GET")
+    # 🔓 Make image publicly readable
+    blob.make_public()
 
-    return url, tmp_path
+    # 🔥 Return the permanent public URL
+    return blob.public_url, tmp_path
+
 
 
 # Save user inputs to Firestore

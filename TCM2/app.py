@@ -28,8 +28,9 @@ st.set_page_config(page_title="TCM Health App", layout="wide")
 db, bucket = init_firebase()
 
 # 🌍 Language Selector at Top
-st.markdown("### 🌐 Choose Language")
-target_lang = set_language_selector()
+col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
+with col1:
+    target_lang = set_language_selector()
 
 # 🌟 Tabs Navigation (NEW)
 tab_labels = [

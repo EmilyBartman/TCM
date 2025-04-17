@@ -32,12 +32,11 @@ def init_firebase():
         return None, None
 
 
-
-from tempfile import NamedTemporaryFile
-import os
-from datetime import timedelta
-
+# Upload file to Firebase and return URL
 def upload_image_to_firebase(uploaded_img, submission_id, bucket):
+    from tempfile import NamedTemporaryFile
+    import os
+
     uploaded_img.seek(0)
     with NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
         tmp.write(uploaded_img.read())
@@ -50,14 +49,12 @@ def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     blob = bucket.blob(blob_path)
     blob.upload_from_filename(tmp_path)
 
-    # 🔐 Generate a very long-lived signed URL (e.g., 10 years)
-    url = blob.generate_signed_url(
-        version="v4",
-        expiration=timedelta(days=365 * 10),  # 10 years
-        method="GET"
-    )
+    # 🔐 Use signed URL (expires in 1 hour)
+    url = blob.generate_signed_url(version="v4", expiration=timedelta(hours=1), method="GET")
 
     return url, tmp_path
+
+
 
 
 

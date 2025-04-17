@@ -3,7 +3,7 @@ import streamlit as st
 from openai import OpenAI
 import json
 
-def run_gpt_diagnosis(user_inputs, image_data):
+def run_gpt_diagnosis(user_inputs, img_path=None):
     try:
         client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
@@ -19,13 +19,6 @@ def run_gpt_diagnosis(user_inputs, image_data):
             f"Bumps: {tongue.get('bumps')}"
         )
 
-        # Create image info for each uploaded image
-        image_info = ""
-        if image_data:
-            for img in image_data:
-                image_info += f"### Tongue Image URL: {img['image_url']}\n"
-                image_info += f"**Tongue Characteristics:** {json.dumps(img['tongue_characteristics'])}\n\n"
-
         prompt = (
             f"A user has submitted self-reported tongue characteristics and symptoms.\n\n"
             f"Please help interpret the following from a Traditional Chinese Medicine (TCM) perspective, "
@@ -34,7 +27,6 @@ def run_gpt_diagnosis(user_inputs, image_data):
             f"### Reported Tongue Description:\n{tongue_description}\n\n"
             f"### Reported Symptoms:\n{symptoms}\n\n"
             f"### Vitals / Lifestyle Info:\n{vitals}\n\n"
-            f"{image_info}"  # Adding all image information to the prompt
 
             f"1. Suggest the most likely TCM pattern (e.g., Qi Deficiency, Damp Heat).\n"
             f"2. Optionally map it to a general Western interpretation (e.g., fatigue, digestion issues).\n"
@@ -48,7 +40,7 @@ def run_gpt_diagnosis(user_inputs, image_data):
 
         response = client.chat.completions.create(
             model="gpt-4o",
-            messages=[ 
+            messages=[
                 {"role": "system", "content": "You are a friendly, wellness-focused Traditional Chinese Medicine assistant."},
                 {"role": "user", "content": prompt}
             ],

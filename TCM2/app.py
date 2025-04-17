@@ -75,21 +75,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 🌍 Language Selector at Top
-col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
+# 🌍 Language and Navigation Bar (Same Row)
+col1, col2 = st.columns([1, 3])  # Adjust width ratio as needed
+
 with col1:
     target_lang = set_language_selector()
 
-
-# 🌟 Tabs Navigation (NEW)
-tab_labels = [
-    translate("🌿 Educational Content", target_lang),
-    translate("👅 Tongue Health Check", target_lang),
-    translate("🧠 Medical Review Dashboard", target_lang),
-    translate("📊 TCM App Usage & Quality Dashboard", target_lang),
-    translate("📚 About & Disclaimer", target_lang)
-]
-selected_tab = st.selectbox("", tab_labels, label_visibility="collapsed")
+with col2:
+    st.markdown(f"#### {translate('🔀 Navigate To', target_lang)}", unsafe_allow_html=True)
+    tab_labels = [
+        translate("🌿 Educational Content", target_lang),
+        translate("👅 Tongue Health Check", target_lang),
+        translate("🧠 Medical Review Dashboard", target_lang),
+        translate("📊 TCM App Usage & Quality Dashboard", target_lang),
+        translate("📚 About & Disclaimer", target_lang)
+    ]
+    selected_tab = st.selectbox("", tab_labels, key="tab_selector", label_visibility="collapsed")
 
 # 🌟 Reset form when switching tabs
 if "last_selected_tab" not in st.session_state:

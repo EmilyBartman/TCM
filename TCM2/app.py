@@ -495,92 +495,97 @@ elif page == "Medical Review Dashboard":
 # ------------------------------
 # 📊 TCM App Usage & Quality Dashboard (Translation Ready)
 # ------------------------------
-
-st.title(translate("📊 TCM App Usage & Quality Dashboard", target_lang))
-
-try:
-    # Load data from Firestore
-    usage_docs = db.collection("tongue_submissions").stream()
-    gpt_docs = db.collection("gpt_diagnoses").stream()
-    feedback_docs = db.collection("medical_feedback").stream()
-
-    usage_data = [doc.to_dict() for doc in usage_docs]
-    gpt_data = [doc.to_dict() for doc in gpt_docs]
-    feedback_data = [doc.to_dict() for doc in feedback_docs]
-
-    df_usage = pd.DataFrame(usage_data)
-    df_gpt = pd.DataFrame(gpt_data)
-    df_fb = pd.DataFrame(feedback_data)
-
-    # 🕒 Filter to last 30 days
-    now = datetime.utcnow()
-    last_30 = now - pd.Timedelta(days=30)
-
-    df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"], errors="coerce")
-    df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"], errors="coerce")
-    df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"], errors="coerce")
-
-    df_usage_recent = df_usage[df_usage["timestamp"] >= last_30]
-    df_gpt_recent = df_gpt[df_gpt["timestamp"] >= last_30]
-    df_fb_recent = df_fb[df_fb["timestamp"] >= last_30]
-
-    # -------------------------
-    # 📈 Top Metrics
-    # -------------------------
-    st.markdown(translate("### 📈 Key Metrics (Last 30 Days)", target_lang))
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric(translate("🧪 Total Submissions", target_lang), len(df_usage_recent))
-    col2.metric(translate("📝 Total Feedbacks", target_lang), len(df_fb_recent))
-    agreement_rate = round(df_fb_recent["agreement"].eq("Yes").mean() * 100, 2) if not df_fb_recent.empty else 0
-    col3.metric(translate("✅ Avg Agreement Rate", target_lang), f"{agreement_rate}%")
-
-    st.markdown("---")
-
-    # -------------------------
-    # 📊 Submission Trend
-    # -------------------------
-    st.markdown(translate("### 📈 Submissions Over Time", target_lang))
-
-    if not df_usage_recent.empty:
-        submission_counts = df_usage_recent.groupby(df_usage_recent["timestamp"].dt.date).size()
-        st.line_chart(submission_counts.rename(translate("Submissions", target_lang)))
-    else:
-        st.info(translate("No submissions in the last 30 days.", target_lang))
-
-    # -------------------------
-    # 📊 Expert Feedback Trend
-    # -------------------------
-    st.markdown(translate("### 🧬 Expert Feedback Agreement Over Time", target_lang))
-
-    if not df_fb_recent.empty and "agreement" in df_fb_recent.columns:
-        agreement_trend = df_fb_recent.groupby(df_fb_recent["timestamp"].dt.date)["agreement"].apply(
-            lambda x: (x == "Yes").mean() * 100
-        )
-        st.line_chart(agreement_trend.rename(translate("% Agreement (Yes)", target_lang)))
-    else:
-        st.info(translate("No expert feedback collected yet.", target_lang))
-
-    # -------------------------
-    # 📥 Download Diagnoses
-    # -------------------------
-    st.markdown(translate("### 📥 Download All GPT Diagnoses", target_lang))
-
-    if not df_gpt.empty:
-        gpt_csv = df_gpt.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label=translate("⬇️ Download GPT Diagnoses (CSV)", target_lang),
-            data=gpt_csv,
-            file_name="gpt_diagnoses.csv",
-            mime="text/csv"
-        )
-    else:
-        st.info(translate("No GPT diagnoses available for download.", target_lang))
-
-except Exception as e:
-    st.error(translate("⚠️ Failed to load dashboard data.", target_lang))
-    st.exception(e)
+elif page == "Submission History":
+    st.title(translate("📊 TCM App Usage & Quality Dashboard", target_lang))
+    
+    try:
+        # Load data from Firestore
+        usage_docs = db.collection("tongue_submissions").stream()
+        gpt_docs = db.collection("gpt_diagnoses").stream()
+        feedback_docs = db.collection("medical_feedback").stream()
+    
+        usage_data = [doc.to_dict() for doc in usage_docs]
+        gpt_data = [doc.to_dict() for doc in gpt_docs]
+        feedback_data = [doc.to_dict() for doc in feedback_docs]
+    
+        df_usage = pd.DataFrame(usage_data)
+        df_gpt = pd.DataFrame(gpt_data)
+        df_fb = pd.DataFrame(feedback_data)
+    
+        # 🕒 Filter to last 30 days
+        now = datetime.utcnow()
+        last_30 = now - pd.Timedelta(days=30)
+    
+        df_usage["timestamp"] = pd.to_datetime(df_usage["timestamp"], errors="coerce")
+        df_gpt["timestamp"] = pd.to_datetime(df_gpt["timestamp"], errors="coerce")
+        df_fb["timestamp"] = pd.to_datetime(df_fb["timestamp"], errors="coerce")
+    
+        df_usage_recent = df_usage[df_usage["timestamp"] >= last_30]
+        df_gpt_recent = df_gpt[df_gpt["timestamp"] >= last_30]
+        df_fb_recent = df_fb[df_fb["timestamp"] >= last_30]
+    
+        # -------------------------
+        # 📈 Top Metrics
+        # -------------------------
+        st.markdown(translate("### 📈 Key Metrics (Last 30 Days)", target_lang))
+    
+        col1, col2, col3 = st.columns(3)
+    
+        col1.metric(translate("🧪 Total Submissions", target_lang), len(df_usage_recent))
+        col2.metric(translate("📝 Total Feedbacks", target_lang), len(df_fb_recent))
+        agreement_rate = round(df_fb_recent["agreement"].eq("Yes").mean() * 100, 2) if not df_fb_recent.empty else 0
+        col3.metric(translate("✅ Avg Agreement Rate", target_lang), f"{agreement_rate}%")
+    
+        st.markdown("---")
+    
+        # -------------------------
+        # 📊 Submission Trend
+        # -------------------------
+        st.markdown(translate("### 📈 Submissions Over Time", target_lang))
+    
+        if not df_usage_recent.empty:
+            submission_counts = df_usage_recent.groupby(df_usage_recent["timestamp"].dt.date).size()
+            st.line_chart(submission_counts.rename(translate("Submissions", target_lang)))
+        else:
+            st.info(translate("No submissions in the last 30 days.", target_lang))
+    
+        # -------------------------
+        # 📊 Expert Feedback Trend
+        # -------------------------
+        st.markdown(translate("### 🧬 Expert Feedback Agreement Over Time", target_lang))
+    
+        if not df_fb_recent.empty and "agreement" in df_fb_recent.columns:
+            agreement_trend = df_fb_recent.groupby(df_fb_recent["timestamp"].dt.date)["agreement"].apply(
+                lambda x: (x == "Yes").mean() * 100
+            )
+            st.line_chart(agreement_trend.rename(translate("% Agreement (Yes)", target_lang)))
+        else:
+            st.info(translate("No expert feedback collected yet.", target_lang))
+    
+        # -------------------------
+        # 📥 Download Diagnoses
+        # -------------------------
+        st.markdown(translate("### 📥 Download All GPT Diagnoses", target_lang))
+    
+        if not df_gpt.empty:
+            gpt_csv = df_gpt.to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label=translate("⬇️ Download GPT Diagnoses (CSV)", target_lang),
+                data=gpt_csv,
+                file_name="gpt_diagnoses.csv",
+                mime="text/csv"
+            )
+        else:
+            st.info(translate("No GPT diagnoses available for download.", target_lang))
+    
+    except Exception as e:
+        st.error(translate("⚠️ Failed to load dashboard data.", target_lang))
+        st.exception(e)
+    try:
+        # Your full dashboard code...
+    except Exception as e:
+        st.error(translate("⚠️ Failed to load dashboard data.", target_lang))
+        st.exception(e)
 
 # ------------------------------
 #  📚 ABOUT & DISCLAIMER (Prettier + Translated)
@@ -589,34 +594,34 @@ elif page == "About & Disclaimer":
     st.title(translate("📚 About Wise Tongue", target_lang))
 
     st.markdown(translate("""
-### 🌿 What is Wise Tongue?
-
-**Wise Tongue** is your AI-powered Traditional Chinese Medicine (TCM) companion — blending ancient insights with modern AI technology.  
-This app aims to:
-
-- 📖 Educate users about the principles of TCM, especially tongue diagnosis.
-- 📸 Allow uploading of tongue images and symptom reports for AI-assisted wellness analysis.
-- 🧠 Leverage multimodal models (such as GPT-4o) to suggest TCM patterns, possible Western health analogies, and lifestyle recommendations.
-- 👩‍⚕️ Enable healthcare professionals to review, validate, and continuously improve AI-generated insights.
-
----
-
-### 🔒 Data Usage & Privacy
-
-Your trust is important to us. Wise Tongue follows strict data handling practices:
-
-- 🔐 **Secure Storage:** All user data (images and self-reported symptoms) are securely stored in Firebase.
-- 🎯 **Purpose Limitation:** Data is used only for educational research, improving AI analysis, and studying global wellness trends.
-- 🕶️ **Anonymity:** Personal identities are **never collected**; all reviews are conducted anonymously.
-- 🩺 **Professional Feedback:** Medical professional feedback is used solely to refine and retrain AI models over time.
-
----
-
-### ⚖️ Disclaimer
-
-Wise Tongue **does not provide medical diagnosis or treatment**.  
-It is intended for **educational, research, and wellness support purposes only**.
-
-Users should always consult licensed healthcare providers for any medical concerns or decisions.
-
-""", target_lang))
+        ### 🌿 What is Wise Tongue?
+        
+        **Wise Tongue** is your AI-powered Traditional Chinese Medicine (TCM) companion — blending ancient insights with modern AI technology.  
+        This app aims to:
+        
+        - 📖 Educate users about the principles of TCM, especially tongue diagnosis.
+        - 📸 Allow uploading of tongue images and symptom reports for AI-assisted wellness analysis.
+        - 🧠 Leverage multimodal models (such as GPT-4o) to suggest TCM patterns, possible Western health analogies, and lifestyle recommendations.
+        - 👩‍⚕️ Enable healthcare professionals to review, validate, and continuously improve AI-generated insights.
+        
+        ---
+        
+        ### 🔒 Data Usage & Privacy
+        
+        Your trust is important to us. Wise Tongue follows strict data handling practices:
+        
+        - 🔐 **Secure Storage:** All user data (images and self-reported symptoms) are securely stored in Firebase.
+        - 🎯 **Purpose Limitation:** Data is used only for educational research, improving AI analysis, and studying global wellness trends.
+        - 🕶️ **Anonymity:** Personal identities are **never collected**; all reviews are conducted anonymously.
+        - 🩺 **Professional Feedback:** Medical professional feedback is used solely to refine and retrain AI models over time.
+        
+        ---
+        
+        ### ⚖️ Disclaimer
+        
+        Wise Tongue **does not provide medical diagnosis or treatment**.  
+        It is intended for **educational, research, and wellness support purposes only**.
+        
+        Users should always consult licensed healthcare providers for any medical concerns or decisions.
+        
+        """, target_lang))

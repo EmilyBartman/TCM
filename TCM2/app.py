@@ -27,6 +27,33 @@ firebase_config = dict(st.secrets["firebase"])
 st.set_page_config(page_title="TCM Health App", layout="wide")
 db, bucket = init_firebase()
 
+
+# ✨ Improve Tabs Style
+st.markdown("""
+    <style>
+    /* Make the tabs bigger and spaced */
+    .stTabs [data-baseweb="tab"] {
+        font-size: 18px;
+        padding: 12px 24px;
+        border-bottom: 3px solid transparent;
+    }
+    /* Highlight active tab */
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        border-bottom: 3px solid #ff4b4b; /* Bright red underline */
+        color: #ff4b4b; /* Bright red text */
+        font-weight: bold;
+        background-color: #f9f9f9;
+        border-radius: 8px 8px 0 0;
+    }
+    /* On hover over tabs */
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: #f0f2f6;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+
 # 🌍 Language Selector at Top
 col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
 with col1:

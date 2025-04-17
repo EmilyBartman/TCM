@@ -29,49 +29,22 @@ st.set_page_config(page_title="TCM Health App", layout="wide")
 db, bucket = init_firebase()
 target_lang = set_language_selector()
 
-# Page navigation
-# Page navigation
-pages = [
-    "Educational Content",
-    "Tongue Health Check",
-    "Medical Review Dashboard",
-    "Submission History",
-    "About & Disclaimer"
+# 🌟 Page Tabs Setup
+tab_labels = [
+    translate("🌿 Educational Content", target_lang),
+    translate("👅 Tongue Health Check", target_lang),
+    translate("🧠 Medical Review Dashboard", target_lang),
+    translate("📊 TCM App Usage & Quality Dashboard", target_lang),
+    translate("📚 About & Disclaimer", target_lang)
 ]
 
-# Create mapping of internal keys -> translated display names
-page_options = {p: translate(p, target_lang) for p in pages}
-
-# Initialize session state
-if "selected_page" not in st.session_state:
-    st.session_state.selected_page = pages[0]
-
-# Translated names for UI
-display_names = list(page_options.values())
-
-# Sidebar radio with translated labels
-selected_display = st.sidebar.radio(
-    translate("Navigate", target_lang),
-    display_names,
-    index=display_names.index(page_options[st.session_state.selected_page]),
-    key="page_navigation"
-)
-
-# Set selected page from translated label
-for internal, display in page_options.items():
-    if display == selected_display:
-        st.session_state.selected_page = internal
-        break
-
-# Final selected page
-page = st.session_state.selected_page
-
+tabs = st.tabs(tab_labels)
 
 
 # ------------------------------
 # EDUCATIONAL CONTENT 
 # ------------------------------
-if page == "Educational Content":
+with tabs[0]:
     target_lang = LANGUAGES[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
@@ -162,7 +135,7 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 # ------------------------------
 # Tongue Health Check
 # ------------------------------
-if page == "Tongue Health Check":
+with tabs[1]:
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
     st.markdown(translate("Upload Tongue Image", target_lang))
@@ -328,7 +301,7 @@ if page == "Tongue Health Check":
 # ------------------------------
 # Medical Review Dashboard
 # ------------------------------
-elif page == "Medical Review Dashboard":
+with tabs[2]:
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
     
@@ -495,7 +468,7 @@ elif page == "Medical Review Dashboard":
 # ------------------------------
 # 📊 TCM App Usage & Quality Dashboard (Translation Ready)
 # ------------------------------
-elif page == "Submission History":
+with tabs[3]:
     st.title(translate("📊 TCM App Usage & Quality Dashboard", target_lang))
     
     try:
@@ -586,7 +559,7 @@ elif page == "Submission History":
 # ------------------------------
 #  📚 ABOUT & DISCLAIMER (Prettier + Translated)
 # ------------------------------
-elif page == "About & Disclaimer":
+with tabs[4]:
     st.title(translate("📚 About Wise Tongue", target_lang))
 
     st.markdown(translate("""

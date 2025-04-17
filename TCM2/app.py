@@ -309,13 +309,16 @@ with tabs[1]:
         if gpt_response:
             if isinstance(gpt_response, dict):
                 st.subheader(translate("Prediction Result", target_lang))
-                st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
-                st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
-                st.markdown("**🌿 Remedies:**")
+                st.markdown(f"**🩺 {translate('TCM Syndrome', target_lang)}:** {translate(gpt_response.get('tcm_syndrome', 'N/A'), target_lang)}")
+                st.markdown(f"**💊 {translate('Western Equivalent', target_lang)}:** {translate(gpt_response.get('western_equivalent', 'N/A'), target_lang)}")
+                
+                st.markdown(f"**🌿 {translate('Remedies', target_lang)}:**")
                 for r in gpt_response.get("remedies", []):
-                    st.markdown(f"- {r}")
-                st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
-                st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
+                    st.markdown(f"- {translate(r, target_lang)}")
+                
+                st.markdown(f"**⚖️ {translate('Discrepancies', target_lang)}:** {translate(gpt_response.get('discrepancies', 'N/A'), target_lang)}")
+                st.markdown(f"**📊 {translate('Confidence Score', target_lang)}:** {gpt_response.get('confidence', 'N/A')}%")
+
             else:
                 st.subheader(translate("Prediction Result", target_lang))
                 st.warning("Could not parse structured response. Displaying raw output:")

@@ -36,10 +36,10 @@ with st.container():
     col1, col2 = st.columns([1, 1])  # Adjust ratio if you want more width
 
     with col1:
-        #st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
         target_lang = set_language_selector()
 
-    with col1:
+    with col2:
         st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🔀 Navigate To', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
         tab_labels = [
             translate("🌿 Educational Content", target_lang),
@@ -159,7 +159,7 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 elif selected_tab == translate("👅 Tongue Health Check", target_lang):
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
-    st.markdown(translate("Upload Images of top, bottom and sides of you tongue. (Note: Four images expected)", target_lang))
+    st.markdown(translate("Upload Tongue Image", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
     # Ensure uploader runs only once
     if "uploaded_img" not in st.session_state:

@@ -581,11 +581,7 @@ elif page == "Submission History":
     except Exception as e:
         st.error(translate("⚠️ Failed to load dashboard data.", target_lang))
         st.exception(e)
-    try:
-        # Your full dashboard code...
-    except Exception as e:
-        st.error(translate("⚠️ Failed to load dashboard data.", target_lang))
-        st.exception(e)
+
 
 # ------------------------------
 #  📚 ABOUT & DISCLAIMER (Prettier + Translated)

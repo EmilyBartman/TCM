@@ -3,7 +3,7 @@ import streamlit as st
 from openai import OpenAI
 import json
 
-def run_gpt_diagnosis(user_inputs, img_path=None):
+def run_gpt_diagnosis(user_inputs, image_data):
     try:
         client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
@@ -19,10 +19,12 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
             f"Bumps: {tongue.get('bumps')}"
         )
 
-        # Include the image path or URL in the prompt (if available)
+        # Create image info for each uploaded image
         image_info = ""
-        if img_path:
-            image_info = f"### Tongue Image URL: {img_path}\n\n"  # Assuming img_path is the image URL or a description
+        if image_data:
+            for img in image_data:
+                image_info += f"### Tongue Image URL: {img['image_url']}\n"
+                image_info += f"**Tongue Characteristics:** {json.dumps(img['tongue_characteristics'])}\n\n"
 
         prompt = (
             f"A user has submitted self-reported tongue characteristics and symptoms.\n\n"
@@ -32,7 +34,7 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
             f"### Reported Tongue Description:\n{tongue_description}\n\n"
             f"### Reported Symptoms:\n{symptoms}\n\n"
             f"### Vitals / Lifestyle Info:\n{vitals}\n\n"
-            f"{image_info}"  # Adding the image information to the prompt
+            f"{image_info}"  # Adding all image information to the prompt
 
             f"1. Suggest the most likely TCM pattern (e.g., Qi Deficiency, Damp Heat).\n"
             f"2. Optionally map it to a general Western interpretation (e.g., fatigue, digestion issues).\n"
@@ -67,4 +69,3 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
         st.error("GPT diagnosis failed.")
         st.exception(e)
         return None
-

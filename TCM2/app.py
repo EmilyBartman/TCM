@@ -27,6 +27,10 @@ firebase_config = dict(st.secrets["firebase"])
 st.set_page_config(page_title="TCM Health App", layout="wide")
 
 
+# Before accessing `selected_lang`, ensure it's set
+if "selected_lang" not in st.session_state:
+    st.session_state.selected_lang = "English"  # Default language
+
 # 🌍 Language and Navigation Bar (Same Row, Equal Style)
 with st.container():
     col1, col2 = st.columns([1, 1])  # Adjust ratio if you want more width

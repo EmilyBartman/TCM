@@ -223,33 +223,23 @@ with tabs[1]:
                 st.stop()
 
             # Process and upload all images
-            image_data = []  # List to store image paths and their associated characteristics
-            for img_file in uploaded_imgs:
-                img_file.seek(0)  # ✅ CORRECT PLACEMENT here, not above
-                submission_id = str(uuid.uuid4())
-                timestamp = datetime.utcnow().isoformat()
-
-                # Save the image to Firebase Storage
-                image_path = f"tongue_images/{submission_id}.jpg"  # Define the path to save the image
-                image_ref = bucket.blob(image_path)  # Firebase Storage reference
-
-                # Upload image to Firebase Storage
-                image_ref.upload_from_file(img_file, content_type=img_file.type)
-
-                # Get image URL after upload
-                image_url = image_ref.public_url
-
-                # Store image data and its characteristics in a list
-                image_data.append({
-                    "image_url": image_url,
-                    "tongue_characteristics": {
-                        "color": tongue_color,
-                        "shape": tongue_shape,
-                        "coating": tongue_coating,
-                        "moisture": tongue_moisture,
-                        "bumps": tongue_bumps
-                    }
-                })
+            image_data = user_doc.get("image_data", []) or gpt_doc.get("image_data", [])
+            if image_data:
+                for img in image_data:
+                    img_url = img.get("image_url")
+                    if img_url:
+                        try:
+                            response = requests.get(img_url)
+                            if response.status_code == 200 and "image" in response.headers.get("Content-Type", ""):
+                                st.image(Image.open(BytesIO(response.content)), caption="📸 Uploaded Tongue Image", width=300)
+                            else:
+                                st.error(f"❌ Image could not be loaded: {img_url}")
+                        except Exception as e:
+                            st.warning("⚠️ Error loading image.")
+                            st.exception(e)
+            else:
+                st.info("No image URLs available.")
+            
 
             # Save all the image data to Firestore
             user_inputs = {

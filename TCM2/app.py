@@ -64,13 +64,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
-
-# 🌍 Language Selector at Top
-col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
-with col1:
-    target_lang = set_language_selector()
-
 # 🎨 Make selectbox (language) smaller and tighter
 st.markdown("""
     <style>
@@ -81,6 +74,12 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
+# 🌍 Language Selector at Top
+col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
+with col1:
+    target_lang = set_language_selector()
+
 
 # 🌟 Tabs Navigation (NEW)
 tab_labels = [

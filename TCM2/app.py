@@ -471,7 +471,7 @@ elif page == "Medical Review Dashboard":
             corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="remedies_input")
             notes = st.text_area("Correction notes", key="notes_input")
         
-            submit_feedback = st.form_submit_button("📤 Submit Feedback")
+            
         
         if st.button("📤 Submit Expert Feedback", key="submit_feedback"):
             feedback = {

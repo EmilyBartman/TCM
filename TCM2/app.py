@@ -34,7 +34,7 @@ with col1:
 
 # 🌟 Tabs Navigation (NEW)
 tab_labels = [
-    translate("##🌿 Educational Content", target_lang),
+    translate("🌿 Educational Content", target_lang),
     translate("👅 Tongue Health Check", target_lang),
     translate("🧠 Medical Review Dashboard", target_lang),
     translate("📊 TCM App Usage & Quality Dashboard", target_lang),

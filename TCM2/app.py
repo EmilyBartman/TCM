@@ -27,7 +27,8 @@ firebase_config = dict(st.secrets["firebase"])
 st.set_page_config(page_title="TCM Health App", layout="wide")
 db, bucket = init_firebase()
 
-# 🌐 Language Selector (KEEP this!)
+# 🌍 Language Selector at Top
+st.markdown("### 🌐 Choose Language")
 target_lang = set_language_selector()
 
 # 🌟 Tabs Navigation (NEW)

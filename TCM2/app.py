@@ -39,7 +39,7 @@ with st.container():
         #st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
         target_lang = set_language_selector()
 
-    with col2:
+    with col1:
         st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🔀 Navigate To', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
         tab_labels = [
             translate("🌿 Educational Content", target_lang),

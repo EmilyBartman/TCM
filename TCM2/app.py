@@ -91,6 +91,22 @@ tab_labels = [
 ]
 tabs = st.tabs(tab_labels)
 
+# Track active tab (NEW)
+if "active_tab" not in st.session_state:
+    st.session_state.active_tab = 0  # Default to first tab (index 0)
+
+# Detect if user switched tab (NEW)
+new_tab_index = 0  # default to first tab
+for i, tab_label in enumerate(tab_labels):
+    if tabs[i]:
+        new_tab_index = i
+
+if new_tab_index != st.session_state.active_tab:
+    # User switched tab - RESET session variables except critical ones
+    for key in list(st.session_state.keys()):
+        if key not in ["active_tab", "selected_lang", "language_selector"]:
+            del st.session_state[key]
+    st.session_state.active_tab = new_tab_index
 
 # ------------------------------
 # EDUCATIONAL CONTENT 

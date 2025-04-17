@@ -18,18 +18,19 @@ import requests
 from io import BytesIO
 from PIL import Image
 import torch
-# GPT-4o key
-openai.api_key = st.secrets["openai"]["api_key"]
 
-# Firebase config
+# 🔑 API and Firebase setup
+openai.api_key = st.secrets["openai"]["api_key"]
 firebase_config = dict(st.secrets["firebase"])
 
-# Set page config and language setup
+# 🌐 App Configuration
 st.set_page_config(page_title="TCM Health App", layout="wide")
 db, bucket = init_firebase()
+
+# 🌐 Language Selector (KEEP this!)
 target_lang = set_language_selector()
 
-# 🌟 Page Tabs Setup
+# 🌟 Tabs Navigation (NEW)
 tab_labels = [
     translate("🌿 Educational Content", target_lang),
     translate("👅 Tongue Health Check", target_lang),
@@ -37,7 +38,6 @@ tab_labels = [
     translate("📊 TCM App Usage & Quality Dashboard", target_lang),
     translate("📚 About & Disclaimer", target_lang)
 ]
-
 tabs = st.tabs(tab_labels)
 
 

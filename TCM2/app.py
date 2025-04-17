@@ -373,26 +373,28 @@ with tabs[2]:
             image_url = gpt_doc["image_url"]
             st.caption("🧠 Image from `gpt_diagnoses`")
         
-        if image_url:
-            try:
-                response = requests.get(image_url)
-                content_type = response.headers.get("Content-Type", "")
-                content_length = len(response.content)
-                
+        if image_data:
+            for img_data in image_data:
+                img_url = img_data.get('image_url')  # Extract the image URL
+                if img_url:
+                    try:
+                        response = requests.get(img_url)
+                        content_type = response.headers.get("Content-Type", "")
+                        content_length = len(response.content)
         
-                if response.status_code != 200:
-                    st.error(f"❌ Failed to fetch image from Firebase. HTTP {response.status_code}")
-                elif content_length == 0:
-                    st.error("❌ The image file is empty (0 bytes). This likely means the upload failed.")
-                elif "image" not in content_type:
-                    st.error("❌ The returned file is not a valid image.")
-                    st.code(image_url)
-                else:
-                    img = Image.open(BytesIO(response.content))
-                    st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
-            except Exception as e:
-                st.warning("⚠️ Failed to decode image.")
-                st.exception(e)
+                        if response.status_code != 200:
+                            st.error(f"❌ Failed to fetch image from Firebase. HTTP {response.status_code}")
+                        elif content_length == 0:
+                            st.error("❌ The image file is empty (0 bytes). This likely means the upload failed.")
+                        elif "image" not in content_type:
+                            st.error(f"❌ The returned file is not a valid image. URL: {img_url}")
+                            st.code(img_url)
+                        else:
+                            img = Image.open(BytesIO(response.content))
+                            st.image(img, caption="Preview of Uploaded Tongue Image", width=300)
+                    except Exception as e:
+                        st.warning(f"⚠️ Failed to decode image from {img_url}.")
+                        st.exception(e)
         else:
             st.info("No image URL available.")
 

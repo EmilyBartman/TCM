@@ -19,6 +19,11 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
             f"Bumps: {tongue.get('bumps')}"
         )
 
+        # Include the image path or URL in the prompt (if available)
+        image_info = ""
+        if img_path:
+            image_info = f"### Tongue Image URL: {img_path}\n\n"  # Assuming img_path is the image URL or a description
+
         prompt = (
             f"A user has submitted self-reported tongue characteristics and symptoms.\n\n"
             f"Please help interpret the following from a Traditional Chinese Medicine (TCM) perspective, "
@@ -27,6 +32,7 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
             f"### Reported Tongue Description:\n{tongue_description}\n\n"
             f"### Reported Symptoms:\n{symptoms}\n\n"
             f"### Vitals / Lifestyle Info:\n{vitals}\n\n"
+            f"{image_info}"  # Adding the image information to the prompt
 
             f"1. Suggest the most likely TCM pattern (e.g., Qi Deficiency, Damp Heat).\n"
             f"2. Optionally map it to a general Western interpretation (e.g., fatigue, digestion issues).\n"
@@ -40,7 +46,7 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
 
         response = client.chat.completions.create(
             model="gpt-4o",
-            messages=[
+            messages=[ 
                 {"role": "system", "content": "You are a friendly, wellness-focused Traditional Chinese Medicine assistant."},
                 {"role": "user", "content": prompt}
             ],
@@ -61,3 +67,4 @@ def run_gpt_diagnosis(user_inputs, img_path=None):
         st.error("GPT diagnosis failed.")
         st.exception(e)
         return None
+

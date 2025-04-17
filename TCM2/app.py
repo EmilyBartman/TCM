@@ -25,47 +25,28 @@ firebase_config = dict(st.secrets["firebase"])
 
 # 🌐 App Configuration
 st.set_page_config(page_title="TCM Health App", layout="wide")
+db, bucket = init_firebase()
 
+# 🌍 Language Selector at Top
+col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
+with col1:
+    target_lang = set_language_selector()
 
-# Before accessing `selected_lang`, ensure it's set
-if "selected_lang" not in st.session_state:
-    st.session_state.selected_lang = "English"  # Default language
-
-# 🌍 Language and Navigation Bar (Same Row, Equal Style)
-with st.container():
-    col1, col2 = st.columns([1, 1])  # Adjust ratio if you want more width
-
-    with col1:
-        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🌐 Choose Language', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
-        target_lang = set_language_selector()
-
-    with col2:
-        st.markdown(f"<div style='margin-bottom:4px; font-weight:600'>{translate('🔀 Navigate To', LANGUAGES[st.session_state.selected_lang])}</div>", unsafe_allow_html=True)
-        tab_labels = [
-            translate("🌿 Educational Content", target_lang),
-            translate("👅 Tongue Health Check", target_lang),
-            translate("🧠 Medical Review Dashboard", target_lang),
-            translate("📊 TCM App Usage & Quality Dashboard", target_lang),
-            translate("📚 About & Disclaimer", target_lang)
-        ]
-        selected_tab = st.selectbox("", tab_labels, key="tab_selector", label_visibility="collapsed")
-
-
-# 🧹 Reset logic when switching tabs
-if "last_selected_tab" not in st.session_state:
-    st.session_state.last_selected_tab = selected_tab
-
-if selected_tab != st.session_state.last_selected_tab:
-    for key in list(st.session_state.keys()):
-        if key not in ["selected_lang", "language_selector", "last_selected_tab", "tab_selector"]:
-            del st.session_state[key]
-    st.session_state.last_selected_tab = selected_tab
+# 🌟 Tabs Navigation (NEW)
+tab_labels = [
+    translate("🌿 Educational Content", target_lang),
+    translate("👅 Tongue Health Check", target_lang),
+    translate("🧠 Medical Review Dashboard", target_lang),
+    translate("📊 TCM App Usage & Quality Dashboard", target_lang),
+    translate("📚 About & Disclaimer", target_lang)
+]
+tabs = st.tabs(tab_labels)
 
 
 # ------------------------------
 # EDUCATIONAL CONTENT 
 # ------------------------------
-if selected_tab == translate("🌿 Educational Content", target_lang):
+with tabs[0]:
     target_lang = LANGUAGES[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
@@ -156,7 +137,7 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 # ------------------------------
 # Tongue Health Check
 # ------------------------------
-elif selected_tab == translate("👅 Tongue Health Check", target_lang):
+with tabs[1]:
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
     st.markdown(translate("Upload Tongue Image", target_lang))
@@ -279,16 +260,13 @@ elif selected_tab == translate("👅 Tongue Health Check", target_lang):
         if gpt_response:
             if isinstance(gpt_response, dict):
                 st.subheader(translate("Prediction Result", target_lang))
-                st.markdown(f"**🩺 {translate('TCM Syndrome', target_lang)}:** {translate(gpt_response.get('tcm_syndrome', 'N/A'), target_lang)}")
-                st.markdown(f"**💊 {translate('Western Equivalent', target_lang)}:** {translate(gpt_response.get('western_equivalent', 'N/A'), target_lang)}")
-                
-                st.markdown(f"**🌿 {translate('Remedies', target_lang)}:**")
+                st.markdown(f"**🩺 TCM Syndrome:** {gpt_response.get('tcm_syndrome', 'N/A')}")
+                st.markdown(f"**💊 Western Equivalent:** {gpt_response.get('western_equivalent', 'N/A')}")
+                st.markdown("**🌿 Remedies:**")
                 for r in gpt_response.get("remedies", []):
-                    st.markdown(f"- {translate(r, target_lang)}")
-                
-                st.markdown(f"**⚖️ {translate('Discrepancies', target_lang)}:** {translate(gpt_response.get('discrepancies', 'N/A'), target_lang)}")
-                st.markdown(f"**📊 {translate('Confidence Score', target_lang)}:** {gpt_response.get('confidence', 'N/A')}%")
-
+                    st.markdown(f"- {r}")
+                st.markdown(f"**⚖️ Discrepancies:** {gpt_response.get('discrepancies', 'N/A')}")
+                st.markdown(f"**📊 Confidence Score:** {gpt_response.get('confidence', 'N/A')}%")
             else:
                 st.subheader(translate("Prediction Result", target_lang))
                 st.warning("Could not parse structured response. Displaying raw output:")
@@ -325,7 +303,7 @@ elif selected_tab == translate("👅 Tongue Health Check", target_lang):
 # ------------------------------
 # Medical Review Dashboard
 # ------------------------------
-elif selected_tab == translate("🧠 Medical Review Dashboard", target_lang):
+with tabs[2]:
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
     
@@ -492,7 +470,7 @@ elif selected_tab == translate("🧠 Medical Review Dashboard", target_lang):
 # ------------------------------
 # 📊 TCM App Usage & Quality Dashboard (Translation Ready)
 # ------------------------------
-elif selected_tab == translate("📊 TCM App Usage & Quality Dashboard", target_lang):
+with tabs[3]:
     st.title(translate("📊 TCM App Usage & Quality Dashboard", target_lang))
     
     try:
@@ -583,7 +561,7 @@ elif selected_tab == translate("📊 TCM App Usage & Quality Dashboard", target_
 # ------------------------------
 #  📚 ABOUT & DISCLAIMER (Prettier + Translated)
 # ------------------------------
-elif selected_tab == translate("📚 About & Disclaimer", target_lang):
+with tabs[4]:
     st.title(translate("📚 About Wise Tongue", target_lang))
 
     st.markdown(translate("""

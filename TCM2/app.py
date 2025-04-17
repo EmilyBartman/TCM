@@ -462,8 +462,9 @@ elif page == "Medical Review Dashboard":
         else:
             st.info("No structured model output available.")
 
-        # 🧬 Expert Feedback
+        # 🧬 Expert Feedback Form
         st.subheader("🧬 Expert Feedback")
+        
         with st.form("expert_feedback_form"):
             agree = st.radio("Do you agree with the GPT diagnosis?", ["Yes", "Partially", "No"], key="agree_radio")
             corrected_syndrome = st.text_input("Correct TCM Syndrome", key="syndrome_input")
@@ -471,9 +472,10 @@ elif page == "Medical Review Dashboard":
             corrected_remedies = st.text_area("Correct Remedies (comma-separated)", key="remedies_input")
             notes = st.text_area("Correction notes", key="notes_input")
         
-            
+            # ✅ Correct submit button inside the form
+            submit_feedback = st.form_submit_button("📤 Submit Expert Feedback")
         
-        if st.button("📤 Submit Expert Feedback", key="submit_feedback"):
+        if submit_feedback:
             feedback = {
                 "submission_id": selected_id,
                 "agreement": agree,
@@ -487,6 +489,7 @@ elif page == "Medical Review Dashboard":
             }
             db.collection("medical_feedback").document(selected_id).set(feedback)
             st.success("✅ Feedback submitted successfully! Thank you for improving the model.")
+
 
             
 # ------------------------------

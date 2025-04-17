@@ -39,7 +39,7 @@ def set_language_selector():
 
     label = translate("🌐 Choose Language", LANGUAGES[current_lang])
     
-    new_lang = st.sidebar.selectbox(
+    new_lang = st.selectbox(   # 🛑 <== CHANGED from st.sidebar.selectbox
         label,
         lang_names,
         index=lang_names.index(current_lang),
@@ -51,8 +51,8 @@ def set_language_selector():
         if not st.session_state.get("form_submitted", False):
             st.rerun()
 
-
     return LANGUAGES[st.session_state.selected_lang]
+
 
 
 

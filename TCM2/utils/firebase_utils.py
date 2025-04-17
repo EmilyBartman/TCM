@@ -50,7 +50,11 @@ def upload_image_to_firebase(uploaded_img, submission_id, bucket):
     blob.upload_from_filename(tmp_path)
 
     # 🔐 Use signed URL (expires in 1 hour)
-    url = blob.generate_signed_url(version="v4", expiration=timedelta(hours=1), method="GET")
+    url = blob.generate_signed_url(
+            version="v4",
+            expiration=timedelta(days=7),  # Maximum allowed for V4 is 7 days
+            method="GET"
+        )
 
     return url, tmp_path
 

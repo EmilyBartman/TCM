@@ -159,7 +159,7 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 elif selected_tab == translate("👅 Tongue Health Check", target_lang):
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
-    st.markdown(translate("Upload Tongue Image", target_lang))
+    st.markdown(translate("Upload Images of top, bottom and sides of you tongue. (Note: Four images expected)", target_lang))
     st.markdown(translate("Drag and drop a file below. Limit 200MB per file • JPG, JPEG, PNG", target_lang))
     # Ensure uploader runs only once
     if "uploaded_img" not in st.session_state:

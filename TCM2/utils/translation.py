@@ -37,9 +37,9 @@ def set_language_selector():
     lang_names = list(LANGUAGES.keys())
     current_lang = st.session_state.selected_lang
 
-    # Removed 'label' and directly used the selectbox
+    # Directly use "Choose Language" within the selectbox
     new_lang = st.selectbox(
-        "Choose Language",  # You can customize this as needed
+        translate("🌐 Choose Language", LANGUAGES[st.session_state.selected_lang]),
         lang_names,
         index=lang_names.index(current_lang),
         key="language_selector"
@@ -51,7 +51,6 @@ def set_language_selector():
             st.rerun()
 
     return LANGUAGES[st.session_state.selected_lang]
-
 
 
 

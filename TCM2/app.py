@@ -274,7 +274,7 @@ with tabs[1]:
             
             # Adjust user_inputs to include the updated structure with images and their characteristics
             # If needed, you might adjust the GPT function to handle multiple images properly
-            gpt_response = run_gpt_diagnosis(user_inputs, temp_path)
+            gpt_response = run_gpt_diagnosis(user_inputs, img_path)
             
             if gpt_response:
                 if isinstance(gpt_response, dict):

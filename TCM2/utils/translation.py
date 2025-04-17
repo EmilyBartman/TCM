@@ -36,9 +36,7 @@ def set_language_selector():
 
     lang_names = list(LANGUAGES.keys())
     current_lang = st.session_state.selected_lang
-
-    label = translate("🌐 Choose Language", LANGUAGES[current_lang])
-    
+   
     new_lang = st.selectbox(   # 🛑 <== CHANGED from st.sidebar.selectbox
         label,
         lang_names,

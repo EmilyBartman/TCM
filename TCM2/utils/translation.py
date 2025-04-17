@@ -39,7 +39,7 @@ def set_language_selector():
 
     # Removed 'label' and directly used the selectbox
     new_lang = st.selectbox(
-        "Choose Language",  # You can customize this as needed
+        #"Choose Language",  # You can customize this as needed
         lang_names,
         index=lang_names.index(current_lang),
         key="language_selector"

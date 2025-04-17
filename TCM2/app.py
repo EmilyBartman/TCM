@@ -89,29 +89,22 @@ tab_labels = [
     translate("📊 TCM App Usage & Quality Dashboard", target_lang),
     translate("📚 About & Disclaimer", target_lang)
 ]
-tabs = st.tabs(tab_labels)
+selected_tab = st.selectbox("", tab_labels, label_visibility="collapsed")
 
-# Track active tab (NEW)
-if "active_tab" not in st.session_state:
-    st.session_state.active_tab = 0  # Default to first tab (index 0)
+# 🌟 Reset form when switching tabs
+if "last_selected_tab" not in st.session_state:
+    st.session_state.last_selected_tab = selected_tab
 
-# Detect if user switched tab (NEW)
-new_tab_index = 0  # default to first tab
-for i, tab_label in enumerate(tab_labels):
-    if tabs[i]:
-        new_tab_index = i
-
-if new_tab_index != st.session_state.active_tab:
-    # User switched tab - RESET session variables except critical ones
+if selected_tab != st.session_state.last_selected_tab:
     for key in list(st.session_state.keys()):
-        if key not in ["active_tab", "selected_lang", "language_selector"]:
+        if key not in ["selected_lang", "language_selector", "last_selected_tab"]:
             del st.session_state[key]
-    st.session_state.active_tab = new_tab_index
+    st.session_state.last_selected_tab = selected_tab
 
 # ------------------------------
 # EDUCATIONAL CONTENT 
 # ------------------------------
-with tabs[0]:
+if selected_tab == translate("🌿 Educational Content", target_lang):
     target_lang = LANGUAGES[st.session_state.selected_lang]
     st.title(translate("🌿 Traditional Chinese Medicine (TCM) Education", target_lang))
 
@@ -202,7 +195,7 @@ This app uses AI (specifically GPT-4o) to analyze tongue images and user-reporte
 # ------------------------------
 # Tongue Health Check
 # ------------------------------
-with tabs[1]:
+elif selected_tab == translate("👅 Tongue Health Check", target_lang):
     st.title(translate("👅 Tongue Diagnosis Tool", target_lang))
 
     st.markdown(translate("Upload Tongue Image", target_lang))
@@ -371,7 +364,7 @@ with tabs[1]:
 # ------------------------------
 # Medical Review Dashboard
 # ------------------------------
-with tabs[2]:
+elif selected_tab == translate("🧠 Medical Review Dashboard", target_lang):
     st.title(translate("🧠 Medical Review Dashboard", target_lang))
     st.info(translate("Select a submission to review and give expert feedback.", target_lang))
     
@@ -538,7 +531,7 @@ with tabs[2]:
 # ------------------------------
 # 📊 TCM App Usage & Quality Dashboard (Translation Ready)
 # ------------------------------
-with tabs[3]:
+elif selected_tab == translate("📊 TCM App Usage & Quality Dashboard", target_lang):
     st.title(translate("📊 TCM App Usage & Quality Dashboard", target_lang))
     
     try:
@@ -629,7 +622,7 @@ with tabs[3]:
 # ------------------------------
 #  📚 ABOUT & DISCLAIMER (Prettier + Translated)
 # ------------------------------
-with tabs[4]:
+elif selected_tab == translate("📚 About & Disclaimer", target_lang):
     st.title(translate("📚 About Wise Tongue", target_lang))
 
     st.markdown(translate("""

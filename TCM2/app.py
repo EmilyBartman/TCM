@@ -373,7 +373,8 @@ with tabs[2]:
             image_url = gpt_doc["image_url"]
             st.caption("🧠 Image from `gpt_diagnoses`")
         
-        if image_data:
+        # 📸 Tongue Image Display - Iterate over the image data
+        if image_data:  # Check if image_data is populated
             for img_data in image_data:
                 img_url = img_data.get('image_url')  # Extract the image URL
                 if img_url:
@@ -397,6 +398,7 @@ with tabs[2]:
                         st.exception(e)
         else:
             st.info("No image URL available.")
+
 
         
 

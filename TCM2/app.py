@@ -473,7 +473,7 @@ elif page == "Medical Review Dashboard":
         
             submit_feedback = st.form_submit_button("📤 Submit Feedback")
         
-        if submit_feedback:
+        if st.button("📤 Submit Expert Feedback", key="submit_feedback"):
             feedback = {
                 "submission_id": selected_id,
                 "agreement": agree,
@@ -486,23 +486,7 @@ elif page == "Medical Review Dashboard":
                 "timestamp": datetime.utcnow().isoformat()
             }
             db.collection("medical_feedback").document(selected_id).set(feedback)
-            st.success("✅ Feedback saved.")
-
-        # 🔄 Retrain
-        with st.expander("🔄 Retrain From Feedback"):
-            retrain_clicked = st.button("🔁 Retrain Now", key="trigger_retrain")
-            if retrain_clicked:
-                try:
-                    from utils.retrain import retrain_model_from_feedback
-        
-                    st.toast("Collecting feedback corrections...", icon="🧠")
-                    retrain_model_from_feedback(db)
-                    st.success("✅ Feedback collected! Future GPT improvements can be made.")
-                except Exception as e:
-                    st.error(f"❌ Failed to process feedback: {e}")
-       
-                except ModuleNotFoundError as e:
-                    st.error(f"Missing module: {e.name} — install with `pip install {e.name}`")
+            st.success("✅ Feedback submitted successfully! Thank you for improving the model.")
 
             
 # ------------------------------

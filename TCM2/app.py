@@ -71,6 +71,17 @@ col1, col2 = st.columns([1, 6])  # Narrow column for language, wide for blank
 with col1:
     target_lang = set_language_selector()
 
+# 🎨 Make selectbox (language) smaller and tighter
+st.markdown("""
+    <style>
+    div[data-baseweb="select"] > div {
+        padding-top: 2px;
+        padding-bottom: 2px;
+        font-size: 14px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # 🌟 Tabs Navigation (NEW)
 tab_labels = [
     translate("🌿 Educational Content", target_lang),

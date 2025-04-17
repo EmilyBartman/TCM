@@ -25,52 +25,28 @@ firebase_config = dict(st.secrets["firebase"])
 
 # 🌐 App Configuration
 st.set_page_config(page_title="TCM Health App", layout="wide")
-# 🔧 Reduce top padding to fix whitespace
+
+# 🔧 CSS: Reduce whitespace + unify dropdown style
 st.markdown("""
     <style>
+    /* Page Padding */
     .block-container {
         padding-top: 1rem;
         padding-bottom: 2rem;
         padding-left: 2rem;
         padding-right: 2rem;
     }
-    </style>
-""", unsafe_allow_html=True)
 
-db, bucket = init_firebase()
-
-
-st.markdown("""
-    <style>
+    /* Dropdowns (Language + Tab Nav) */
     div[data-baseweb="select"] > div {
         padding-top: 4px !important;
         padding-bottom: 4px !important;
         font-size: 15px !important;
     }
 
-    /* Fix box width and vertical centering */
     .stSelectbox > div {
         padding: 0.25rem 0.5rem;
         border-radius: 0.5rem;
-    }
-
-    /* Reduce spacing between rows if needed */
-    .block-container {
-        padding-top: 1rem;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-    </style>
-""", unsafe_allow_html=True)
-
-# 🎨 Make selectbox (language) smaller and tighter
-st.markdown("""
-    <style>
-    div[data-baseweb="select"] > div {
-        padding-top: 2px;
-        padding-bottom: 2px;
-        font-size: 14px;
     }
     </style>
 """, unsafe_allow_html=True)

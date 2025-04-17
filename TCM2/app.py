@@ -374,7 +374,40 @@ with tabs[2]:
             st.caption("🧠 Image from `gpt_diagnoses`")
         
         # 📸 Tongue Image Display - Iterate over the image data
-        if image_data:  # Check if image_data is populated
+        # Ensure image_data is initialized correctly
+        image_data = []  # Initialize as an empty list before processing each set of uploads
+        
+        # Process the uploaded images and store image URLs with their characteristics
+        for img_file in uploaded_imgs:
+            img_file.seek(0)  # ✅ CORRECT PLACEMENT here, not above
+            submission_id = str(uuid.uuid4())
+            timestamp = datetime.utcnow().isoformat()
+        
+            # Save the image to Firebase Storage
+            image_path = f"tongue_images/{submission_id}.jpg"  # Define the path to save the image
+            image_ref = bucket.blob(image_path)  # Firebase Storage reference
+        
+            # Upload image to Firebase Storage
+            image_ref.upload_from_file(img_file, content_type=img_file.type)
+        
+            # Get image URL after upload
+            image_url = image_ref.public_url
+        
+            # Store image data and its characteristics in a list
+            image_data.append({
+                "image_url": image_url,
+                "tongue_characteristics": {
+                    "color": tongue_color,
+                    "shape": tongue_shape,
+                    "coating": tongue_coating,
+                    "moisture": tongue_moisture,
+                    "bumps": tongue_bumps
+                }
+            })
+        
+        # After this block, image_data will contain the newly uploaded images and their details
+        
+        if image_data:  # Ensure image_data is populated
             for img_data in image_data:
                 img_url = img_data.get('image_url')  # Extract the image URL
                 if img_url:
@@ -398,6 +431,7 @@ with tabs[2]:
                         st.exception(e)
         else:
             st.info("No image URL available.")
+
 
 
         
